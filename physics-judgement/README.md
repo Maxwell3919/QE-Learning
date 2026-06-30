@@ -58,9 +58,9 @@
 - 把物理风险落实到 `PASS / WARN / BLOCK` 和 calculation record。
 
 
-## 结论型补写页面
+## 快速判断页
 
-这些页面来自 authoritative literature loop 的稳定判断结论。它们不替代编号理论页，而是用于从 output 现象快速回查物理判断边界。
+快速判断页用于从 output 现象直接回查物理判断边界。它们不替代编号主题页：编号页给出系统理论框架，快速判断页给出常见失败模式、`PASS / WARN / BLOCK` 边界和回查路线。维护时优先保持编号页为 canonical topic page，快速判断页只保留高密度审阅卡片和路由。
 
 - [Physics Judgement Conclusion Reference Book](CONCLUSION_REFERENCE_BOOK.md)
 - [DFT ground-state boundary](dft-ground-state-boundary.md)
@@ -90,6 +90,8 @@
 - Version-sensitive：依赖 QE / PHonon / EPW / Wannier90 / Yambo 等版本，必须查官方文档。
 
 ## 页面索引
+
+编号主题页适合系统阅读；快速判断页适合遇到异常 output 时回查。
 
 - [DFT 近似地图](01-dft-approximation-map.md)
 - [交换关联泛函阶梯](02-exchange-correlation-ladder.md)

@@ -55,4 +55,5 @@
 - [QE INPUT_PH](https://www.quantum-espresso.org/Doc/INPUT_PH.html)
 - [EPW documentation](https://docs.epw-code.org/)
 - [Wannier90 documentation](https://wannier.org/)
-- [Yambo documentation](https://www.yambo-code.eu/wiki/index.php/Documentation)
+- [Yambo educational wiki](https://wiki.yambo-code.eu/wiki/index.php?title=Main_Page)
+- [Yambo learn](https://www.yambo-code.eu/learn/)

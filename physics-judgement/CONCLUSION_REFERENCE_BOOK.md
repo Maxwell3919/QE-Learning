@@ -1,6 +1,6 @@
 # QE Physics Judgement Conclusion Reference Book (v1)
 
-本文件是 `physics-judgement/` 的结论内核。它把 DFT/QE 计算判断中最稳定、最容易影响结论可信度的规则压缩成一份可复查的参考册，用于指导后续页面维护、workflow 审阅和 agent 分工。
+本文件是 `physics-judgement/` 的结论内核。它把 DFT/QE 计算判断中最稳定、最容易影响结论可信度的规则压缩成一份可复查的参考册，用于指导后续页面维护、workflow 审阅和专题分工。
 
 它不是论文综述，也不是新的 workflow 教程。使用时应先定位 output 现象，再回查对应的 `physics-judgement/`、`theory-minimum/`、`workflows/`、`standards/` 与 `references/` 页面。
 
@@ -231,7 +231,8 @@
 - [QE INPUT_PH](https://www.quantum-espresso.org/Doc/INPUT_PH.html)
 - [EPW documentation](https://docs.epw-code.org/)
 - [Wannier90 documentation](https://wannier.org/)
-- [Yambo documentation](https://www.yambo-code.eu/wiki/index.php/Documentation)
+- [Yambo educational wiki](https://wiki.yambo-code.eu/wiki/index.php?title=Main_Page)
+- [Yambo learn](https://www.yambo-code.eu/learn/)
 
 ## 10. 维护入口
 

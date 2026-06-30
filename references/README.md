@@ -27,7 +27,7 @@ AiiDA 保持 optional advanced reference：它适合用来理解 workflow/proven
 ## 原始链接
 
 - [Quantum ESPRESSO documentation](https://www.quantum-espresso.org/documentation/)
-- [QE official learning resources](https://www.quantum-espresso.org/resources/)
+- [QE official learning resources](https://www.quantum-espresso.org/learn/)
 - [references/source-index.md](source-index.md)
 - [references/canonical-literature.md](canonical-literature.md)
 - [references/reading-maintenance-policy.md](reading-maintenance-policy.md)

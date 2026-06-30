@@ -42,4 +42,5 @@
 |---|---|---|
 | [Canonical Literature](canonical-literature.md) | A0/A1/A2/B/C 文献分级和 Fast Core Loop | [reading-maintenance-policy.md](reading-maintenance-policy.md) |
 | [Canonical BibTeX](canonical.bib) | 可复用 BibTeX 起点 | [canonical-literature.md](canonical-literature.md) |
-| [Yambo documentation](https://www.yambo-code.eu/wiki/index.php/Documentation) | GW/BSE 与 excited-state 工具入口 | [tools/yambo.md](tools/yambo.md) |
+| [Yambo educational wiki](https://wiki.yambo-code.eu/wiki/index.php?title=Main_Page) | GW/BSE 与 excited-state 工具入口 | [tools/yambo.md](tools/yambo.md) |
+| [Yambo learn](https://www.yambo-code.eu/learn/) | Yambo 理论、教程和代码文档入口 | [tools/yambo.md](tools/yambo.md) |

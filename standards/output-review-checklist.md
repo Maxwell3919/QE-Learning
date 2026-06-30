@@ -2,7 +2,7 @@
 
 本页用于把 QE output 从“程序跑完”审阅成可记录的 `PASS / WARN / BLOCK` 状态。它不要求仓库保存具体 output 文件，也不替代具体 workflow 页面；审阅者只需要在个人计算记录中写明 output 位置、关键证据、状态理由和允许进入的下游。
 
-每个 workflow 至少执行四步：
+每个 workflow 至少执行五步：
 
 1. 确认 output 对应正确的 input、command、`prefix/outdir` 和 QE 程序。
 2. 从 output 中摘录决定状态的关键行或数值。

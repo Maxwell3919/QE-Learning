@@ -1,6 +1,6 @@
 # QE Learning
 
-面向 Quantum ESPRESSO（QE）使用流程的中文学习笔记，内容围绕原生命令行 workflow、input/output 阅读、数值收敛、后处理和结果可靠性判断组织。
+面向 Quantum ESPRESSO（QE）科研计算的中文参考手册与 DFT 学习知识库，内容围绕原生命令行 workflow、input/output 阅读、数值收敛、后处理、DFT 理论边界和结果可靠性判断组织。
 
 ## 内容范围
 

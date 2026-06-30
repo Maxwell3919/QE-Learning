@@ -33,5 +33,6 @@ Yambo 引入独立的文件转换、many-body convergence 参数和光谱解释�
 
 ## 原始链接
 
-- [Yambo documentation](https://www.yambo-code.eu/wiki/index.php/Documentation)
+- [Yambo educational wiki](https://wiki.yambo-code.eu/wiki/index.php?title=Main_Page)
+- [Yambo learn](https://www.yambo-code.eu/learn/)
 - [Yambo project](https://www.yambo-code.eu/)

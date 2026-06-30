@@ -26,7 +26,7 @@
 | `06-phonon-dfpt-loop.md` | 掌握 DFPT phonon 基本路线 | 能说明 `ph.x`、`q2r.x`、`matdyn.x`、`dynmat.x` 分工 |
 | `07-postprocessing-loop.md` | 理解 QE 后处理 | 能说明 `pp.x`、charge density、potential、ELF、work function 的数据来源 |
 | `08-hpc-and-reproducibility.md` | 建立运行环境与记录意识 | 能记录 QE version、pseudopotential source、command、output review |
-| `09-feature-expansion-map.md` | 了解 QE 功能边界 | 能区分核心学习和高级扩展 |
+| `09-feature-expansion-map.md` | 查询 QE 功能边界和扩展入口 | 能区分核心学习、高级扩展和只需知道入口的专题 |
 
 ## 阶段完成判断
 
@@ -55,6 +55,8 @@
 - 先证据后结论：先读 input/output、参数记录和 warning，再写可靠性判断。
 - 先最小闭环后复杂组合：每个阶段先完成一个能被复查的最小 workflow，再增加参数或功能。
 - 先记录来源后沉淀经验：参数定义、模板和教程经验需要能追踪到公开来源；个人判断要标明依据和版本边界。
+
+`09-feature-expansion-map.md` 是扩展功能地图，不是基础学习闭环的必修阶段。读者完成 SCF、收敛、relax、电子结构、phonon/DFPT、后处理和记录规范后，再用它判断某个高级主题应进入 `workflows/advanced/`、`physics-judgement/` 还是外部官方文档。
 
 ## 进一步理论学习
 

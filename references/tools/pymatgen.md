@@ -25,7 +25,7 @@
 
 ## 局限
 
-pymatgen 不是 QE-native workflow engine；生成文件后仍需 output review。
+pymatgen 不是 QE 原生命令行 workflow 的替代层；生成文件后仍需 output review。
 
 ## 原始链接
 
