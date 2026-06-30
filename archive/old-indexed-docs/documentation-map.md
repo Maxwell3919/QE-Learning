@@ -7,7 +7,7 @@
 | 路径 | 文档目的 | 学习阶段 | 内容范围 | 资料状态 | 最终能力 |
 |---|---|---|---|---|---|
 | `README.md` | QE 学习笔记入口 | 全阶段 | 定位、阅读顺序、维护原则 | 已写第一版 | 知道如何使用本仓库 |
-| `00-learning-roadmap.md` | 快速学习路线图 | 入门到进阶 | 1 周、2-4 周、1-2 个月路线 | 已写第一版 | 避免只复制 input 的路线错误 |
+| `00-learning-roadmap.md` | 旧版学习路线图 | 已废弃 | 旧版按时间组织，当前不再使用 | 已归档 | 当前以 `learn/` 的能力阶段为准 |
 | `01-qe-ecosystem.md` | QE 工作流生态地图 | 入门后 | 原生模块、外部工具、学习优先级 | 已写第一版 | 知道每个工具插入 workflow 的位置 |
 | `02-theory-minimum/` | QE 使用所需最低理论 | 入门到进阶 | DFT、cutoff、赝势、k 点、smearing、SCF、symmetry、DFPT | 占位，需官方/教材补充 | 能把理论映射到 input/output |
 | `03-core-input-structure/` | 系统理解 QE input | 入门核心 | `pw.x` namelist 和 cards | 占位，需官方 input reference | 能解释关键参数而非照抄 |
@@ -25,4 +25,3 @@
 3. 扩展 `04-workflows/09-phonon-gamma.md`，与 `10-phonon-dispersion.md` 明确分工。
 4. 写 `06-convergence-and-debugging/07-phonon-instability-vs-numerical-error.md`。
 5. 用 Si、Al、GaAs 各补一个最小可运行案例。
-

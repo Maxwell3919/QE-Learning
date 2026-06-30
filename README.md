@@ -1,81 +1,55 @@
 # QE Learning
 
-这是一套面向科研计算流程的 Quantum ESPRESSO（QE）中文学习笔记。包含普通教程的翻译、input文件合集，并且把 QE 的实际使用过程整理成可复习、可扩展、可追溯的 workflow 文档。
+这是一个面向计算材料科研实践的中文 Quantum ESPRESSO（QE）学习笔记仓库。它的目标不是收集零散教程链接，也不是把 input 文件堆在一起，而是把 QE 的真实计算流程整理成可执行、可复习、可追溯、可扩展的学习体系。
 
-本仓库当前处于“从占位到细节”的第一轮迭代：先建立稳定目录、统一写作模板、核心学习路线和少数关键 workflow 初稿；后续再逐篇补充官方文档、教程案例和真实计算记录。
+本仓库当前采用四条主线：
 
-## 解决什么问题
+- `learn/`：按能力闭环组织的快速学习路径。
+- `workflows/`：稳定的 QE workflow 规范，强调输入前提、计算图、output 判断和下游准入。
+- `references/`：外部教程、官方文档和工具生态的学习资产库。
+- `standards/`：命名、记录、引用、PASS/WARN/BLOCK 和 output review 标准。
 
-很多 QE 学习材料按 `pw.x`、`ph.x`、`dos.x`、`bands.x` 这样的程序逐个展开，容易让初学者误以为“会改 input 文件”等于会做计算。本仓库采用另一条主线：
+旧的编号式文档已经归档到 `archive/old-indexed-docs/`，不再作为主要入口。
 
-```text
-结构文件 / CIF
-  -> 结构检查与标准化
-  -> 赝势选择
-  -> pw.x SCF
-  -> cutoff / k-point / smearing 收敛性测试
-  -> relax / vc-relax
-  -> bands / DOS / PDOS
-  -> phonon / DFPT / q2r / matdyn
-  -> charge density / potential / visualization
-  -> HPC 批量运行 / restart / provenance
-```
+## 如何开始
 
-每一篇笔记都尽量回答四个问题：
+从这里读：
 
-- 这一步解决什么物理或数值问题？
-- QE 中对应哪些程序、输入参数和中间文件？
-- 输出文件应该怎么看？
-- 什么条件下结果才可以被继续用于下游 workflow？
+1. [learn/00-start-here.md](learn/00-start-here.md)
+2. [learn/01-first-scf-loop.md](learn/01-first-scf-loop.md)
+3. [standards/pass-warn-block.md](standards/pass-warn-block.md)
+4. [workflows/ground-state/scf.md](workflows/ground-state/scf.md)
+5. [references/source-index.md](references/source-index.md)
 
-## 推荐阅读顺序
+学习路线不按时间承诺组织，而按“能力目标 + 完成判据 + 可验证输出”组织。只有当你能解释 input、读懂 output、记录 provenance，并判断结果是否能进入下游 workflow，才算完成一个学习闭环。
 
-1. [00-learning-roadmap.md](docs/00-learning-roadmap.md)：先建立 1 周、2-4 周、1-2 个月的学习路线。
-2. [01-qe-ecosystem.md](docs/01-qe-ecosystem.md)：理解 QE 原生模块和外部工具在 workflow 中的位置。
-3. `02-theory-minimum/`：只补“会影响 input/output 判断”的最低理论。
-4. `03-core-input-structure/`：系统读懂 `pw.x` 输入文件。
-5. `04-workflows/`：按 SCF、收敛性、relax、bands、DOS、phonon 等真实计算链学习。
-6. `06-convergence-and-debugging/`：把“算完了”升级为“结果可信”。
-7. `09-templates-and-checklists/`：用命名规范、记录模板和 checklist 固化习惯。
-
-## 文档结构
+## 当前结构
 
 ```text
-docs/
-  README.md
-  00-learning-roadmap.md
-  01-qe-ecosystem.md
-  02-theory-minimum/
-  03-core-input-structure/
-  04-workflows/
-  05-postprocessing/
-  06-convergence-and-debugging/
-  07-hpc-and-reproducibility/
-  08-tools-and-ecosystem/
-  09-templates-and-checklists/
+QE-Learning/
+  learn/
+  workflows/
+  theory-minimum/
+  references/
+  cases/
+  standards/
+  structure-learning/
+  archive/old-indexed-docs/
 ```
 
-## 当前资料基础
+## 本轮资料基础
 
-本仓库第一版主要来自两份本地调研材料：
+本轮重构优先读取两个 `.docx` 源文件：
 
-- `/Users/paquette/Downloads/Quantum ESPRESSO as a Modern Research Stack.md`
-- `/Users/paquette/Downloads/Quantum ESPRESSO Tutorial Website Ecosystem.md`
+- `/Users/paquette/Downloads/Quantum ESPRESSO Tutorial Website Ecosystem.docx`
+- `/Users/paquette/Downloads/Quantum ESPRESSO as a Modern Research Stack.docx`
 
-后续逐篇补充时，应优先核对：
-
-- [Quantum ESPRESSO official documentation](https://www.quantum-espresso.org/documentation/)
-- [QE input reference](https://www.quantum-espresso.org/Doc/INPUT_PW.html)
-- [PHonon user guide / input docs](https://www.quantum-espresso.org/Doc/INPUT_PH.html)
-- Pranab Das QE tutorial
-- Kyoto University QE DokuWiki
-- AiiDA Quantum ESPRESSO plugin docs
-- Phonopy QE interface
-- Materials Cloud / QE school materials
+它们提供了教程网站、官方文档、QE 原生模块、外部工具生态、workflow 表示方式和学习路径的索引。完整来源整理见 [references/source-index.md](references/source-index.md)。
 
 ## 维护原则
 
-- 不接受只有 input 文件、没有判断标准的笔记。
-- 不把 phonon 当作普通后处理；它是 DFPT workflow，对 SCF、结构和收敛性更敏感。
-- 每个 workflow 必须写清楚输入前提、中间文件、输出判断和下游依赖。
-- 每次真实计算都应留下 calculation record，包括结构来源、赝势来源、命令、环境、输出摘要、收敛状态和下一步。
+- 每个知识点都尽量落到 QE input、output、workflow 或记录标准上。
+- 每个外部教程页面必须保留原始链接，并说明适合跟做的部分与局限。
+- 每个 input 模板必须说明来源：官方文档、教程改写或本仓库验证。
+- 每个案例必须记录 QE 版本、结构来源、赝势来源、运行命令、环境和 PASS/WARN/BLOCK 状态。
+- 结构操作学习单独放入 `structure-learning/`，QE workflow 页面只说明结构输入前提，不展开结构教学。
