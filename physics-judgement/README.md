@@ -62,6 +62,7 @@
 
 这些页面来自 authoritative literature loop 的稳定判断结论。它们不替代编号理论页，而是用于从 output 现象快速回查物理判断边界。
 
+- [Physics Judgement Conclusion Reference Book](CONCLUSION_REFERENCE_BOOK.md)
 - [DFT ground-state boundary](dft-ground-state-boundary.md)
 - [Kohn-Sham eigenvalue boundary](kohn-sham-eigenvalue-boundary.md)
 - [Functional choice and sensitivity](functional-choice-and-sensitivity.md)
