@@ -23,7 +23,7 @@ phonon dispersion、phonon DOS、force constants、Born charge 输入辅助。
 ## 6. 它和本仓库哪些页面对应？
 
 - `workflows/phonon/phonon-dispersion-dfpt.md`
-- `structure-learning/README.md`
+- 结构操作独立学习项目
 
 ## 7. 它的局限是什么？
 

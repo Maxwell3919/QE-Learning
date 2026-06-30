@@ -2,7 +2,7 @@
 
 ## 1. 它是什么？
 
-Materials Cloud QE school materials 是学校/培训型 QE 教学资源，在 `.docx` 中被标为高级 QE 学习材料来源。
+Materials Cloud QE school materials 是学校/培训型 QE 教学资源，是高级 QE 学习材料来源。
 
 ## 2. 适合学习或解决什么问题？
 

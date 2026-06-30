@@ -2,10 +2,9 @@
 
 ## 页面定位
 
-- 对应学习路线：[learn/05-phonon-dfpt-loop.md](../../learn/05-phonon-dfpt-loop.md)
-- 对应案例：`cases/si/06-phonon/`、`cases/gaas/03-phonon-dispersion/`
-- 结构学习边界：本页要求结构已经充分 relax；2D vacuum、supercell、defect 和结构标准化细节后续见 [structure-learning/README.md](../../structure-learning/README.md)。
-- 当前验证状态：保留第一版技术框架；还缺真实 `ph.x/q2r.x/matdyn.x` output、ASR 前后对照和 negative frequency 诊断样例。
+- 对应学习路线：[learn/06-phonon-dfpt-loop.md](../../learn/06-phonon-dfpt-loop.md)
+- 结构学习边界：本页要求结构已经充分 relax；结构操作学习将作为独立项目展开。
+- 规范入口：[standards/calculation-record-template.md](../../standards/calculation-record-template.md)、[standards/pass-warn-block.md](../../standards/pass-warn-block.md)
 
 ## 1. 计算目标
 
@@ -241,9 +240,8 @@ phonon 记录必须额外写明：
 - Phonopy QE interface: <https://phonopy.github.io/phonopy/qe.html>
 - Pranab Das phonon tutorial: <https://pranabdas.github.io/espresso/hands-on/phonon/>
 - Kyoto phonon DokuWiki: <https://www2.yukawa.kyoto-u.ac.jp/~koudai.sugimoto/dokuwiki/doku.php?id=quantumespresso%3Aphonon%3A%E3%83%95%E3%82%A9%E3%83%8E%E3%83%B3%E3%81%AE%E8%A8%88%E7%AE%97>
-- 本轮 `.docx` 来源：`Quantum ESPRESSO as a Modern Research Stack.docx`、`Quantum ESPRESSO Tutorial Website Ecosystem.docx`
 
-## 14. 当前页面还缺哪些验证？
+## 14. 后续完善重点
 
 - Si 或 GaAs q-grid phonon 的真实 dyn/fc/freq 文件链。
 - Gamma acoustic branch 与 ASR 对照。

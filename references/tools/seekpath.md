@@ -23,7 +23,7 @@ SeeK-path 是用于晶体结构标准化和高对称 k-path 生成的工具。
 ## 6. 它和本仓库哪些页面对应？
 
 - `workflows/electronic/bands.md`
-- `structure-learning/README.md`
+- 结构操作独立学习项目
 
 ## 7. 它的局限是什么？
 

@@ -2,7 +2,7 @@
 
 ## 1. 它是什么？
 
-Pranab Das QE tutorial 是一个 GitHub Pages + GitHub repository 形式的 QE 教程系统。`.docx` 调研材料把它归类为“modular workflow tutorial system”：左侧导航包含 Setup、Theory 和大量 Hands-on 分支。
+Pranab Das QE tutorial 是一个 GitHub Pages + GitHub repository 形式的 QE 教程系统。公开教程生态中可视为“modular workflow tutorial system”：左侧导航包含 Setup、Theory 和大量 Hands-on 分支。
 
 ## 2. 适合学习或解决什么问题？
 

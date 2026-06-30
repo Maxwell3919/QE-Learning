@@ -1,55 +1,46 @@
 # QE Learning
 
-这是一个面向计算材料科研实践的中文 Quantum ESPRESSO（QE）学习笔记仓库。它的目标不是收集零散教程链接，也不是把 input 文件堆在一起，而是把 QE 的真实计算流程整理成可执行、可复习、可追溯、可扩展的学习体系。
+这是一个面向计算材料科研实践的 Quantum ESPRESSO（QE）中文学习笔记仓库，目标是帮助学习者从 input/output、workflow 和数值可靠性角度系统掌握 QE。
 
-本仓库当前采用四条主线：
+## 仓库不是什么
 
-- `learn/`：按能力闭环组织的快速学习路径。
-- `workflows/`：稳定的 QE workflow 规范，强调输入前提、计算图、output 判断和下游准入。
-- `references/`：外部教程、官方文档和工具生态的学习资产库。
-- `standards/`：命名、记录、引用、PASS/WARN/BLOCK 和 output review 标准。
+本仓库不是工具大全、官方文档翻译、input 文件合集、AiiDA 教程、高通量 workflow 教程、真实计算案例仓库，也不是结构操作学习仓库。
 
-旧的编号式文档已经归档到 `archive/old-indexed-docs/`，不再作为主要入口。
+## 仓库提供什么
 
-## 如何开始
+- QE 使用流程学习笔记
+- QE 功能地图
+- QE workflow 精细解释
+- QE input/output 阅读笔记
+- QE 数值可靠性判断笔记
+- QE 官方文档和优秀教程的中文导读
+- 长期维护的科研计算规范文档
 
-从这里读：
-
-1. [learn/00-start-here.md](learn/00-start-here.md)
-2. [learn/01-first-scf-loop.md](learn/01-first-scf-loop.md)
-3. [standards/pass-warn-block.md](standards/pass-warn-block.md)
-4. [workflows/ground-state/scf.md](workflows/ground-state/scf.md)
-5. [references/source-index.md](references/source-index.md)
-
-学习路线不按时间承诺组织，而按“能力目标 + 完成判据 + 可验证输出”组织。只有当你能解释 input、读懂 output、记录 provenance，并判断结果是否能进入下游 workflow，才算完成一个学习闭环。
-
-## 当前结构
+## 主目录
 
 ```text
-QE-Learning/
-  learn/
-  workflows/
-  theory-minimum/
-  references/
-  cases/
-  standards/
-  structure-learning/
-  archive/old-indexed-docs/
+learn/              学习路径：按能力目标、完成判据和可验证输出组织
+workflows/          QE 原生命令行 workflow 的输入、输出和可靠性判断
+theory-minimum/     使用 QE 必须补的最低理论背景
+references/         官方文档、优秀教程和辅助工具的中文导读
+standards/          命名、记录、引用、output review 和 PASS/WARN/BLOCK 规范
 ```
 
-## 本轮资料基础
+## 学习顺序
 
-本轮重构优先读取两个 `.docx` 源文件：
+1. 从 [learn/00-start-here.md](learn/00-start-here.md) 开始，理解为什么要优先学习 QE 原生命令行 workflow。
+2. 阅读 [learn/01-qe-workflow-map.md](learn/01-qe-workflow-map.md)，建立 QE 主计算图。
+3. 按 `SCF -> convergence -> relax -> electronic structure -> phonon -> postprocessing -> reproducibility` 的顺序推进。
+4. 每进入一个 workflow，都同时阅读对应的 `standards/` 页面，留下可追溯记录。
 
-- `/Users/paquette/Downloads/Quantum ESPRESSO Tutorial Website Ecosystem.docx`
-- `/Users/paquette/Downloads/Quantum ESPRESSO as a Modern Research Stack.docx`
+## Structure-Learning 边界
 
-它们提供了教程网站、官方文档、QE 原生模块、外部工具生态、workflow 表示方式和学习路径的索引。完整来源整理见 [references/source-index.md](references/source-index.md)。
+材料结构操作、CIF 处理、对称性标准化、超胞、缺陷、slab 和低维结构构建会在独立的 Structure-Learning 项目中展开，本仓库只在 QE workflow 中说明结构输入前提。
 
-## 维护原则
+## 外部工具边界
 
-- 每个知识点都尽量落到 QE input、output、workflow 或记录标准上。
-- 每个外部教程页面必须保留原始链接，并说明适合跟做的部分与局限。
-- 每个 input 模板必须说明来源：官方文档、教程改写或本仓库验证。
-- 每个案例必须记录 QE 版本、结构来源、赝势来源、运行命令、环境和 PASS/WARN/BLOCK 状态。
-- 结构操作学习单独放入 `structure-learning/`，QE workflow 页面只说明结构输入前提，不展开结构教学。
+本仓库优先学习 QE 原生命令行 workflow。ASE、pymatgen、SeeK-path、phonopy、Wannier90、AiiDA 等工具只作为辅助参考，不替代 QE 基础学习。AiiDA / AiiDA-QE 属于高级 workflow/provenance 参考，不作为 QE 入门主线。
+
+## 主要参考来源
+
+本仓库参考 QE 官方文档、Pranab Das QE tutorial、Kyoto University QE phonon DokuWiki、Phonopy QE interface、Wannier90、ASE、pymatgen、SeeK-path 等公开资料。来源索引见 [references/source-index.md](references/source-index.md)。

@@ -2,10 +2,9 @@
 
 ## 页面定位
 
-- 对应学习路线：[learn/01-first-scf-loop.md](../../learn/01-first-scf-loop.md)
-- 对应案例：`cases/si/01-scf/`、`cases/al/01-metal-scf-smearing/`
-- 结构学习边界：本页要求结构已经被检查；CIF、primitive/conventional cell、symmetry、vacuum、defect 等结构操作细节后续见 [structure-learning/README.md](../../structure-learning/README.md)。
-- 当前验证状态：保留第一版技术框架；还缺真实 Si/Al input/output 和 output 行号级标注。
+- 对应学习路线：[learn/02-first-scf-loop.md](../../learn/02-first-scf-loop.md)
+- 结构学习边界：结构操作学习将作为独立项目展开；本页只说明 QE 对结构输入的要求。
+- 规范入口：[standards/calculation-record-template.md](../../standards/calculation-record-template.md)、[standards/pass-warn-block.md](../../standards/pass-warn-block.md)
 
 ## 1. 计算目标
 
@@ -174,10 +173,9 @@ README.md
 - QE `pw.x` input reference: <https://www.quantum-espresso.org/Doc/INPUT_PW.html>
 - QE documentation: <https://www.quantum-espresso.org/documentation/>
 - Pranab Das SCF tutorial: <https://pranabdas.github.io/espresso/hands-on/scf>
-- 本轮 `.docx` 来源：`Quantum ESPRESSO as a Modern Research Stack.docx`、`Quantum ESPRESSO Tutorial Website Ecosystem.docx`
 
-## 14. 当前页面还缺哪些验证？
+## 14. 后续完善重点
 
-- 真实 Si `pw.scf.Si.in/out`。
-- 真实 Al metallic SCF + smearing 示例。
+- Si 学习示例 `pw.scf.Si.in/out`。
+- Al 学习示例 metallic SCF + smearing 示例。
 - 对 output 中 total energy、SCF accuracy、Fermi energy、cutoff、k-points、pseudopotential 段落的逐项标注。

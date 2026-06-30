@@ -2,10 +2,9 @@
 
 ## 页面定位
 
-- 对应学习路线：[learn/04-electronic-structure-loop.md](../../learn/04-electronic-structure-loop.md)
-- 对应案例：`cases/si/04-bands/`、`cases/gaas/02-bands/`
-- 结构学习边界：bands 的 k-path 依赖结构标准化和 primitive/conventional cell 选择；细节后续见 [structure-learning/README.md](../../structure-learning/README.md)。
-- 当前验证状态：保留第一版技术框架；还缺 SeeK-path 生成路径与真实 QE bands output 对照。
+- 对应学习路线：[learn/05-electronic-structure-loop.md](../../learn/05-electronic-structure-loop.md)
+- 结构学习边界：k-path 依赖结构标准化；结构操作学习将作为独立项目展开，本页只说明 QE 对 k-path 输入的要求。
+- 规范入口：[standards/calculation-record-template.md](../../standards/calculation-record-template.md)、[standards/pass-warn-block.md](../../standards/pass-warn-block.md)
 
 ## 1. 计算目标
 
@@ -36,7 +35,7 @@ structure + pseudopotential
 
 - `pw.x`：先跑 `calculation='scf'`，再跑 `calculation='bands'`。
 - `bands.x`：整理 bands 计算结果，输出绘图文件。
-- 可选：seekpath、AiiDA `PwBandsWorkChain`、Python/matplotlib。
+- 可选：SeeK-path、Python/matplotlib。
 
 ## 5. 输入文件模板
 
@@ -205,12 +204,10 @@ record.md
 - 已有调研：`Quantum ESPRESSO Tutorial Website Ecosystem.md`
 - QE `bands.x` input reference: <https://www.quantum-espresso.org/Doc/INPUT_BANDS.html>
 - SeeK-path documentation: <https://seekpath.readthedocs.io/>
-- AiiDA Quantum ESPRESSO docs: <https://aiida-quantumespresso.readthedocs.io/>
 - Pranab Das QE tutorial: <https://pranabdas.github.io/espresso/>
-- 本轮 `.docx` 来源：`Quantum ESPRESSO as a Modern Research Stack.docx`、`Quantum ESPRESSO Tutorial Website Ecosystem.docx`
 
-## 14. 当前页面还缺哪些验证？
+## 14. 后续完善重点
 
-- Si/GaAs bands 的真实 input/output。
+- Si/GaAs bands 的input/output 阅读示例。
 - k-path 来源文件或脚本。
 - band figure 生成脚本和能量零点说明。

@@ -1,43 +1,29 @@
 # Start Here
 
-## 为什么先读这一页？
+## 如何使用本仓库
 
-QE 学习不是先背参数，而是先形成计算闭环。一个闭环至少包括：明确物理目标，构造 input，运行程序，读 output，判断是否可信，记录结果和下一步。
+本仓库按 QE 实际使用流程组织。建议先读 `learn/`，再进入 `workflows/` 的具体页面，并用 `standards/` 固化命名、记录和 output review。
 
-如果只复制 tutorial input，你可能得到一个 `JOB DONE`，但仍然不知道赝势是否合适、cutoff 是否收敛、k 点是否足够、结构是否稳定，也不知道结果能否进入 bands、DOS 或 phonon。
+## 为什么先学 QE 原生 workflow？
 
-## 本仓库学习顺序
+QE 的核心能力来自原生命令行程序之间的数据传递：`pw.x` 产生 ground state，`bands.x`、`dos.x`、`projwfc.x`、`pp.x`、`ph.x`、`q2r.x`、`matdyn.x` 等读取或转换上游状态。先理解这些程序和文件边界，才能判断外部工具是否真的帮上忙。
 
-1. 建立资料入口：官方文档、input reference、Pranab、Kyoto、AiiDA、Phonopy。
-2. 完成第一个 SCF 闭环。
-3. 完成 cutoff、ecutrho、k-point、smearing 收敛闭环。
-4. 完成 relax / vc-relax 判断闭环。
-5. 完成电子结构闭环：SCF -> bands，SCF -> NSCF -> DOS/PDOS。
-6. 完成 DFPT phonon 闭环：SCF -> ph.x -> q2r.x -> matdyn.x。
-7. 用 `standards/` 把每次计算记录为可追溯项目。
+## 为什么不能只复制 input？
 
-## 外部资料怎么读？
+input 能跑通只说明语法和环境没有立即失败。科研计算还必须判断赝势、cutoff、k 点、smearing、结构状态、SCF 收敛、output warning 和下游依赖。
 
-- 官方文档用于参数定义和程序边界，不适合直接当初学主线。
-- Pranab Das QE tutorial 适合跟做 SCF、收敛、relax、bands、DOS、PDOS、phonon 等案例。
-- Kyoto phonon DokuWiki 适合补充 phonon 的专家判断，尤其 Gamma、ASR、`epsil`、金属/绝缘体差异。
-- AiiDA-QE 适合理解 workflow graph、provenance 和 restart，但不建议作为第一步。
+## 为什么每一步都要读 output？
 
-## 结构学习的边界
+QE 的可靠性证据在 output 中：total energy、SCF iteration、estimated accuracy、Fermi energy、forces、stress、irreducible k-points、loaded pseudopotentials、phonon perturbation convergence 等。没有 output review，就不能判断结果是否可信。
 
-结构文件读取、primitive/conventional cell、space group、Wyckoff、supercell、slab、vacuum、defect、strain、k-path 标准化等内容会在 [structure-learning/README.md](../structure-learning/README.md) 单独展开。本仓库的 QE workflow 页面只要求结构已经被检查，并在必要处指向 `structure-learning/`。
+## 为什么要保留计算记录？
 
-## 如何使用 cases 和 standards？
+个人学习笔记也需要可追溯。至少记录结构来源、赝势来源、input 文件、命令、QE 版本、运行环境、output 摘要、收敛状态和 PASS/WARN/BLOCK 判断。
 
-- `cases/` 用来放最小可复现案例。当前先建立案例入口，后续逐步补 input/output。
-- `standards/` 用来规范文件命名、记录模板、引用策略、source traceability 和 output review。
+## 结构学习边界
 
-## 进入下一阶段的判断
+结构操作学习将作为独立项目展开；本仓库只说明 QE 对结构输入的要求。
 
-不要用时间判断学习进度。只有当你能留下可审查输出，才进入下一阶段：
+## 自动化工具边界
 
-- 能解释 input 参数。
-- 能指出 output 中关键判断位置。
-- 能说明下游 workflow 依赖什么文件和前提。
-- 能把结果标成 PASS/WARN/BLOCK。
-- 能说明当前页面或案例还缺哪些验证。
+AiiDA 等自动化工具暂时不作为主线。它们适合在理解 QE 原生命令行 workflow 后，作为高级 workflow/provenance 参考。
