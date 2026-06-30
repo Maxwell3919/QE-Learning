@@ -104,7 +104,9 @@
 
 ```text
 pw.scf.<system>.in
+pw.scf.<system>.out
 pw.nscf.<system>.in
+pw.nscf.<system>.out
 dos.<system>.in
 dos.<system>.out
 dos.<system>.dat

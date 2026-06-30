@@ -38,6 +38,7 @@
   prefix = '<system>',
   outdir = '<scratch_dir>',
   pseudo_dir = '<pseudo_dir>',
+  forc_conv_thr = <force_threshold>,
 /
 &SYSTEM
   ibrav = 0,
