@@ -31,6 +31,16 @@ pw.x scf
 
 `pw.x`、`fs.x`、XCrySDen 或其他可视化工具
 
+## Command boundary
+
+| 对象 | 要求 |
+|---|---|
+| 上游命令 | 已审阅的 `pw.x scf`，随后是 dense uniform mesh 的 `pw.x nscf` |
+| 本步命令 | `fs.x -in fs.<system>.in > fs.<system>.out` |
+| 必须读取 | NSCF 的 eigenvalues、Fermi energy、band occupations 和 `prefix/outdir` |
+| 主要输出 | BXSF 文件，例如 `fermi-surface.<system>.bxsf` |
+| 不应混用 | bands high-symmetry path、稀疏 SCF mesh 或不同 Fermi-level reference |
+
 ## 通用输入模板
 
 ```fortran
@@ -75,8 +85,10 @@ pw.x scf
 ## 输出判断标准
 
 - 仅对有 Fermi surface 的体系有意义。
-- 确认 NSCF k mesh 足够密。
+- `fs.x` output 和 BXSF 文件应能追踪到正确的 dense NSCF 数据。
+- 确认 NSCF k mesh 足够密，并记录 shifted/unshifted mesh 与 Fermi energy 来源。
 - BXSF 可视化应与 bands crossing 和 DOS at Fermi level 对照。
+- BXSF 只是一种可视化数据格式；费米面拓扑或嵌套判断需要额外 k mesh sensitivity。
 
 ## 收敛性要求
 
@@ -90,6 +102,7 @@ pw.x scf
 | BXSF 不显示或破碎 | k mesh 太稀或文件格式问题 | 加密 NSCF 并检查 fs.x 输出 |
 | 与 bands 不一致 | 能量零点或 band index 混乱 | 对照 Fermi energy 和 bands crossing |
 | 用于非金属体系 | 物理前提错误 | 回到 DOS/bands 判断 |
+| 费米面形状随 smearing 大幅变化 | k mesh 或占据设置不稳 | 回到 smearing/k-point convergence |
 
 ## 通用学习模板
 
@@ -115,3 +128,11 @@ record.md
 
 - QE PostProc guide: <https://www.quantum-espresso.org/Doc/pp_user_guide/>
 - XCrySDen: <http://www.xcrysden.org/>
+
+## Source / version boundary
+
+| 项目 | 边界 |
+|---|---|
+| `fs.x` 输入字段 | 以当前 QE PostProc 文档为准 |
+| BXSF 可视化 | XCrySDen 或其他工具只负责显示，不判断物理可信度 |
+| 金属判断 | 必须与 bands、DOS、occupation 和 smearing review 共同成立 |

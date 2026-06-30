@@ -30,6 +30,16 @@ pw.x scf
 
 `ph.x`、`dynmat.x`
 
+## Command boundary
+
+| 对象 | 要求 |
+|---|---|
+| 上游命令 | 已审阅的 `pw.x scf` 和 Gamma phonon 前置条件 |
+| 本步命令 | `ph.x -in ph.ir-raman.<system>.in > ph.ir-raman.<system>.out`，必要时接 `dynmat.x` |
+| 必须读取 | SCF `prefix/outdir`、Gamma dynamical matrix、响应张量输出 |
+| 主要输出 | Gamma modes、dielectric/Born branch、IR/Raman 相关响应量 |
+| 不应混用 | q-grid dispersion 的插值结果与 Gamma response tensor 解释 |
+
 ## 通用输入模板
 
 ```fortran
@@ -77,8 +87,10 @@ pw.x scf
 ## 输出判断标准
 
 - 先确认 Gamma phonon modes 和 perturbations 收敛。
-- IR/Raman 输出的单位、模式编号和选择定则解释应回到官方 PHonon 文档。
+- `ph.x` output 应明确显示 `epsil`、`lraman` 或相关响应分支是否被执行；缺少分支输出时不能补写强度结论。
+- IR/Raman 输出的单位、模式编号、张量和选择定则解释应回到官方 PHonon 文档。
 - 没有响应张量或强度输出时，不应从频率表直接推断活性。
+- 金属、smearing 较强或电场响应条件不成立时，应将 dielectric/Born/IR/Raman 解释降级为 WARN 或 BLOCK。
 
 ## 收敛性要求
 
@@ -118,3 +130,11 @@ record.md
 - Kyoto phonon DokuWiki: <https://www2.yukawa.kyoto-u.ac.jp/~koudai.sugimoto/dokuwiki/doku.php?id=quantumespresso%3Aphonon%3A%E3%83%95%E3%82%A9%E3%83%8E%E3%83%B3%E3%81%AE%E8%A8%88%E7%AE%97>
 - Pranab Das phonon tutorial: <https://pranabdas.github.io/espresso/hands-on/phonon/>
 - QE INPUT_DYNMAT reference: <https://www.quantum-espresso.org/Doc/INPUT_DYNMAT.html>
+
+## Source / version boundary
+
+| 项目 | 边界 |
+|---|---|
+| `epsil` / `lraman` | 字段含义、适用条件和输出内容以当前 QE `INPUT_PH` 与 PHonon guide 为准 |
+| Raman 支持 | 与 QE build、版本和方法分支有关，不能只凭 input 字段存在判断 |
+| 强度解释 | 需要响应张量或强度输出；频率表本身不足以支持活性结论 |

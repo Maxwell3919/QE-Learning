@@ -30,6 +30,16 @@ pw.x scf
 
 `pp.x`
 
+## Command boundary
+
+| 对象 | 要求 |
+|---|---|
+| 上游命令 | 已审阅的 `pw.x scf` |
+| 本步命令 | `pp.x -in pp.elf.<system>.in > pp.elf.<system>.out` |
+| 必须读取 | SCF charge density 和对应的 `prefix/outdir` |
+| 主要输出 | ELF grid 或切片文件 |
+| 不应混用 | 不同等值面、不同色标、不同网格的可视化结果作为定量比较 |
+
 ## 通用输入模板
 
 ```fortran
@@ -80,8 +90,10 @@ pw.x scf
 ## 输出判断标准
 
 - 确认 ELF 文件来自目标 SCF。
-- 可视化前记录等值面、切片方向和单位。
+- `pp.x` output 应显示对应 `plot_num`、`filplot`、`iflag`、`output_format` 和 `fileout` 已处理。
+- 可视化前记录等值面、切片方向、色标、单位和软件版本。
 - ELF 解释应结合 charge density、PDOS 或结构信息。
+- ELF 只支持“电子局域化图像”的定性讨论；不能单独给出键强度、键级或电荷转移的定量结论。
 
 ## 收敛性要求
 
@@ -118,3 +130,11 @@ record.md
 ## 资料来源
 
 - QE INPUT_PP reference: <https://www.quantum-espresso.org/Doc/INPUT_PP.html>
+
+## Source / version boundary
+
+| 项目 | 边界 |
+|---|---|
+| ELF `plot_num` | 以当前 QE `INPUT_PP` 为准 |
+| 文件格式 | 以当前 QE PostProc 文档和可视化工具支持为准 |
+| 物理解释 | 属于定性后处理，必须与结构、charge density、DOS/PDOS 或其他证据交叉审阅 |

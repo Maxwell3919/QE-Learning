@@ -30,6 +30,16 @@ pw.x scf
 
 `pp.x`
 
+## Command boundary
+
+| 对象 | 要求 |
+|---|---|
+| 上游命令 | `pw.x -in pw.scf.<system>.in > pw.scf.<system>.out` |
+| 本步命令 | `pp.x -in pp.density.<system>.in > pp.density.<system>.out` |
+| 必须读取 | 已审阅 SCF 的 `prefix/outdir` 和 charge density |
+| 主要输出 | `filplot` 中间文件、`fileout` 可视化/分析文件 |
+| 不应混用 | 不同结构、不同 FFT grid、不同 `prefix/outdir` 的密度文件 |
+
 ## 通用输入模板
 
 ```fortran
@@ -80,8 +90,10 @@ pw.x scf
 ## 输出判断标准
 
 - 确认读取的是目标 SCF `prefix/outdir`。
-- 输出格式和网格维度符合可视化或分析目标。
+- `pp.x` output 中应能确认 `filplot` 和 `fileout` 已生成，且输出维度与 `iflag` 一致。
+- 输出格式和网格维度符合可视化或分析目标；3D charge density 用于体数据，1D/2D 输出只能解释所选方向或切片。
 - 图像解释必须回到 SCF input/output，不能脱离收敛性。
+- 电荷差分或跨计算对比必须确认 cell、原子顺序、FFT grid、单位和参考密度一致。
 
 ## 收敛性要求
 
@@ -121,3 +133,11 @@ record.md
 
 - QE INPUT_PP reference: <https://www.quantum-espresso.org/Doc/INPUT_PP.html>
 - QE PostProc guide: <https://www.quantum-espresso.org/Doc/pp_user_guide/>
+
+## Source / version boundary
+
+| 项目 | 边界 |
+|---|---|
+| `plot_num` | 具体编号含义以当前 QE `INPUT_PP` 为准 |
+| `output_format` | 可用格式和可视化软件支持以当前 PostProc 文档为准 |
+| 图像解释 | 属于后处理判断，不能替代 SCF 收敛和物理模型审阅 |
