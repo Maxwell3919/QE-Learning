@@ -88,6 +88,7 @@ pw.x scf
 - 确认势类型、单位和方向。
 - 平均方向应与目标表面/界面法向一致。
 - slab/work function 分析需看到足够平坦的真空平台。
+- 若电势 profile 用于 work function、band alignment、slab 或 interface 判断，应同时记录边界条件、真空平台和能量零点；物理边界见 [physics-judgement/work-function-and-electrostatic-boundary.md](../../physics-judgement/work-function-and-electrostatic-boundary.md)。
 
 ## 收敛性要求
 

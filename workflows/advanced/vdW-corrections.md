@@ -128,6 +128,12 @@ pseudo-source.md
 
 `record.md` 至少写清楚：为什么需要 vdW correction、`input_dft` 是否显式设置、`vdw_corr` 取值、赝势来源、结构来源、基础数值参数、运行命令、output 中如何确认 XC/vdW 设置、PASS/WARN/BLOCK 判断，以及允许进入的下游 workflow。
 
+## Physics judgement 回查
+
+- 低维、表面、层状和界面体系的 vdW、真空、偶极、长程修正、k/q 采样是一组边界条件；只记录 `vdw_corr` 不足以支撑低维结论。
+- vdW correction 会改变结构，结构改变会传递到 bands、phonon、work function 和 EPC。
+- 结论边界见 [physics-judgement/vdw-and-low-dimensional-boundary.md](../../physics-judgement/vdw-and-low-dimensional-boundary.md)。
+
 ## 资料来源
 
 - QE `pw.x` input reference, `&SYSTEM input_dft` and `vdw_corr`: <https://www.quantum-espresso.org/Doc/INPUT_PW.html>

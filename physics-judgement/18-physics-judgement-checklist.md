@@ -2,6 +2,12 @@
 
 本页把 `physics-judgement/` 压缩成一张审阅清单。它不替代各主题页；当某一组出现 WARN 或 BLOCK 信号时，应回查对应页面，再回到 `workflows/` 和 `standards/` 写入记录。
 
+## 核心判断结论
+
+- 先把异常 output 归类为 numerical、model、boundary、post-processing 或 workflow propagation 问题。
+- 再决定是继续收敛测试、切换物理模型、回到上游 workflow，还是停止下游解释。
+- `PASS / WARN / BLOCK` 必须写明证据、允许进入的下游和 uncertainty statement。
+
 ## PASS / WARN / BLOCK 判断
 
 - PASS：必问问题已有 output 证据支撑，相关 input/source/workflow 记录完整，允许进入对应下游。
@@ -338,6 +344,14 @@
 
 - [17-uncertainty-error-bars-and-reproducibility.md](17-uncertainty-error-bars-and-reproducibility.md)
 - [../standards/calculation-record-template.md](../standards/calculation-record-template.md)
+
+
+## 结论强度
+
+- Strong：本页中由 DFT/DFPT 基础理论、经典方法论文或 QE 官方文档直接支撑的判断。
+- Moderate：本页中由综述、方法摘要或多个来源共同支持，但细节需要回到正文或官方文档核验的判断。
+- Boundary：本页中用于限制解释范围的判断，不作为定量结论。
+- Version-sensitive：涉及 QE、PHonon、Wannier90、EPW、Yambo 或其他工具字段和行为的判断，必须按当前官方文档复查。
 
 ## 资料来源
 

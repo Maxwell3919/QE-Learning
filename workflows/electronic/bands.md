@@ -158,6 +158,9 @@ CELL_PARAMETERS <unit>
 
 - bands 计算应读取同一 `prefix/outdir` 下的 SCF ground state。
 - `<k_path>` 必须对应当前使用的 cell convention；primitive/conventional cell 混用会导致标签错误。
+- bands 图审阅的是 Kohn-Sham eigenvalues。它可以支持能带趋势、交叉检查和态成分讨论，但不能单独作为实验 quasiparticle gap、optical gap、excited-state spectrum 或拓扑结论。
+- 若研究目标超出普通 ground-state DFT，应回查 [physics-judgement/kohn-sham-eigenvalue-boundary.md](../../physics-judgement/kohn-sham-eigenvalue-boundary.md) 和 [physics-judgement/ground-state-vs-excited-state.md](../../physics-judgement/ground-state-vs-excited-state.md)。
+- `PASS` 只表示 bands workflow 数据链可用；若要写 gap 或 spectroscopy 定量结论，仍需要额外 model boundary 和 uncertainty statement。
 - `nbnd` 应覆盖关注的价带和导带范围。
 - 画图前必须明确能量零点：Fermi energy、VBM、CBM 或自定义参考。
 - 高对称点标签、路径段数量和绘图横轴应与 `<k_path>` 记录一致。

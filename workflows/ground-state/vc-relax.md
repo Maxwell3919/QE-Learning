@@ -108,6 +108,7 @@ CELL_PARAMETERS <unit>
 - 检查 final forces、stress tensor、pressure 和 final cell parameters。
 - 确认 cell 自由度设置符合维度与物理问题。
 - vc-relax 后应以 final cell/coordinates 重跑 static SCF。
+- 物理边界见 [physics-judgement/relax-is-not-final-electronic-structure.md](../../physics-judgement/relax-is-not-final-electronic-structure.md)：cell 改变会传播到 k 点密度、stress、symmetry 和下游性质判断。
 
 ## 收敛性要求
 

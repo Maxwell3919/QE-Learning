@@ -205,6 +205,8 @@ SCF convergence + force/stress convergence + reviewed structure
 | WARN | 程序完成但轨迹较短、平衡不足、温控或能量漂移需要继续检查；可用于探索和调参，不用于强统计结论 |
 | BLOCK | 程序/字段混用、单位不明、每步 SCF 或 CP 电子状态异常、结构崩坏、轨迹缺失、restart 不可追溯，或把短测试轨迹当最终物性结论 |
 
+有限温热力学结论还需要单独声明 free-energy model、采样和不确定性；0 K total energy 或短 MD 轨迹不能自动代表实验温度稳定性。物理边界见 [physics-judgement/energy-vs-free-energy.md](../../physics-judgement/energy-vs-free-energy.md)。
+
 ## 记录模板
 
 ```text

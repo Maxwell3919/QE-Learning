@@ -81,6 +81,8 @@
 - 轨道标签、原子序号和赝势通道是否一致。
 - total DOS 与 PDOS 求和趋势应能互相对照，但投影不是严格完备性的保证。
 - Lowdin charge 可作辅助信息，不应直接当作充分价态证据。
+- PDOS/Lowdin/轨道标签只是证据链的一部分，不能单独证明价态、局域化、电荷转移或化学键强度。
+- 若 PDOS 用于判断 delocalization、defect level、DFT+U projector 或 Wannier projection，应回查 [physics-judgement/band-gap-problem-and-delocalization.md](../../physics-judgement/band-gap-problem-and-delocalization.md) 与 [physics-judgement/wannier-validation-and-window-choice.md](../../physics-judgement/wannier-validation-and-window-choice.md)。
 
 ## 收敛性要求
 

@@ -142,6 +142,7 @@ relaxed/checkable endpoint A + relaxed/checkable endpoint B
 - NEB 的 engine input 本质上仍是 PWscf 设置；凡是会改变 Hamiltonian 或能量零点的基础字段，都必须继承并记录。
 - NEB 结果通常不能直接替代 phonon、bands、DOS 或 transition-state 精修；它提供路径和鞍点候选，需要按下游目标再做专项审阅。
 - 如果 NEB 暴露出端点不合理、路径断裂或 SCF 不稳定，应回到基础 workflow 修复，而不是继续堆叠高级开关。
+- NEB 默认审阅的是 minimum energy path 和势能面上的 barrier 候选；它不是 free-energy path。有限温或熵相关结论需回查 [physics-judgement/energy-vs-free-energy.md](../../physics-judgement/energy-vs-free-energy.md)。
 
 ## 资料来源
 

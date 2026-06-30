@@ -9,6 +9,8 @@
 - 查参数定义、默认值、输入卡片和程序说明：先读 [official-qe-docs.md](tutorial-sites/official-qe-docs.md)，再回到 QE 官方 `INPUT_*` reference 或 package guide 核对。
 - 查 hands-on workflow 拆解：读 `tutorial-sites/` 下的教程导读，用它们理解命令顺序、文件关系和常见输出判断。
 - 查辅助工具边界：读 `tools/` 下对应页面，确认该工具解决的是结构处理、路径生成、后处理、可视化、workflow provenance 还是高级耦合计算问题。
+- 查论文级物理判断来源：读 [canonical-literature.md](canonical-literature.md)。该页维护 A0/A1/A2/B1/B2/C 分级和 Fast Core Loop；[canonical.bib](canonical.bib) 只作为 BibTeX 起点。
+- 查文献维护规则：读 [reading-maintenance-policy.md](reading-maintenance-policy.md)，确认新增来源是否真的改变 input/output review 或 `PASS / WARN / BLOCK` 判断。
 
 ## 资料选择原则
 
@@ -27,3 +29,5 @@ AiiDA 保持 optional advanced reference：它适合用来理解 workflow/proven
 - [Quantum ESPRESSO documentation](https://www.quantum-espresso.org/documentation/)
 - [QE official learning resources](https://www.quantum-espresso.org/resources/)
 - [references/source-index.md](source-index.md)
+- [references/canonical-literature.md](canonical-literature.md)
+- [references/reading-maintenance-policy.md](reading-maintenance-policy.md)

@@ -2,9 +2,12 @@
 
 本页是公开网页来源索引。它用于定位原始资料，不替代 `references/tutorial-sites/` 和 `references/tools/` 中的学习导读。
 
-## 使用规则- 参数定义优先核对 QE 官方 `INPUT_*` reference。
+## 使用规则
+
+- 参数定义优先核对 QE 官方 `INPUT_*` reference。
 - 程序链优先核对 QE 官方 guide、Pranab、Kyoto 或 package 文档。
 - 工具文档只说明辅助边界，不替代 QE 原生命令行 workflow 学习。
+- 本页维护公开网页、教程和工具入口；论文级 canonical source 进入 [canonical-literature.md](canonical-literature.md)，不要塞进本页正文。
 
 ## 原始链接
 
@@ -31,3 +34,12 @@
 | [VESTA](https://jp-minerals.org/vesta/en/) | 可视化 | [vesta-xcrysden.md](tools/vesta-xcrysden.md) |
 | [XCrySDen](http://www.xcrysden.org/) | 可视化和费米面 | [vesta-xcrysden.md](tools/vesta-xcrysden.md) |
 | [AiiDA-QE tutorials](https://aiida-quantumespresso.readthedocs.io/en/latest/tutorials/) | 高级 provenance/workflow 参考 | [aiida-qe-optional.md](tools/aiida-qe-optional.md) |
+
+
+## Canonical literature spine
+
+| 来源 | 用途 | 对应导读页 |
+|---|---|---|
+| [Canonical Literature](canonical-literature.md) | A0/A1/A2/B/C 文献分级和 Fast Core Loop | [reading-maintenance-policy.md](reading-maintenance-policy.md) |
+| [Canonical BibTeX](canonical.bib) | 可复用 BibTeX 起点 | [canonical-literature.md](canonical-literature.md) |
+| [Yambo documentation](https://www.yambo-code.eu/wiki/index.php/Documentation) | GW/BSE 与 excited-state 工具入口 | [tools/yambo.md](tools/yambo.md) |

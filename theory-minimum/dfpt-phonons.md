@@ -110,6 +110,7 @@ negative frequency 的最低判断顺序：
 - [workflows/phonon/phonon-dispersion-dfpt.md](../workflows/phonon/phonon-dispersion-dfpt.md)：q-grid dispersion、`ph.x -> q2r.x -> matdyn.x`、q-path 插值和 negative frequency 判断。
 - [workflows/phonon/phonon-dos.md](../workflows/phonon/phonon-dos.md)：基于 `matdyn.x` 的 phonon DOS 分支。
 - [workflows/phonon/phonon-debugging.md](../workflows/phonon/phonon-debugging.md)：不收敛、ASR、虚频、q-grid 和上游 SCF/relax 质量排查。
+- [physics-judgement/imaginary-frequency-triage.md](../physics-judgement/imaginary-frequency-triage.md)：虚频三分法和 ASR 边界。
 
 ## 资料来源
 

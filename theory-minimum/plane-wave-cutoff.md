@@ -86,6 +86,8 @@
 - [SCF workflow](../workflows/ground-state/scf.md)
 - [Relax workflow](../workflows/ground-state/relax.md)
 - [Phonon dispersion DFPT workflow](../workflows/phonon/phonon-dispersion-dfpt.md)
+- [physics-judgement/numerical-vs-model-error.md](../physics-judgement/numerical-vs-model-error.md)
+- [physics-judgement/pseudopotential-transferability-and-functional-consistency.md](../physics-judgement/pseudopotential-transferability-and-functional-consistency.md)
 
 ## 资料来源
 

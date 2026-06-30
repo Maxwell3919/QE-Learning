@@ -124,6 +124,8 @@ PASS / WARN / BLOCK 判断应写成目标量可复查的记录，而不是写成
 - [DFT+U workflow](../workflows/advanced/dft-plus-u.md)
 - [vdW corrections workflow](../workflows/advanced/vdW-corrections.md)
 - [Pseudopotential generation overview](../workflows/advanced/pseudopotential-generation-overview.md)
+- [physics-judgement/pseudopotential-transferability-and-functional-consistency.md](../physics-judgement/pseudopotential-transferability-and-functional-consistency.md)
+- [physics-judgement/numerical-vs-model-error.md](../physics-judgement/numerical-vs-model-error.md)
 
 ## 资料来源
 

@@ -57,6 +57,37 @@
 - 将 band gap、磁性、SOC、DFT+U、vdW、phonon、Born charge、work function、EPC、激发态和有限温度结论写成带边界的判断。
 - 把物理风险落实到 `PASS / WARN / BLOCK` 和 calculation record。
 
+
+## 结论型补写页面
+
+这些页面来自 authoritative literature loop 的稳定判断结论。它们不替代编号理论页，而是用于从 output 现象快速回查物理判断边界。
+
+- [DFT ground-state boundary](dft-ground-state-boundary.md)
+- [Kohn-Sham eigenvalue boundary](kohn-sham-eigenvalue-boundary.md)
+- [Functional choice and sensitivity](functional-choice-and-sensitivity.md)
+- [Numerical vs model error](numerical-vs-model-error.md)
+- [Pseudopotential transferability and functional consistency](pseudopotential-transferability-and-functional-consistency.md)
+- [Band gap problem and delocalization](band-gap-problem-and-delocalization.md)
+- [K-mesh and smearing sensitivity](kmesh-smearing-sensitivity.md)
+- [Relax is not final electronic structure](relax-is-not-final-electronic-structure.md)
+- [Imaginary frequency triage](imaginary-frequency-triage.md)
+- [U value provenance and boundary](u-value-provenance-and-boundary.md)
+- [SOC and symmetry boundary](soc-and-symmetry-boundary.md)
+- [vdW and low-dimensional boundary](vdw-and-low-dimensional-boundary.md)
+- [Work function and electrostatic boundary](work-function-and-electrostatic-boundary.md)
+- [Wannier validation and window choice](wannier-validation-and-window-choice.md)
+- [EPC data chain and convergence](epc-data-chain-and-convergence.md)
+- [Ground-state vs excited-state boundary](ground-state-vs-excited-state.md)
+- [Energy vs free energy](energy-vs-free-energy.md)
+- [Uncertainty statement template](uncertainty-statement-template.md)
+
+## 结论强度
+
+- Strong：经典理论、方法论文或官方文档直接支持。
+- Moderate：摘要、综述或多个方法来源共同支持，但细节需正文或官方文档核验。
+- Boundary：用于限制解释范围，不作为定量结论。
+- Version-sensitive：依赖 QE / PHonon / EPW / Wannier90 / Yambo 等版本，必须查官方文档。
+
 ## 页面索引
 
 - [DFT 近似地图](01-dft-approximation-map.md)

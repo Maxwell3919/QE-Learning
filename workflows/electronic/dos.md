@@ -81,6 +81,9 @@
 - 能量范围覆盖 VBM/CBM、Fermi 附近或关注能区。
 - DOS 金属性判断应与 bands 和 Fermi energy 一致。
 - 记录能量零点采用 Fermi energy、VBM 还是原始 QE 输出。
+- DOS gap、DOS peak 和 DOS at Fermi level 都需要写明 k mesh、smearing/broadening 和 energy zero。它们不能单独替代 bands、PDOS 或 excited-state 方法。
+- 如果 DOS 与 bands 的金属性或 gap 判断不一致，优先回查 dense NSCF mesh、Fermi reference、smearing 和 [physics-judgement/kmesh-smearing-sensitivity.md](../../physics-judgement/kmesh-smearing-sensitivity.md)。
+- 用路径型 bands k-list 支撑 DOS 解释应标记为 `BLOCK`。
 
 ## 收敛性要求
 

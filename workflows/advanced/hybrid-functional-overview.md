@@ -189,6 +189,11 @@ record.md
 
 `record.md` 至少写清：semilocal baseline 路径、hybrid input 边界、QE version、运行命令、资源消耗、output review、与 baseline 的可比性、PASS / WARN / BLOCK 判断和允许进入的下游 workflow。
 
+## Physics judgement 回查
+
+- hybrid functional 不是“实验 gap 修复器”。它改变 functional 模型并产生模型依赖的 KS-like eigenvalues；准粒子能量和 optical spectra 仍需按 [physics-judgement/ground-state-vs-excited-state.md](../../physics-judgement/ground-state-vs-excited-state.md) 审阅。
+- 若目标是 band gap 或局域态修正，应同时回查 [physics-judgement/functional-choice-and-sensitivity.md](../../physics-judgement/functional-choice-and-sensitivity.md) 和 [physics-judgement/band-gap-problem-and-delocalization.md](../../physics-judgement/band-gap-problem-and-delocalization.md)。
+
 ## 资料来源
 
 - QE `pw.x` input reference: <https://www.quantum-espresso.org/Doc/INPUT_PW.html>

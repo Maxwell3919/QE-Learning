@@ -8,6 +8,7 @@
 2. 从 output 中摘录决定状态的关键行或数值。
 3. 按本页列出的 WARN/BLOCK 触发项给出状态。
 4. 明确写出 `Downstream allowed`，不要只写 `JOB DONE`。
+5. 写出 `Uncertainty statement`，区分 numerical uncertainty、model uncertainty、pseudopotential uncertainty、finite-size/boundary uncertainty 和 workflow propagation uncertainty；没有这一步，`PASS` 只能表示 workflow 通过，不能直接升级为科研定量结论。
 
 状态定义以 [pass-warn-block.md](pass-warn-block.md) 为准：
 

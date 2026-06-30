@@ -143,6 +143,12 @@ relaxed structure + pseudo
 - 高级开关改变 Hamiltonian、采样或插值数据链时，应重新审阅下游 bands、DOS、phonon 或 EPC 结果的可比性。
 - 本页只说明边界和审阅字段；完整执行细节应在掌握基础 workflow 后按官方文档展开。
 
+## Physics judgement 回查
+
+- EPC/EPW 不是单程序结果；SCF/NSCF、phonon q-grid、Wannier、coarse/fine mesh、smearing、单位和定义必须作为一条数据链审阅。
+- 不能只看 `lambda` 或 `Tc`。不同目标量，例如 phonon linewidth、Eliashberg function、mobility、resistivity、superconducting Tc 或 temperature-dependent spectra，需要不同的 convergence 和物理边界。
+- 结论边界见 [physics-judgement/epc-data-chain-and-convergence.md](../../physics-judgement/epc-data-chain-and-convergence.md)。
+
 ## 资料来源
 
 - QE PHonon user guide: <https://www.quantum-espresso.org/Doc/ph_user_guide/>

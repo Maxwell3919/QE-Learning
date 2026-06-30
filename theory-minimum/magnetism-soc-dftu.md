@@ -98,6 +98,8 @@
 - [workflows/advanced/spin-polarization.md](../workflows/advanced/spin-polarization.md)
 - [workflows/advanced/noncollinear-soc.md](../workflows/advanced/noncollinear-soc.md)
 - [workflows/advanced/dft-plus-u.md](../workflows/advanced/dft-plus-u.md)
+- [physics-judgement/u-value-provenance-and-boundary.md](../physics-judgement/u-value-provenance-and-boundary.md)
+- [physics-judgement/soc-and-symmetry-boundary.md](../physics-judgement/soc-and-symmetry-boundary.md)
 
 ## 资料来源
 

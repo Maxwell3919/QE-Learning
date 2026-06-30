@@ -162,6 +162,12 @@ record.md
 - 系统讲解 Wannier90 所有高级关键字。
 - 给出可直接投产的自动化 workflow。
 
+## Physics judgement 回查
+
+- Wannier PASS 必须同时满足目标能窗定义、`nbnd` 覆盖、projection 理由、frozen/disentanglement window、QE bands 对照和接口文件链可追踪。
+- spread 小不是独立成功标准；如果 Wannier bands 未在目标能区复现 QE bands，下游 Berry、transport、topology 或 EPC 应标记为 `BLOCK`。
+- 结论边界见 [physics-judgement/wannier-validation-and-window-choice.md](../../physics-judgement/wannier-validation-and-window-choice.md)。
+
 ## 资料来源
 
 - QE INPUT_pw2wannier90 reference: <https://www.quantum-espresso.org/Doc/INPUT_pw2wannier90.html>

@@ -37,6 +37,17 @@
 - Recommended cutoff:
 - Notes:
 
+## Model / boundary provenance
+
+- Exchange-correlation functional:
+- Pseudopotential consistency with functional:
+- Hubbard U / J / V source and projector, if used:
+- Spin / magnetic configuration:
+- SOC / fully relativistic pseudopotential status:
+- vdW model, if used:
+- Slab / vacuum / dipole / charged-state boundary:
+- Excited-state / GW / BSE / TDDFT boundary, if relevant:
+
 ## Input files
 
 - `pw.scf.<system>.in`:
@@ -86,6 +97,16 @@ pw.x -in pw.scf.<system>.in > pw.scf.<system>.out
 - Units:
 - Comparison with previous run / reference:
 - Interpretation limit:
+
+## Uncertainty statement
+
+- Numerical uncertainty:
+- Model uncertainty:
+- Pseudopotential uncertainty:
+- Finite-size / boundary uncertainty:
+- Workflow propagation uncertainty:
+- Version-sensitive items:
+- Claim strength: Strong / Moderate / Boundary / Version-sensitive
 
 ## Problems encountered
 

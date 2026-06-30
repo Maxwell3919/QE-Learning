@@ -102,6 +102,7 @@ CELL_PARAMETERS <unit>
 - 检查最后一次电子 SCF 是否收敛。
 - 检查 final forces、convergence message 和 updated coordinates。
 - relax 完成后通常需要用最终结构重跑 static SCF，作为 bands/DOS/phonon 的上游。
+- 物理边界见 [physics-judgement/relax-is-not-final-electronic-structure.md](../../physics-judgement/relax-is-not-final-electronic-structure.md)：relax 输出结构不是最终电子结构结论。
 
 ## 收敛性要求
 

@@ -95,6 +95,7 @@ slab-like <structure>
 - profile 中应有可识别的 vacuum plateau。
 - work function expression 和能量零点必须写入 record。
 - 检查 vacuum thickness、dipole correction、slab 厚度和 k mesh 是否影响结果。
+- work function 不是单行公式；若真空平台、平均方向、Fermi reference、偶极/边界条件或 charged-state 处理不可复查，应降级为 `WARN` 或 `BLOCK`。物理边界见 [physics-judgement/work-function-and-electrostatic-boundary.md](../../physics-judgement/work-function-and-electrostatic-boundary.md)。
 
 ## 收敛性要求
 

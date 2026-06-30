@@ -91,6 +91,7 @@
 - [Phonon dispersion DFPT workflow](../workflows/phonon/phonon-dispersion-dfpt.md)
 - [Calculation record template](../standards/calculation-record-template.md)
 - [PASS / WARN / BLOCK](../standards/pass-warn-block.md)
+- [physics-judgement/kmesh-smearing-sensitivity.md](../physics-judgement/kmesh-smearing-sensitivity.md)
 
 ## 资料来源
 

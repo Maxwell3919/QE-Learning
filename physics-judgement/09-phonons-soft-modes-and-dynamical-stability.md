@@ -80,6 +80,14 @@
 - [standards/pass-warn-block.md](../standards/pass-warn-block.md)
 - [references/source-index.md](../references/source-index.md)
 
+
+## 结论强度
+
+- Strong：本页中由 DFT/DFPT 基础理论、经典方法论文或 QE 官方文档直接支撑的判断。
+- Moderate：本页中由综述、方法摘要或多个来源共同支持，但细节需要回到正文或官方文档核验的判断。
+- Boundary：本页中用于限制解释范围的判断，不作为定量结论。
+- Version-sensitive：涉及 QE、PHonon、Wannier90、EPW、Yambo 或其他工具字段和行为的判断，必须按当前官方文档复查。
+
 ## 12. 资料来源
 
 - [Baroni et al., Rev. Mod. Phys. 73, 515 (2001)](https://doi.org/10.1103/RevModPhys.73.515)
