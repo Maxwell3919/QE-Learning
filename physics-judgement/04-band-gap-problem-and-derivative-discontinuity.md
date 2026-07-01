@@ -4,9 +4,13 @@
 
 本页帮助判断 QE bands/DOS 中的 Kohn-Sham gap 能解释什么，不能解释什么。
 
-## 2. 物理图像
+## 物理图像
 
-Kohn-Sham eigenvalue gap 不等同于 fundamental gap。近似泛函缺少或近似处理 derivative discontinuity，LDA/GGA 常低估带隙。光学 gap 还涉及激子和多体效应。
+Kohn-Sham band structure 给出的是辅助单粒子方程的 eigenvalue dispersion。它对理解价带、导带、能带色散和金属性很有用，但 Kohn-Sham gap 不是一般意义上的 fundamental gap。Fundamental gap 对应加一个电子和移走一个电子所需能量之差；optical gap 还包含电子-空穴相互作用和激子效应。普通 bands/DOS 图只处在 DFT-level electronic structure 这一层。
+
+Derivative discontinuity 是 band-gap problem 的核心概念之一。精确 DFT 的 exchange-correlation potential 在电子数跨过整数时存在不连续项，Kohn-Sham gap 加上这个不连续贡献才与 fundamental gap 对应。常见 semilocal functional 对这个贡献处理不足，同时还可能有 self-interaction 和 delocalization error，使电子态过度离域、gap 偏小或态位置不合理。
+
+这并不意味着某个方向的误差可以机械套用到所有体系。小带隙体系、磁性体系、含 SOC 的体系、DFT+U/hybrid 模型和 GW/BSE 结果都可能改变 gap 解释。QE 用户需要把 band plot、DOS、Fermi level、occupation、SOC/U/functional、k path 和 uniform mesh 放在同一证据链里，而不是只从一张图读出一个无边界数字。
 
 ## 3. DFT/QE 中的近似来源
 

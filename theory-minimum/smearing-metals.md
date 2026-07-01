@@ -13,6 +13,12 @@
 - `degauss` 会影响 energy、force、DOS、Fermi surface、phonon 和 EPC 相关量。
 - SCF smearing 与 DOS 后处理 broadening 是不同层面的设置，必须分开记录。
 
+## 物理图像
+
+绝缘体在 Fermi level 附近有清楚能隙，occupied 和 unoccupied states 的分界相对稳定。金属的 Fermi level 穿过能带，极少量 k 点附近的能量误差就会改变占据、总能和力。有限 k mesh 无法精确表示真实 Fermi surface，SCF 迭代也可能因为占据突然跳变而振荡。
+
+Smearing 把零温阶跃占据替换成一个平滑函数，使 Fermi level 附近的积分更稳定。它可以改善数值积分和 SCF 稳定性，但也会改变能量、力、DOS 形状和 phonon response 的数值表现。因此 smearing 要和 k mesh 一起收敛；一条平滑的 DOS 曲线只是后处理图像更平滑，不代表 Fermi surface 已被充分采样。
+
 ## QE 中的对应对象
 
 | 对象 | QE 位置 | 判断意义 | output 证据 |

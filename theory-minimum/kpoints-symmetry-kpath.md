@@ -13,6 +13,30 @@
 - QE 会利用 symmetry 约化 k points；output 中 irreducible k-points 是重要审阅证据。
 - 结构 relax、cell convention、SOC、magnetism、noncollinear 设置和 symmetry 开关都可能改变 k-path 和 k 点解释。
 
+## 物理图像
+
+周期晶体把实空间问题变成倒空间问题。Bloch theorem 说明，在周期势场中，电子态可以写成周期函数乘以相位因子；这个相位由波矢 `k` 决定。不同 `k` 点对应相邻原胞之间不同的相位关系，因此一个固体的电子结构不是少数离散能级，而是定义在 Brillouin zone 上的能量函数 `E_n(k)`。
+
+Uniform k mesh 的作用是对 Brillouin zone 做积分。SCF total energy、charge density、force、stress、DOS 和 Fermi surface 都需要从整个 Brillouin zone 的采样中得到近似。High-symmetry k-path 的作用不同：它选取 Brillouin zone 中若干有代表性的线段，把 `E_n(k)` 画成能带图，方便观察色散、简并、带交叉和开隙。路径图能帮助解释，但它没有覆盖整个 Brillouin zone，不能替代积分网格。
+
+Symmetry 是连接结构和倒空间采样的另一层信息。空间群描述晶体整体对称性，点群描述绕某一点的旋转、镜面和反演等操作；这些操作在倒空间中会把不同 k 点联系起来。QE 利用这些对称性减少实际计算的 irreducible k-points。若结构 relax 后晶胞变形，或 SOC、磁性、noncollinear 设置改变 Hamiltonian 的对称性，原来的 k-path、简并解释和 irreducible k-point 数量都需要重新审阅。
+
+## 最低数学结构
+
+实空间基矢 `a_i` 与倒空间基矢 `b_i` 满足 `a_i · b_j = 2 pi delta_ij`。Brillouin zone 是倒空间中的 primitive cell；`K_POINTS automatic` 近似的是其中的积分：
+
+```text
+integral over BZ f(k) dk  ->  sum over k_i w_i f(k_i)
+```
+
+Band path 则是若干特殊点之间的线段采样：
+
+```text
+Gamma -> X -> ...  gives E_n(k) along selected directions
+```
+
+Little group 是保持某个 k 点不变的对称操作集合。它影响该 k 点处能带简并和 mode 标记。QE 用户不需要完整群论推导，但需要知道：简并、band crossing、phonon irreps 和 SOC/magnetism 下的 symmetry reduction 都不是纯绘图问题，而会影响 output review 和下游解释。
+
 ## QE 中的对应对象
 
 | 对象 | QE 位置 | 判断意义 | output 证据 |
@@ -24,7 +48,7 @@
 | `ibrav` / `CELL_PARAMETERS` | `pw.x` input | direct/reciprocal cell convention | cell、reciprocal axes、symmetry |
 | `bands.x` | post-processing | 整理 band data | `filband` / band data file |
 
-相关 workflow：[k-point convergence](../workflows/ground-state/kpoint-convergence.md)、[bands](../workflows/electronic/bands.md)、[DOS](../workflows/electronic/dos.md)、[Fermi surface](../workflows/electronic/fermi-surface.md)、[phonon dispersion](../workflows/phonon/phonon-dispersion-dfpt.md)。
+相关 workflow：[k-point convergence](../workflows/ground-state/kpoint-convergence.md)、[bands](../workflows/electronic/bands.md)、[DOS](../workflows/electronic/dos.md)、[Fermi surface](../workflows/electronic/fermi-surface.md)、[phonon dispersion](../workflows/phonon/phonon-dispersion-dfpt.md)。相关理论回查：[reciprocal space and Brillouin zone](reciprocal-space-and-brillouin-zone.md)、[band structure and DOS](band-structure-and-dos.md)、[crystal symmetry, space group and point group](crystal-symmetry-space-group-point-group.md)。
 
 ## 核心概念
 

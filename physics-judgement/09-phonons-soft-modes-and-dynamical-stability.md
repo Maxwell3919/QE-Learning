@@ -4,9 +4,13 @@
 
 本页帮助判断 phonon 虚频、软模和动力学稳定性结论是否可信。
 
-## 2. 物理图像
+## 物理图像
 
-声子频率来自 dynamical matrix 的本征值。acoustic modes 对整体平移应接近零；soft mode 表示某个集体位移方向曲率很小。imaginary/negative frequency 可能来自真实相不稳定，也可能来自数值噪声或上游结构问题。
+声子频率来自 Born-Oppenheimer 能量面对原子位移的二阶曲率。把 force constants 质量归一化并转换到 q 空间后得到 dynamical matrix；它的本征值对应 `omega^2(q)`。正的 `omega^2` 表示该振动方向附近是稳定曲率，接近零的 acoustic modes 来自整体平移自由度，负的 `omega^2` 在 output 中通常显示为 imaginary 或 negative frequency。
+
+Soft mode 的物理含义是某个集体位移方向的能量面很平。它可能预示结构相变、畸变或真实动力学不稳定，也可能只是 SCF、force/stress、cutoff、k/q mesh、smearing、ASR、IFC 插值或低维/极性长程相互作用没有处理好。判断虚频时要同时看位置、大小、分支、eigenvector、参数敏感性和上游结构质量。
+
+Gamma acoustic 的小虚频、单个 q 点的局部软模和整条 branch 的系统性不稳定需要不同处理。ASR 能帮助检查平移不变性并改善 acoustic branch 行为，但它不会让未优化结构、错误文件链或不收敛 response 变成可信 phonon。最终判断应落到 mode pattern 和完整 workflow evidence。
 
 ## 3. DFT/QE 中的近似来源
 

@@ -4,9 +4,13 @@
 
 本页帮助判断 EPC、phonon linewidth、Eliashberg function、Tc 或输运相关结果是否可信。
 
-## 2. 物理图像
+## 物理图像
 
-EPC 描述电子态与声子位移之间的耦合矩阵元。它同时依赖电子结构、费米面、phonon、Wannier 插值和积分网格，因此比普通 bands/DOS 更依赖整条数据链。
+Electron-phonon coupling 描述电子态在原子集体振动下如何被散射。一个声子模式改变离子势和电子 Hamiltonian，电子从一个 `k` 态散射到另一个 `k+q` 态；耦合强度由 electron-phonon matrix elements、phonon frequencies、电子 occupation 和 Fermi surface 共同决定。
+
+这使 EPC 成为多级数据链问题。Ground-state SCF 提供电子密度和势；NSCF 或 Wannier 前置提供电子态；`ph.x` 提供 phonon perturbations；Wannier/EPW 把电子、声子和 EPC matrix elements 插值到 dense k/q meshes；最后才得到 linewidth、Eliashberg function、lambda、mobility 或 superconducting Tc 等 observable。任一环节的误差都会传到最终数值。
+
+EPC 对金属 Fermi surface、smearing/broadening、q-grid、Wannier band validation、polar correction、functional、pseudopotential 和 SOC/U 模型都敏感。因此一个 `lambda` 或 `Tc` 数字本身不是结论；它必须附带上游 phonon 质量、Wannier 质量、dense mesh convergence 和目标 observable 的边界说明。
 
 ## 3. DFT/QE 中的近似来源
 

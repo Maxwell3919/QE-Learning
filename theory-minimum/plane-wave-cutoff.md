@@ -13,6 +13,24 @@
 - cutoff 是系统性数值收敛参数，不是物理模型参数；但它和 pseudopotential 类型强耦合。
 - total energy、force、stress、phonon frequency、Born charge、work function 等对 cutoff 的敏感性不同。
 
+## 物理图像
+
+Plane-wave basis 把周期体系中的 Kohn-Sham 波函数写成许多不同波长的平面波叠加。波长越短，对应的 reciprocal vector 越大，也越能描述靠近原子核区域的快速变化和复杂节点结构。有限计算不能保留无限多平面波，因此 QE 用 kinetic-energy cutoff 只保留动能低于阈值的分量。
+
+`ecutwfc` 控制波函数可以包含多少高频分量；`ecutrho` 控制电荷密度、势和相关 FFT 网格的表示能力。由于电荷密度由波函数乘积构成，它通常包含比波函数更高的 Fourier 分量。USPP 和 PAW 还引入 augmentation charge，使 density cutoff、smooth grid、force 和 stress 的收敛不能简单从 `ecutwfc` 推断。
+
+Cutoff 的直觉是“分辨率”：cutoff 越高，能表示的最短波长越短，基组误差通常越小。但科研判断关注的不是 cutoff 数值本身，而是目标量是否稳定。Total energy 可能比 force、stress、phonon frequency、Born charge 或 work function 更早看起来平滑；这也是 cutoff convergence 必须按目标 observable 设计的原因。
+
+## 最低数学结构
+
+Plane-wave 展开可写成：
+
+```text
+psi_nk(r) = sum_G c_nk(G) exp[i(k+G)·r]
+```
+
+QE 中 `ecutwfc` 选择满足 `(1/2)|k+G|^2` 低于阈值的平面波集合，`ecutrho` 选择 density/potential 相关 Fourier 分量和 FFT grid。提高 cutoff 会扩大基组并改变 Hamiltonian 的数值表示；只有当目标 output 随 cutoff scan 稳定时，才可以把 cutoff 误差视为当前结论下可接受。
+
 ## QE 中的对应对象
 
 | 对象 | QE 位置 | 判断意义 | output 证据 |

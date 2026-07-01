@@ -4,9 +4,13 @@
 
 本页帮助判断介电张量、Born effective charge、LO-TO splitting 和 polar phonon 结果是否有效。
 
-## 2. 物理图像
+## 物理图像
 
-极性绝缘体中，长程库仑相互作用会让 Gamma 附近纵向和横向光学声子分裂。DFPT 的电场微扰可给出 dielectric tensor 和 Born effective charge，用于 non-analytic correction。
+DFPT response 处理的是系统对小扰动的线性响应。对 polar materials，原子位移不仅改变局域键长和短程 force constants，还会改变宏观极化；极化产生的长程电场再反馈到动力学矩阵。这个长程项在 Gamma 附近具有方向依赖，因此纵向光学模式和横向光学模式可能出现 LO-TO splitting。
+
+Dielectric tensor 描述宏观电场下极化如何响应，Born effective charge 描述原子位移如何改变极化。它们共同进入 polar phonon 的 non-analytic correction。由于这些量是 response quantities，它们比普通 total energy 更依赖 band gap、occupation、k mesh、functional、pseudopotential、structure 和 perturbation convergence。
+
+QE 中 `epsil=.true.` 请求的是特定条件下的电场响应分支。输出张量并不自动证明 polar correction 可用于所有后处理：需要检查体系是否适合绝缘体电场响应、tensor symmetry 是否合理、warnings 是否解释、`dynmat.x`/`matdyn.x` 是否读取同一数据链，以及 LO-TO 方向和 ASR/zasr 设置是否记录。
 
 ## 3. DFT/QE 中的近似来源
 

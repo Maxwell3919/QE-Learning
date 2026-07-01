@@ -13,6 +13,25 @@
 - 它们是 response quantities，对 functional、PP、gap、structure、k mesh、cutoff 和 response convergence 敏感。
 - QE 中 `epsil=.true.` 是 Gamma、非金属电场响应分支；输出后仍需审阅 tensor symmetry、warning 和文件链。
 
+## 物理图像
+
+极性材料中的晶格振动和宏观电场会相互耦合。某些原子位移会改变晶体极化，极化变化又会产生长程库仑场；这个电场反过来改变长波极限下的 dynamical matrix。因此，在极性绝缘体中，只看短程 force constants 不能完整描述 Gamma 附近的纵向光学模式。
+
+Dielectric tensor 描述电子和离子系统对宏观电场的线性响应。Born effective charge 描述某个原子沿某方向位移时，宏观极化如何变化。它是动态响应量，包含成键和电子重排信息，因此不能解释为静态离子价。一个形式电荷相同的原子，在不同结构、泛函、赝势或局域环境下可以有不同的 Born effective charge。
+
+LO-TO splitting 来自长程电场的 non-analytic contribution：同样接近 Gamma 点，纵向和横向扰动的电场边界不同，频率可以分裂。QE 中 `epsil=.true.`、Born charge、dielectric tensor、`dynmat.x` 或 `matdyn.x` 的 non-analytic 设置共同决定这个解释是否成立。
+
+## 最低数学结构
+
+可以把 Born effective charge 看作极化对原子位移的导数，把 dielectric tensor 看作极化对电场的导数：
+
+```text
+Z*  ~  dP / du
+epsilon  ~  dP / dE
+```
+
+这些导数来自线性响应。它们进入长波极限 dynamical matrix 的 non-analytic 项，影响 polar phonon、LO-TO splitting 和 IR activity。因为响应量依赖 band gap、occupation、pseudopotential、functional 和 structure，output review 需要检查的不只是张量数值，还包括适用条件、收敛、对称性和文件链。
+
 ## QE 中的对应对象
 
 | 对象 | QE 程序 | 判断意义 | output 证据 |

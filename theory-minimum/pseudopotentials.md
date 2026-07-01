@@ -13,6 +13,26 @@
 - PP transferability 是物理判断风险，不是单纯调大 cutoff 就能消除的问题。
 - 不同 PP 不应无记录混用；同一元素的不同 UPF 可能对应不同 valence、XC、relativistic 能力和 recommended cutoff。
 
+## 物理图像
+
+在全电子图像中，原子核附近的 core electrons 变化很快，valence electrons 决定多数化学键、能带和响应性质。Plane-wave 方法若直接表示 core region 的快速振荡，需要极高 cutoff。Pseudopotential 的思路是把 core electrons 和原子核的强势场替换成一个对 valence electrons 有效的势，同时让价电子在核外区域保持正确的散射和成键行为。
+
+这个替换既提高效率，也引入模型边界。Core/valence 分离、valence configuration、semicore 是否进入价层、scalar-relativistic 或 fully relativistic 处理、projector 形式和 exchange-correlation functional 都被写入 UPF 文件。两个 UPF 即使元素相同，也可能定义了不同的有效 Hamiltonian。
+
+Norm-conserving、ultrasoft 和 PAW 可以理解为不同的 core/valence 表示策略。Norm-conserving 形式较直接但可能需要较高 cutoff；ultrasoft 通过放松范数守恒降低 wavefunction cutoff，同时需要更认真审阅 density cutoff；PAW 保留了重构全电子信息的思想，也带来 projector 和 augmentation 相关边界。QE 用户不需要把它们排成绝对优劣顺序，关键是记录来源、功能一致性和目标性质的收敛证据。
+
+## 最低数学结构
+
+Pseudopotential 把全电子问题中的强 Coulomb 势和 core states 约化为 valence-only Hamiltonian：
+
+```text
+all-electron nuclei + core + valence problem
+  -> effective ionic potential + selected valence states
+  -> plane-wave calculation
+```
+
+Transferability 指这个有效势能否在目标化学环境、氧化态、磁性状态、压力、响应计算或相对论条件下仍然保持可靠。它不能由一次 SCF convergence 单独证明；需要结合 UPF metadata、functional consistency、cutoff convergence、目标 output 和必要的来源/对照判断。
+
 ## QE 中的对应对象
 
 | 对象 | QE 位置 | 判断意义 | output 证据 |

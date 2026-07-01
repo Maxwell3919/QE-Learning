@@ -13,6 +13,12 @@
 - `relax` 优化原子坐标；`vc-relax` 同时优化原子坐标和 cell。
 - relax/vc-relax output 是优化轨迹和最终结构来源；进入性质计算前通常需要基于 final structure 重做 static SCF。
 
+## 物理图像
+
+在 Born-Oppenheimer 能量面上，原子坐标决定电子基态能量。Force 是这个能量面对原子位移的一阶导数；当所有自由原子的力接近目标阈值时，结构处在当前模型下的局部平衡附近。Stress 是能量面对晶胞形变的一阶导数；它描述晶胞体积和形状是否仍受到内部压力或剪切驱动。
+
+`relax` 和 `vc-relax` 的区别可以理解为搜索空间不同。`relax` 在固定晶胞内移动原子，只判断 internal coordinates；`vc-relax` 同时改变晶胞和原子坐标，因此对 stress、cutoff、k mesh、赝势和约束设置更敏感。优化输出给出的主要成果是结构，而不是最终电子性质。新的 bands、DOS、phonon 或 work function 需要在最终结构上重新建立清晰的 static SCF 数据边。
+
 ## QE 中的对应对象
 
 | 对象 | QE 位置 | 判断意义 | output 证据 |

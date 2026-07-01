@@ -1,6 +1,6 @@
 # Theory Minimum
 
-本目录只记录正确使用 Quantum ESPRESSO 所需的最低 DFT / DFPT / 固体计算理论背景。它不是 DFT 教材，也不追求从历史、定理或完整推导建立理论体系；它只回答一个问题：为了读懂 QE input/output，并判断一次计算是否可以进入下游，最低需要知道哪些概念。
+本目录记录正确使用 Quantum ESPRESSO 所需的最低充分 DFT / DFPT / 固体计算理论背景。它面向 input/output 阅读、workflow 准入和结果可靠性判断，回答一个问题：为了读懂 QE input/output，并判断一次计算是否可以进入下游，最低需要知道哪些概念。
 
 Phase 3-A 的核心页已经与 ground-state、electronic 和 phonon 三类 workflow 建立回链：SCF、cutoff、pseudopotential、k-points、smearing、force/stress、DFPT phonon、dielectric tensor 和 Born effective charge 都应作为 output review 的理论回查层使用。
 
@@ -14,7 +14,7 @@ Phase 3-A 的核心页已经与 ground-state、electronic 和 phonon 三类 work
 - 看不懂 output review 时，查对应物理量或数值判据，再回到 output 判断 `PASS / WARN / BLOCK`。
 - 遇到常见错误时，先确认它属于概念误解、输入不一致、收敛不足还是下游依赖错误，再回到 workflow 修复。
 
-不要按时间顺序阅读本目录，也不要按某一种材料、体系或研究故事组织理论页。理论页应按 QE workflow 中反复出现的判断问题组织。
+阅读本目录时建议按 workflow 问题回查，而不是按时间顺序或某一种材料故事阅读。理论页按 QE workflow 中反复出现的判断问题组织。
 
 ## 页面写作要求
 
@@ -40,6 +40,9 @@ Phase 3-A 的核心页已经与 ground-state、electronic 和 phonon 三类 work
 - [Exchange-correlation functional choice](functional-choice.md)
 - [Pseudopotentials](pseudopotentials.md)
 - [K-points, symmetry and k-path](kpoints-symmetry-kpath.md)
+- [Reciprocal space and Brillouin zone](reciprocal-space-and-brillouin-zone.md)
+- [Band structure and DOS](band-structure-and-dos.md)
+- [Crystal symmetry, space group and point group](crystal-symmetry-space-group-point-group.md)
 - [Smearing and metals](smearing-metals.md)
 - [Force, stress and relaxation](force-stress-relaxation.md)
 - [Magnetism, SOC and DFT+U](magnetism-soc-dftu.md)

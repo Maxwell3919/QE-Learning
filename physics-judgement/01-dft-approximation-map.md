@@ -6,9 +6,25 @@
 
 本页的目标是让学习者在看到异常 output 时先判断“问题属于哪一类”，再决定是重做收敛测试、换模型、检查上游依赖，还是把结果标记为 `WARN / BLOCK`。
 
-## 2. 物理图像
+## 物理图像
 
-DFT/QE 的结果来自一串近似。常见层次包括：
+一次 DFT/QE 结果不是单一误差源的输出，而是多个层次共同作用后的判断对象。更有用的审查方式是先问：这次结果依赖哪个物理模型？这个模型被怎样数值表示？赝势是否定义了合适的价电子问题？边界条件是否代表目标体系？下游程序是否读取了正确上游数据？图像或后处理是否被过度解释？
+
+可以把审查地图写成：
+
+```text
+DFT result
+  = physical model
+  + numerical representation
+  + pseudopotential model
+  + boundary condition
+  + workflow data chain
+  + post-processing interpretation
+```
+
+这只是用于审阅的分类图，不是严格数学分解。它的价值在于让异常 output 有明确回查路径：SCF 振荡优先回到 occupation、mixing、structure、PP 和 k mesh；band gap 异常需要同时看 functional、SOC、U、k path、DOS mesh 和 KS eigenvalue 边界；phonon 虚频需要检查结构、force/stress、SCF、q-grid、ASR 和 mode eigenvector；work function 漂移则需要回到 slab、vacuum、dipole 和 electrostatic potential plateau。
+
+DFT/QE 的主要近似层次包括：
 
 - Born-Oppenheimer 图像：电子和原子核运动分离，许多 QE workflow 默认在给定原子结构上求电子基态。
 - Kohn-Sham 映射：把相互作用电子问题映射为辅助单粒子方程；Kohn-Sham eigenvalues 可用于 bands/DOS 审阅，但并不自动等同于所有实验激发能。
@@ -20,6 +36,8 @@ DFT/QE 的结果来自一串近似。常见层次包括：
 - Post-processing approximation：bands、DOS、PDOS、potential、ELF、Wannier、EPC、光谱等后处理会继续传播上游误差。
 
 这些近似共同决定 output 的可信度。一次 `JOB DONE` 只说明程序结束，不说明这些近似已经适合目标物理问题。
+
+模型近似和数值近似的区别尤其重要。提高 cutoff、加密 k mesh 或收紧 `conv_thr` 可以降低数值表示误差，却不能修复 semilocal functional 的 band-gap limitation、错误的 U provenance、SOC 赝势不兼容、vdW 模型缺失或 slab 边界条件不合适。相反，切换 hybrid、DFT+U、SOC 或 vdW 也不能跳过 cutoff、k/q mesh、smearing、structure 和 output review；模型升级会带来新的数据链和新的收敛要求。
 
 ## 3. DFT/QE 中的近似来源
 
@@ -105,6 +123,9 @@ DFT/QE 的误差可以按处理方式分层：
 ## 11. 对应仓库页面
 
 - [theory-minimum/dft-ks-scf.md](../theory-minimum/dft-ks-scf.md)
+- [theory-minimum/reciprocal-space-and-brillouin-zone.md](../theory-minimum/reciprocal-space-and-brillouin-zone.md)
+- [theory-minimum/band-structure-and-dos.md](../theory-minimum/band-structure-and-dos.md)
+- [theory-minimum/crystal-symmetry-space-group-point-group.md](../theory-minimum/crystal-symmetry-space-group-point-group.md)
 - [theory-minimum/plane-wave-cutoff.md](../theory-minimum/plane-wave-cutoff.md)
 - [theory-minimum/pseudopotentials.md](../theory-minimum/pseudopotentials.md)
 - [workflows/ground-state/scf.md](../workflows/ground-state/scf.md)

@@ -14,6 +14,14 @@
 - 磁性、SOC 和 DFT+U 会影响 symmetry、irreducible k-points、band degeneracy、DOS/PDOS 标签、phonon/electronic downstream consistency。
 - 任何 spin/SOC/DFT+U 结论都必须保留 input 设置、output 回显、warning、磁矩或 occupation 证据，以及同一 `prefix/outdir` 数据链。
 
+## 物理图像
+
+普通 non-spin-polarized DFT 把自旋自由度隐含地平均处理。磁性计算允许不同自旋通道或不同方向的自旋密度形成不同占据，从而改变 exchange-correlation potential、total energy、band splitting 和局域磁矩。初始磁化只是帮助 SCF 找到某个可能的解；最终磁态来自自洽后的 density、magnetization 和能量比较。
+
+SOC 来自相对论效应，把电子自旋和轨道运动耦合起来。它会改变 Hamiltonian 的对称性、能带简并和某些能隙或交叉点，因此不能只看作后处理绘图开关。DFT+U 则在指定局域轨道子空间上加入 Hubbard correction，用来改变 semilocal functional 对局域电子占据的处理。U 的意义绑定到 projector、manifold、赝势、functional 和结构环境。
+
+这三类设置共同特点是改变模型本身。模型改变后，SCF、NSCF、bands、DOS、PDOS、phonon 和高级 workflow 都必须使用同一数据链；否则 output 之间的差异可能来自混用模型，而不是目标物理效应。
+
 ## QE 中的对应对象
 
 | 对象 | QE 位置 | 判断意义 | output 证据 |

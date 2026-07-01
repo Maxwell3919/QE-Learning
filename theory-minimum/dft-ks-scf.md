@@ -2,7 +2,7 @@
 
 ## 本页解决什么问题
 
-本页解释 `pw.x calculation='scf'` 在 QE workflow 中到底建立了什么：一个在给定结构、赝势、泛函、cutoff、k mesh 和 occupation 设置下自洽的 ground-state charge density。它帮助判断 SCF output 是否足以进入 relax、NSCF、bands、DOS、PDOS、`pp.x` 或 `ph.x`。本页不推导完整 DFT，只保留读 input/output 和做下游准入所需的最低概念。
+本页解释 `pw.x calculation='scf'` 在 QE workflow 中到底建立了什么：一个在给定结构、赝势、泛函、cutoff、k mesh 和 occupation 设置下自洽的 ground-state charge density。它帮助判断 SCF output 是否足以进入 relax、NSCF、bands、DOS、PDOS、`pp.x` 或 `ph.x`。页面重点放在读 input/output 和做下游准入所需的最低概念。
 
 ## 最低掌握深度
 
@@ -12,6 +12,29 @@
 - Kohn-Sham system 是辅助非相互作用体系；Kohn-Sham eigenvalue 可用于 bands/DOS workflow 的内部解释，但不能直接当作实验激发能。
 - SCF convergence 说明电子自洽迭代满足停止条件；它不等于 cutoff/k mesh/smearing 对目标 observable 已收敛。
 - `JOB DONE` 只说明程序结束；是否允许下游取决于 output evidence 和 PASS / WARN / BLOCK。
+
+## 物理图像
+
+固体中的电子问题困难在于电子之间彼此相互作用，同时还在原子核产生的周期势场中运动。直接求解多电子波函数会让自由度随电子数迅速膨胀；实际第一性原理计算需要把问题改写成更可处理的形式。QE 中最常见的 `pw.x scf` 就是在 Born-Oppenheimer 图像下固定原子核位置，求这个结构对应的电子基态。
+
+Hohenberg-Kohn 定理把 ground-state 问题的核心变量从多电子波函数转为电子密度。Kohn-Sham 方法进一步引入一个辅助的非相互作用电子体系，让它产生与真实相互作用体系相同的 ground-state density。这样，QE 实际求解的是一组 Kohn-Sham 单粒子方程；它们给出 density、total energy、effective potential 和 Kohn-Sham eigenvalues，但这些量在物理解释中的地位不同。
+
+SCF loop 可以看成 density 和 effective potential 之间的闭环：给定一个 density，就可以构造 Hartree potential、exchange-correlation potential 和离子势；解 Kohn-Sham 方程后得到新的 occupied states 和新的 density；新旧 density 混合后进入下一轮。`conv_thr` 判断的是这个循环是否在数值上停止，而不是泛函、赝势、cutoff、k mesh 或 occupation 模型是否足以支撑所有下游结论。
+
+## 最低数学结构
+
+在 QE 用户需要掌握的层次上，可以把普通 SCF 写成下面的结构：
+
+```text
+fixed nuclei + pseudopotential + exchange-correlation functional
+  -> Kohn-Sham Hamiltonian H_KS[n]
+  -> eigenvalue problem H_KS[n] psi_nk = epsilon_nk psi_nk
+  -> occupied states and charge density n(r)
+  -> new H_KS[n]
+  -> convergence test
+```
+
+Total energy 是 density functional 评估出的基态能量；force 和 stress 是能量对原子位置和晶胞形变的导数；Kohn-Sham eigenvalues 是辅助方程的本征值，常用于 bands 和 DOS 的 DFT-level 分析。它们不应被放在同一个可信度层级中：SCF total energy 可收敛，并不自动说明 band gap、DOS 峰位、phonon frequency 或 work function 已经达到目标精度。
 
 ## QE 中的对应对象
 
@@ -25,7 +48,7 @@
 | `occupations` / `smearing` / `degauss` | `&SYSTEM` | 占据和 Fermi-level 附近积分处理 | occupation scheme、Fermi energy、band occupation |
 | `prefix/outdir` | `&CONTROL` | 下游读取 SCF scratch 数据的数据边 | temporary directory、data-file 读取记录 |
 
-相关 workflow：[SCF](../workflows/ground-state/scf.md)、[NSCF](../workflows/ground-state/nscf.md)、[bands](../workflows/electronic/bands.md)、[phonon DFPT](../workflows/phonon/phonon-dispersion-dfpt.md)。相关标准：[output review checklist](../standards/output-review-checklist.md)。
+相关 workflow：[SCF](../workflows/ground-state/scf.md)、[NSCF](../workflows/ground-state/nscf.md)、[bands](../workflows/electronic/bands.md)、[phonon DFPT](../workflows/phonon/phonon-dispersion-dfpt.md)。相关理论回查：[band structure and DOS](band-structure-and-dos.md)。相关标准：[output review checklist](../standards/output-review-checklist.md)。
 
 ## 核心概念
 

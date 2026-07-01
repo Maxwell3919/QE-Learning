@@ -14,6 +14,24 @@
 - ASR 是 acoustic sum rule 约束和诊断工具，不替代结构优化或数值收敛。
 - Imaginary frequency 需要 triage，不能直接写成真实不稳定。
 
+## 物理图像
+
+声子是晶体中原子集体振动的正则模式。在 Born-Oppenheimer 图像下，电子先在给定原子结构上达到基态，原子核在这个电子基态能量面上运动。若原子只在平衡位置附近小幅振动，可以把能量面对原子位移展开到二阶；二阶曲率决定 force constants，进一步决定 dynamical matrix 和 phonon frequencies。
+
+频率平方可以看成能量曲率的符号和大小。正的曲率对应稳定振动模式；接近零的 acoustic branch 反映整体平移；负的曲率在输出中通常表现为 imaginary 或 negative frequency，需要判断它来自数值误差、结构未充分优化、边界条件、q-grid 插值问题，还是可能的真实软模和动力学不稳定。
+
+DFPT 的价值在于不用显式构造巨大超胞，也能在给定 q point 上计算原子位移微扰的线性响应。`ph.x` 计算 q 点上的 dynamical matrix；q-grid 的 dynamical matrices 经 `q2r.x` 转换为 real-space interatomic force constants，再由 `matdyn.x` 插值到 band path 或 DOS mesh。这个链条让 phonon 比普通 bands/DOS 更依赖上游 SCF、结构、cutoff、k mesh、smearing 和文件一致性。
+
+## 最低数学结构
+
+在 harmonic approximation 下，能量对原子位移 `u` 的展开可以理解为：
+
+```text
+E = E0 + (1/2) sum Phi u u + higher-order terms
+```
+
+`Phi` 是 force constants。经过质量归一化和 Fourier transform 后得到 dynamical matrix `D(q)`，对角化得到 `omega^2(q)` 和 mode eigenvectors。Acoustic sum rule 来自整体平移不应改变能量；ASR 可以约束 acoustic 行为，但不能替代结构、SCF、q-grid 和 response convergence。
+
 ## QE 中的对应对象
 
 | 对象 | QE 程序 | 判断意义 | output 证据 |

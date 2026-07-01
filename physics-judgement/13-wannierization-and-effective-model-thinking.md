@@ -4,9 +4,13 @@
 
 本页帮助判断 Wannier 化是否可靠，以及何时可以把 DFT 结果压缩成有效模型。
 
-## 2. 物理图像
+## 物理图像
 
-Bloch states 是 k 空间本征态；Wannier functions 是局域化轨道表示。Wannier 化通过 projections、disentanglement/frozen windows 和 spread minimization，把目标能窗的能带映射到可插值的有效哈密顿量。
+Bloch states 是周期体系在 k 空间中的本征态，天然适合描述能带色散；Wannier functions 则把同一子空间重新表示为实空间局域轨道。这个转换不是改变 DFT 结果本身，而是选择一个 gauge 和一个目标子空间，把 `E_n(k)` 与矩阵元压缩成可插值的有效 Hamiltonian。
+
+当目标 bands 是 isolated manifold 时，Wannier 化主要考验 projection 和局域化质量；当 bands 与其他能带纠缠时，还需要选择 outer window、frozen window 和 disentanglement 策略。窗口选择过窄会丢失目标态，过宽可能引入无关态；projection 看似合理也可能无法复现目标能区的 ab initio bands。
+
+Wannier validation 的核心证据是 interpolated bands 在目标窗口内回对 QE bands，并且 projection、window、spread、spin/SOC 设置和接口文件都可复查。Small spread 是有用线索，但不是充分条件；用于 Berry curvature、transport、topology 或 EPC 时，还需要对目标 observable 的额外质量检查。
 
 ## 3. DFT/QE 中的近似来源
 
