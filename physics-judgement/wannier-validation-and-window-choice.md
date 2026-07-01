@@ -37,13 +37,14 @@
 | outer window / disentanglement | Wannier90 input/output | 判断 entangled bands 的子空间选择 |
 | spreads and convergence | `.wout` | 只作为局域性和优化证据之一 |
 | interpolated bands vs ab initio bands | plotting / compare output | 最关键 validation 证据 |
+| band crossing / Fermi-window match | QE bands 与 Wannier interpolation | 输运、Berry、topology 或 EPC 所需子空间是否稳定 |
 | `pw2wannier90.x` / interface files | QE-Wannier90 interface | 检查文件链、spinor、SOC、orbital projection 是否一致 |
 
 ## 判断规则
 
-1. Wannier validation 的首要证据是目标能区内 interpolated bands 回对 QE bands，而不是 spread 数值本身。
+1. Wannier validation 的首要证据是目标能区内 interpolated bands 回对 QE bands，而不是 spread 数值本身。回对应覆盖目标能区、目标 k-path 或后续 observable 所需的 k 区域；少数展示点看起来相似不足以支撑 dense interpolation。
 2. isolated bands 和 entangled bands 的风险不同。entangled 情况必须记录 frozen window、outer window 和 disentanglement 判断。
-3. 下游用途决定验证强度。只做可视化、有效模型、Berry curvature、transport、EPC 或 topology 时，所需 band/subspace 验证层级不同。
+3. 下游用途决定验证强度。只做可视化、有效模型、Berry curvature、transport、EPC 或 topology 时，所需 band/subspace 验证层级不同。Berry、transport、topology 和 EPC 还需要审阅目标 band crossing、near-degeneracy、Fermi-level 附近窗口和 SOC/spinor 数据链。
 4. SOC、noncollinear spin、magnetism、DFT+U 或 functional 切换后，不能复用旧 Wannier 文件解释新模型。
 5. Window 和 projection 是研究选择，必须在 calculation record 中记录，不能只保存最终 `.wout`。
 
@@ -62,6 +63,7 @@
 - 不能跨 SOC / non-SOC、不同 functional、不同 PP 或不同 `prefix/outdir` 混用 Wannier 文件。
 - 不能把 projection 默认值当作物理证明。
 - 不能解释 frozen window 外的 bands，除非重新说明外推边界。
+- 不能把 total spread 较小等同于每个目标 orbital、Fermi-level crossing 或 near-degenerate subspace 都已正确。
 
 ## 下游影响
 

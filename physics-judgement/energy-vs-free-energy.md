@@ -2,7 +2,7 @@
 
 ## 本页解决什么问题
 
-本页用于判断 DFT total energy、energy difference、enthalpy、phonon free energy、finite-temperature stability、MD 和 NEB 之间的边界。SCF/relax/vc-relax 给出的能量属于特定模型和结构状态下的电子能量面信息；它不能自动代表所有温度、压力和动力学条件下的 thermodynamic stability。
+本页用于判断 DFT total energy、energy difference、enthalpy、phonon free energy、finite-temperature stability、MD 和 NEB 之间的边界。SCF/relax/vc-relax 给出的能量属于特定模型和结构状态下的电子能量面信息；它不能自动代表所有温度、压力和动力学条件下的 thermodynamic stability。能量差的可信度还取决于它是否显著大于数值不确定性和模型不确定性。
 
 本页不承担热力学教程功能；它帮助用户决定当前 QE output 能支持 0 K electronic energy statement，还是需要 phonon/QHA/MD/free-energy 方法补充。
 
@@ -15,6 +15,7 @@
 | phonon DOS 存在未解释 imaginary modes | harmonic free energy 前提失败 | 不能直接做 harmonic thermodynamics |
 | NEB barrier 输出正常 | MEP 完成 | 不能直接写成 free-energy barrier |
 | 短 MD trajectory 看似稳定 | 采样有限 | 不能证明有限温全局稳定 |
+| 加入 zero-point 或 vibrational entropy 后排序改变 | 振动贡献重要 | 不能再只引用 static total energy |
 
 ## 可能原因
 
@@ -41,9 +42,9 @@
 
 ## 判断规则
 
-1. 0 K DFT total energy difference 只能支持选定模型下的 static-lattice energy statement。
+1. 0 K DFT total energy difference 只能支持选定模型下的 static-lattice energy statement。若差值与 cutoff/kmesh/functional/PP/磁态不确定性同量级，应降低 claim strength。
 2. 需要压力边界时，应区分 total energy、enthalpy 和 stress/pressure convergence。
-3. Harmonic vibrational free energy 需要可信 phonon dispersion/DOS；未解释 imaginary modes 会破坏 harmonic 前提。
+3. Harmonic vibrational free energy 需要可信 phonon dispersion/DOS；未解释 imaginary modes 会破坏 harmonic 前提。Zero-point energy 和 vibrational entropy 可以改变接近简并结构的排序，但前提是 phonon 数据链本身为 PASS。
 4. QHA、anharmonic methods、AIMD 或 thermodynamic integration 属于更高层级，不能由单点 total energy 替代。
 5. NEB 默认提供 potential-energy surface 上的 minimum energy path；free-energy path 需要额外采样或模型说明。
 
@@ -62,6 +63,7 @@
 - 不能用不可信 phonon DOS 做热力学。
 - 不能把短 MD 稳定性写成充分采样。
 - 不能把 NEB minimum energy barrier 写成 free-energy barrier，除非额外方法支持。
+- 不能在 energy difference 接近收敛误差或模型差异时写强相稳定结论。
 
 ## 下游影响
 

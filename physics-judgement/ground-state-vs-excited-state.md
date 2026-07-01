@@ -2,7 +2,7 @@
 
 ## 本页解决什么问题
 
-本页用于判断普通 QE 基态计算能支持哪些电子结构表述，不能支持哪些激发态、quasiparticle 或 optical spectrum 结论。Kohn-Sham bands 和 DOS 是理解电子结构的重要对象，但它们不直接对应实验激发谱。
+本页用于判断普通 QE 基态计算能支持哪些电子结构表述，不能支持哪些激发态、quasiparticle 或 optical spectrum 结论。Kohn-Sham bands 和 DOS 是理解电子结构的重要对象，但它们不直接对应实验激发谱。区分这些层级的关键是：ground-state DFT 给出基态密度和辅助单粒子谱，quasiparticle 方法处理电子添加/移除能，optical 方法还要处理电子-空穴相互作用、矩阵元和局域场效应。
 
 本页不承担完整 GW/BSE/TDDFT 教程功能；它用于防止把 ground-state workflow 输出越界解释为 quasiparticle gap、optical gap、exciton、absorption spectrum、XAS 或 EELS 结论。
 
@@ -13,6 +13,7 @@
 | bands 显示某个 Kohn-Sham gap | DFT-level electronic structure | 不能直接写成 experimental gap、quasiparticle gap 或 optical gap |
 | DOS peak 出现在某能区 | state density 或 broadening 结果 | 不能直接写成 optical transition |
 | hybrid / scissor 后 gap 改变 | 模型或后处理层级改变 | 不能替代完整 GW/BSE 边界说明 |
+| independent-particle optical spectrum | 基于单粒子态和矩阵元的近似谱 | 不能自动包含 exciton 或完整 BSE 效应 |
 | absorption-like spectrum 对空带、window 或 broadening 敏感 | excited-state workflow 未收敛 | 不能只用一次输出给定量光谱 |
 | Yambo/GW/BSE/TDDFT 正常结束 | 高级程序完成 | 不能免除空带、介电矩阵、k mesh、broadening 等审阅 |
 
@@ -43,7 +44,7 @@
 1. Ground-state DFT 输出可以支持 DFT-level density、total energy、forces、stress 和 KS-level electronic structure 讨论，但不自动支持 quasiparticle 或 optical spectrum。
 2. Kohn-Sham eigenvalue dispersion 可用于能带图和定性电子结构分析；定量 excitation claim 需要额外方法或明确模型边界。
 3. Optical gap、quasiparticle gap、exciton 和 absorption spectrum 是不同对象，不能用一个 KS gap 替代。
-4. Scissor correction、hybrid functional 或 broadened DOS 是边界化处理，不等同于完整 GW/BSE。
+4. Scissor correction、hybrid functional 或 broadened DOS 是边界化处理，不等同于完整 GW/BSE。Scissor 通常只移动能量差，不自动修正 wavefunction、matrix elements、screening 或 excitonic effects。
 5. 若使用 Yambo、GW、BSE、TDDFT、XSpectra 或 EELS 工具，必须单独审阅其输入、收敛和版本文档。
 
 ## PASS / WARN / BLOCK
@@ -59,6 +60,7 @@
 - 不能把 Kohn-Sham gap 写成 optical gap。
 - 不能把 DOS peak 写成 optical transition。
 - 不能把 scissor correction 当作完整 BSE/GW。
+- 不能把 independent-particle absorption 曲线当作含激子效应的 optical spectrum。
 - 不能把 ordinary DFT bands 当作 experimental spectrum。
 - 不能在未说明 SOC、U、functional 和 PP 边界时做高风险 gap 或 topology 结论。
 

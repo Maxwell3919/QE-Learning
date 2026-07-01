@@ -45,6 +45,17 @@
 4. 若结论依赖可视化或后处理，必须说明上游数据链和后处理解释边界。
 5. 未完成审阅的结果可以写成 internal note 或 exploratory trend，不能写成无边界定量结论。
 
+## Claim strength 写法
+
+| 证据状态 | 推荐写法 | 避免写法 |
+|---|---|---|
+| PASS，目标 observable 已收敛且模型边界清楚 | “在 `<model>` 和 `<convergence evidence>` 下，结果支持 `<bounded claim>`。” | “DFT 证明……” |
+| PASS，但模型本身有已知边界 | “该结论是 `<DFT-level / harmonic / KS-level>` 层级判断。” | “与实验完全一致。” |
+| WARN，缺少部分敏感性或对照 | “当前结果提示 `<trend>`，仍需 `<missing check>` 后才能定量化。” | “该性质已经确定。” |
+| BLOCK，关键文件链或 output 证据缺失 | “当前输出不能支撑 `<claim>`，原因是 `<missing evidence>`。” | “结果仅供参考但仍给最终数值。” |
+
+好的 uncertainty statement 应减少读者猜测：它说明哪些证据已经通过，哪些证据仍缺失，以及下游可以做什么。它不是在结论末尾添加一句泛泛的“存在误差”，而是把误差来源和 claim strength 直接绑定。
+
 ## PASS / WARN / BLOCK
 
 | 状态 | 条件 | 是否允许进入下游 |
