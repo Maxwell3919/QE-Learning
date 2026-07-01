@@ -69,3 +69,17 @@
 - Project layout：[standards/project-layout.md](standards/project-layout.md)
 
 使用规则：参数定义优先官方 INPUT reference；程序链优先官方文档；物理边界优先 canonical literature；教程只作为辅助。
+
+## 6. 图像与 release 路径
+
+目标：用原创示意图快速定位 workflow、理论对象和判断 gate，并了解 v0.2 当前完成边界。
+
+- Diagram assets：[assets/diagrams/README.md](assets/diagrams/README.md)
+- Ground-state chain：[assets/diagrams/workflows/qe-ground-state-chain.svg](assets/diagrams/workflows/qe-ground-state-chain.svg)
+- Electronic chain：[assets/diagrams/workflows/qe-electronic-chain.svg](assets/diagrams/workflows/qe-electronic-chain.svg)
+- Phonon / DFPT chain：[assets/diagrams/workflows/qe-phonon-dfpt-chain.svg](assets/diagrams/workflows/qe-phonon-dfpt-chain.svg)
+- PASS/WARN/BLOCK gate：[assets/diagrams/physics-judgement/pass-warn-block-gate.svg](assets/diagrams/physics-judgement/pass-warn-block-gate.svg)
+- v0.2 release notes：[RELEASE_NOTES_v0.2.md](RELEASE_NOTES_v0.2.md)
+- v0.2 completion matrix：[V0_2_CONTENT_COMPLETION_MATRIX.md](V0_2_CONTENT_COMPLETION_MATRIX.md)
+
+使用规则：图像是学习辅助和审阅地图，不替代 workflow 页面、output review、calculation record 或来源边界。

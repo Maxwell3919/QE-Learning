@@ -34,6 +34,7 @@
 - physics-judgement 页面：应包含典型现象、误差来源区分、`PASS / WARN / BLOCK`、不能过度解释的结论和来源边界。
 - references 页面：每个来源说明支持什么判断，不堆 DOI，不用教程替代官方 `INPUT_*`。
 - standards 页面：`PASS / WARN / BLOCK`、output review、calculation record、文件命名、project layout 和 source policy 术语一致。
-- 全仓库 QA：Markdown 本地链接、私有路径、研究中间文件路径残留、自动化工具项目偏移、具体材料案例、万能参数、过度物理结论和 `git diff --check`。
+- 全仓库 QA：Markdown 本地链接、私有路径、研究中间文件路径残留、自动化工具项目偏移、具体材料案例、无边界参数结论、过度物理结论和 `git diff --check`。
+- 图像 QA：新增 SVG 必须是原创学习图，必须被 Markdown 页面引用，必须说明不能替代 output review、calculation record 或来源边界；图像清单见 [assets/diagrams/README.md](../assets/diagrams/README.md)。
 
 这些检查是合并前 gate，不替代后续逐页人工审稿。若发现无法自动判断的问题，应在阶段报告或 PR 描述中列为 remaining risk。

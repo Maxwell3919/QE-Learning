@@ -6,6 +6,8 @@
 
 先读 `learn/`，用每一页建立问题框架、术语边界和判断标准；如果需要从具体问题反查页面，可先用 [HANDBOOK_INDEX.md](../HANDBOOK_INDEX.md) 定位入口。再读 `workflows/`，把同一阶段对应到 QE 原生命令、input/output 和可靠性检查。`theory-minimum/` 用于回查最低理论，`physics-judgement/` 用于解释结果可信度，`standards/` 用于把学习过程写成可复查记录。
 
+如果学习某一步时需要图像辅助，先从 [assets/diagrams/README.md](../assets/diagrams/README.md) 查当前图像清单；图像只帮助定位 workflow 和判断关系，完成判据仍以 output review 与记录为准。
+
 推荐每个阶段都按同一轮次阅读：
 
 1. 在 `learn/` 中确认本阶段的能力目标。

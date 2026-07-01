@@ -85,7 +85,40 @@ A3's writer-size principle is kept: each writer owns one page or two tightly cou
 - Batch 1 is only an audit and routing PR. It intentionally does not close content-depth gaps.
 - Future batch reports should update this file only with compact cumulative evidence; detailed per-batch evidence belongs in each `AGENT_TEAM_V0_2_BATCH_*_REPORT.md`.
 
-## Final QA Gate
+## Cumulative batch summary
+
+| Batch | PR | Scope | Merge status | Report |
+|---|---|---|---|---|
+| 1 | #12 | Repository audit and v0.2 writing matrix | merged | [AGENT_TEAM_V0_2_BATCH_1_AUDIT_REPORT.md](AGENT_TEAM_V0_2_BATCH_1_AUDIT_REPORT.md) |
+| 2 | #13 | Ground-state workflow completion | merged | [AGENT_TEAM_V0_2_BATCH_2_GROUND_STATE_REPORT.md](AGENT_TEAM_V0_2_BATCH_2_GROUND_STATE_REPORT.md) |
+| 3 | #14 | Electronic workflow completion | merged | [AGENT_TEAM_V0_2_BATCH_3_ELECTRONIC_REPORT.md](AGENT_TEAM_V0_2_BATCH_3_ELECTRONIC_REPORT.md) |
+| 4 | #15 | Phonon / DFPT workflow completion | merged | [AGENT_TEAM_V0_2_BATCH_4_PHONON_DFPT_REPORT.md](AGENT_TEAM_V0_2_BATCH_4_PHONON_DFPT_REPORT.md) |
+| 5 | #16 | Theory-minimum final deepening | merged | [AGENT_TEAM_V0_2_BATCH_5_THEORY_MINIMUM_REPORT.md](AGENT_TEAM_V0_2_BATCH_5_THEORY_MINIMUM_REPORT.md) |
+| 6 | #17 | Physics-judgement final deepening | merged | [AGENT_TEAM_V0_2_BATCH_6_PHYSICS_JUDGEMENT_REPORT.md](AGENT_TEAM_V0_2_BATCH_6_PHYSICS_JUDGEMENT_REPORT.md) |
+| 7 | #18 | Standards, records and source-boundary completion | merged | [AGENT_TEAM_V0_2_BATCH_7_STANDARDS_SOURCE_REPORT.md](AGENT_TEAM_V0_2_BATCH_7_STANDARDS_SOURCE_REPORT.md) |
+| 8 | #19 | Diagram and visual learning integration | merged | [AGENT_TEAM_V0_2_BATCH_8_DIAGRAMS_REPORT.md](AGENT_TEAM_V0_2_BATCH_8_DIAGRAMS_REPORT.md) |
+| 9 | pending in this branch | Navigation and release-candidate finalization | finalization branch | [AGENT_TEAM_V0_2_BATCH_9_RELEASE_FINALIZATION_REPORT.md](AGENT_TEAM_V0_2_BATCH_9_RELEASE_FINALIZATION_REPORT.md) |
+
+## v0.2 completion status
+
+The v0.2 program leaves the repository in a content-complete handbook state for the current scope:
+
+- `learn/` gives capability-oriented learning routes and completion evidence.
+- `workflows/` covers the ground-state, electronic and phonon/DFPT command chains with output review and downstream gates.
+- `theory-minimum/` gives the minimum theory needed to read QE input/output and judge downstream readiness.
+- `physics-judgement/` gives model-boundary and result-credibility pages with quick judgement cards and numbered canonical topics.
+- `references/` provides the source spine for official documentation, canonical literature, tutorials and tool boundaries.
+- `standards/` defines calculation records, naming, project layout, citation/source policy, output review and `PASS / WARN / BLOCK`.
+- `assets/diagrams/` provides original SVG learning diagrams tied to referenced pages.
+
+## Final remaining risks
+
+- v0.2 is a handbook content-completion release, not a line-by-line external scientific peer review.
+- Some canonical literature metadata can still benefit from external spot checks before publication use.
+- Tool pages remain boundary-oriented cards; they are not full tool tutorials.
+- Future work should prefer selected page expert review over another full-repository expansion pass.
+
+## Batch 1 QA Gate
 
 | Gate | Result | Evidence |
 |---|---|---|
@@ -103,3 +136,5 @@ A3's writer-size principle is kept: each writer owns one page or two tightly cou
 | Universal parameter scan | PASS | No parameter recommendations added. |
 | High-risk overclaim scan | PASS | No DFT/QE result interpretation claims added. |
 | Merge recommendation | READY | Batch 1 audit/matrix PR is ready to merge. |
+
+The v0.2 release-level final gate is recorded in [AGENT_TEAM_V0_2_BATCH_9_RELEASE_FINALIZATION_REPORT.md](AGENT_TEAM_V0_2_BATCH_9_RELEASE_FINALIZATION_REPORT.md), not in this historical Batch 1 gate.

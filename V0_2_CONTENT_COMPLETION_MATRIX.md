@@ -12,13 +12,17 @@
 - `needs source boundary`: 需要说明来源支持什么判断、不支持什么结论。
 - `overlap risk`: 与另一页功能接近，需要明确 canonical topic 与 quick review card 的分工。
 
+## v0.2 final status
+
+v0.2 completion pass 通过 Batch 1-9 追踪：主线 workflow、theory-minimum、physics-judgement、standards/source spine、原创图像和导航发布页均在对应批次报告中记录 agent QA gate。最终 release readiness 只以 [AGENT_TEAM_V0_2_BATCH_9_RELEASE_FINALIZATION_REPORT.md](AGENT_TEAM_V0_2_BATCH_9_RELEASE_FINALIZATION_REPORT.md) 的 final gate 为准。矩阵保留原始分配信息，`Missing elements` 中的 `future maintenance` 表示后续可做逐页专家审阅，不构成本轮 release BLOCK。
+
 ## Matrix
 
 | File | Role | Status | Missing elements | Batch | Writer subagent | QA focus |
 |---|---|---|---|---|---|---|
-| `README.md` | Project landing | complete | release navigation only | 9 | W9-1 | scope and handbook entry |
-| `HANDBOOK_INDEX.md` | Handbook navigation | complete | update after diagrams/content batches | 9 | W9-1 | route consistency |
-| `learn/README.md` | Learn path | complete | final navigation refresh | 9 | W9-1 | capability path |
+| `README.md` | Project landing | complete | v0.2 release and diagram route added | 9 | W9-1 | scope and handbook entry |
+| `HANDBOOK_INDEX.md` | Handbook navigation | complete | v0.2 release and diagram route added | 9 | W9-1 | route consistency |
+| `learn/README.md` | Learn path | complete | diagram route added | 9 | W9-1 | capability path |
 | `learn/00-start-here.md` | Learn path | complete | optional style polish | 9 | W9-2 | no checklist-only completion |
 | `learn/01-qe-workflow-map.md` | Learn path | complete | optional diagram link | 8/9 | W9-2 | workflow-map consistency |
 | `learn/02-first-scf-loop.md` | Learn path | complete | optional ground-state diagram link | 8/9 | W9-3 | output evidence route |
@@ -29,7 +33,7 @@
 | `learn/07-postprocessing-loop.md` | Learn path | complete | optional post-processing diagram link | 8/9 | W9-5 | visualization boundary |
 | `learn/08-hpc-and-reproducibility.md` | Learn path | complete | optional record link refresh | 9 | W9-6 | reproducibility |
 | `learn/09-feature-expansion-map.md` | Learn path | complete | source/tool boundary refresh | 7/9 | W7-7 | advanced tools not basic path |
-| `workflows/README.md` | Workflow index | complete | optional diagram index link | 8/9 | W9-1 | directory responsibility |
+| `workflows/README.md` | Workflow index | complete | diagram index route added | 8/9 | W9-1 | directory responsibility |
 | `workflows/ground-state/scf.md` | Workflow reference | complete | optional diagram/caption link | 2/8 | W2-1 | SCF evidence, scratch chain |
 | `workflows/ground-state/nscf.md` | Workflow reference | complete | optional NSCF vs bands/DOS cross-link | 2/3 | W2-2 | upstream SCF dependency |
 | `workflows/ground-state/relax.md` | Workflow reference | complete | optional final static SCF emphasis | 2 | W2-3 | force convergence |
@@ -61,11 +65,11 @@
 | `workflows/advanced/pseudopotential-generation-overview.md` | Advanced boundary | complete | optional source boundary | 7 | W7-5 | official docs only |
 | `workflows/advanced/neb-reaction-path.md` | Advanced boundary | complete | optional free-energy boundary link | 6/7 | W6-16 | MEP vs free energy |
 | `workflows/advanced/molecular-dynamics.md` | Advanced boundary | complete | optional finite-T boundary link | 6/7 | W6-16 | MD sampling |
-| `theory-minimum/README.md` | Theory index | complete | final navigation refresh | 9 | W9-1 | directory boundary |
+| `theory-minimum/README.md` | Theory index | complete | diagram index route added | 9 | W9-1 | directory boundary |
 | `theory-minimum/dft-ks-scf.md` | Theory background | complete | optional style/source refresh | 5 | W5-1 | ground-state theory |
 | `theory-minimum/plane-wave-cutoff.md` | Theory background | complete | optional diagram link | 5/8 | W5-2 | basis convergence |
 | `theory-minimum/pseudopotentials.md` | Theory background | complete | optional transferability cross-link | 5 | W5-3 | PP provenance |
-| `theory-minimum/functional-choice.md` | Theory background | needs depth | explicit `物理图像`, P/W/B relation, source boundary | 5 | W5-4 | older-format cleanup |
+| `theory-minimum/functional-choice.md` | Theory background | complete | future maintenance only | 5 | W5-4 | older-format cleanup |
 | `theory-minimum/reciprocal-space-and-brillouin-zone.md` | Theory background | complete | optional diagram link | 5/8 | W5-5 | reciprocal-space picture |
 | `theory-minimum/crystal-symmetry-space-group-point-group.md` | Theory background | complete | optional terminology polish | 5 | W5-6 | little group / degeneracy |
 | `theory-minimum/kpoints-symmetry-kpath.md` | Theory background | complete | optional reduce duplication | 5 | W5-7 | kmesh vs k-path |
@@ -75,7 +79,7 @@
 | `theory-minimum/dfpt-phonons.md` | Theory background | complete | optional phonon diagram link | 5/8 | W5-11 | dynamical matrix |
 | `theory-minimum/dielectric-born-charge.md` | Theory background | complete | optional polar-response diagram link | 5/8 | W5-12 | Born charge response |
 | `theory-minimum/magnetism-soc-dftu.md` | Theory background | complete | optional SOC/U cross-link refresh | 5/6 | W5-13 | model choices |
-| `physics-judgement/README.md` | Judgement index | overlap risk | quick-card vs numbered-page routing | 6/9 | W6-1 | canonical routing |
+| `physics-judgement/README.md` | Judgement index | complete | canonical/quick-card routing clarified; diagram route added | 6/9 | W6-1 | canonical routing |
 | `physics-judgement/CONCLUSION_REFERENCE_BOOK.md` | Judgement reference | overlap risk | keep as conclusion kernel, avoid duplicate正文 | 6 | W6-1 | source boundary |
 | `physics-judgement/01-dft-approximation-map.md` | Judgement page | complete | optional diagram link | 6/8 | W6-2 | error taxonomy |
 | `physics-judgement/02-exchange-correlation-ladder.md` | Judgement page | complete | optional functional quick-card link | 6 | W6-3 | functional ladder |
@@ -96,26 +100,26 @@
 | `physics-judgement/17-uncertainty-error-bars-and-reproducibility.md` | Judgement page | complete | optional uncertainty template route | 6 | W6-18 | uncertainty |
 | `physics-judgement/18-physics-judgement-checklist.md` | Judgement checklist | complete | optional diagram link | 6/8 | W6-19 | checklist consistency |
 | `physics-judgement/*-boundary.md`, `*-convergence.md`, `*-template.md` | Quick judgement cards | overlap risk | role clarity vs numbered canonical pages | 6 | W6-card team | no duplicate canonical drift |
-| `standards/README.md` | Standard index | complete | final navigation refresh | 7/9 | W7-1 | standards scope |
-| `standards/pass-warn-block.md` | Standard | needs source boundary | add internal links to output review, record, source policy | 7 | W7-1 | P/W/B canonical semantics |
+| `standards/README.md` | Standard index | complete | diagram QA route added | 7/9 | W7-1 | standards scope |
+| `standards/pass-warn-block.md` | Standard | complete | diagram and source-boundary links added | 7/8 | W7-1 | P/W/B canonical semantics |
 | `standards/output-review-checklist.md` | Standard | complete | optional cross-link refresh | 7 | W7-2 | evidence tables |
 | `standards/calculation-record-template.md` | Standard | complete | optional output-review wording | 7 | W7-3 | reproducibility record |
-| `standards/input-file-naming.md` | Standard | needs P/W/B | explicit consequences for prefix/outdir/restart/scratch mix | 7 | W7-4 | naming as evidence |
-| `standards/project-layout.md` | Standard | needs P/W/B | exact terminology consistency | 7 | W7-5 | personal project boundary |
+| `standards/input-file-naming.md` | Standard | complete | prefix/outdir/restart consequences added | 7 | W7-4 | naming as evidence |
+| `standards/project-layout.md` | Standard | complete | terminology and P/W/B consequences aligned | 7 | W7-5 | personal project boundary |
 | `standards/citation-and-source-policy.md` | Standard | complete | optional source spine cross-link | 7 | W7-6 | source policy |
-| `references/README.md` | Source index | complete | optional source map refresh | 7/9 | W7-7 | source roles |
-| `references/source-index.md` | Source index | needs QE mapping | map source type to output review/PWB decisions | 7 | W7-8 | source-use boundary |
+| `references/README.md` | Source index | complete | release notes route added | 7/9 | W7-7 | source roles |
+| `references/source-index.md` | Source index | complete | source type to output review/PWB mapping added | 7 | W7-8 | source-use boundary |
 | `references/canonical-literature.md` | Source reference | complete | optional metadata audit | 7 | W7-9 | A0/A1/A2 levels |
 | `references/canonical.bib` | BibTeX source | complete | duplicate-key check | 7/9 | W7-9 | no invented metadata |
 | `references/reading-maintenance-policy.md` | Source standard | complete | optional v0.2 update | 7 | W7-10 | maintenance policy |
 | `references/tools/*.md` | Tool cards | needs QE mapping | QE file-chain/downstream boundary in short cards | 7 | W7-tool team | tool not basic path |
 | `references/tutorial-sites/*.md` | Tutorial cards | needs source boundary | what supports / what cannot prove | 7 | W7-tutorial team | tutorial not official INPUT |
-| `assets/diagrams/README.md` | Diagram policy | missing | create diagram source-boundary policy | 8 | D8-0 | original diagrams only |
-| `assets/diagrams/workflows/*.svg` | Diagrams | missing | workflow learning diagrams | 8 | D8-1 | command/file-chain accuracy |
-| `assets/diagrams/theory-minimum/*.svg` | Diagrams | missing | theory learning diagrams | 8 | D8-2 | no misleading physics |
-| `assets/diagrams/physics-judgement/*.svg` | Diagrams | missing | judgement diagrams | 8 | D8-3 | no overclaim arrows |
-| `V0_2_AGENT_TEAM_COMPLETION_REPORT.md` | v0.2 final report | missing | cumulative batch summary | 1/9 | A3/W9-final | merge readiness |
-| `RELEASE_NOTES_v0.2.md` | v0.2 release note | missing | release delta and validation | 9 | W9-final | release boundary |
+| `assets/diagrams/README.md` | Diagram policy | complete | source-boundary policy and inventory added | 8 | D8-0 | original diagrams only |
+| `assets/diagrams/workflows/*.svg` | Diagrams | complete | workflow learning diagrams added and referenced | 8 | D8-1 | command/file-chain accuracy |
+| `assets/diagrams/theory-minimum/*.svg` | Diagrams | complete | theory learning diagrams added and referenced | 8 | D8-2 | no misleading physics |
+| `assets/diagrams/physics-judgement/*.svg` | Diagrams | complete | judgement diagrams added and referenced | 8 | D8-3 | no overclaim arrows |
+| `V0_2_AGENT_TEAM_COMPLETION_REPORT.md` | v0.2 final report | complete | cumulative batch summary added | 1/9 | A3/W9-final | merge readiness |
+| `RELEASE_NOTES_v0.2.md` | v0.2 release note | complete | release delta and validation added | 9 | W9-final | release boundary |
 
 ## Batch allocation summary
 
