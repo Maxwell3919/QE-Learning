@@ -26,6 +26,19 @@
 - [ ] 电荷、磁矩、自旋、非共线或 SOC 相关设置与 input 目标一致。
 - [ ] warning、error、FFT/grid、对称性、负电荷密度、占据数异常等信息已解释。
 
+### Evidence table
+
+| 检查项 | 从哪里看 | 能证明什么 | 不能证明什么 | WARN/BLOCK 触发 |
+|---|---|---|---|---|
+| 程序结束 | output 末尾、error/warning 区域 | `pw.x` 运行流程完成 | 结果已经物理可信 | 缺少完整结束信息或异常中止为 `BLOCK`；仅有 `JOB DONE` 但未审阅数值证据为 `WARN` |
+| 输入链一致 | output header、input echo、`prefix/outdir`、command record | output 对应本次记录的 input 和 scratch | scratch 中没有旧数据污染 | `prefix/outdir`、结构或赝势与记录不一致为 `BLOCK` |
+| 赝势加载 | pseudopotential summary、UPF 信息 | 元素、UPF 文件和计算读取的赝势可追踪 | 赝势 transferable 或泛函选择一定合适 | 赝势来源不明、泛函/相对论类型混用为 `BLOCK` |
+| cutoff 与 FFT/grid | `kinetic-energy cutoff`、`charge density cutoff`、FFT/grid 信息 | 实际使用的 `ecutwfc/ecutrho` 与 input 目标一致 | cutoff 已对目标 observable 收敛 | 未做收敛测试但用于最终结论为 `WARN`；数值明显与记录不符为 `BLOCK` |
+| k-points 与 symmetry | `number of k points`、irreducible k-points、symmetry section | k 点网格、shift 和对称性约简可复查 | k 点已对 DOS/phonon/EPC 等下游收敛 | mesh 与目标不符或对称性异常未解释为 `WARN/BLOCK` |
+| occupations / Fermi energy | occupation scheme、smearing、`Fermi energy`、band occupations | 金属/绝缘体处理与 input 目标一致 | smearing 后 DOS 峰位可直接解释 | 金属使用不合适占据或 degauss 影响结论未评估为 `WARN/BLOCK` |
+| SCF iteration | iteration log、`convergence has been achieved`、`estimated scf accuracy` | 电子自洽达到本次阈值 | cutoff/k-point/model error 已解决 | 达到最大步数、振荡或 accuracy 未达阈值为 `BLOCK` |
+| total energy | final total energy line | 当前模型和数值设置下的自洽能量可记录 | 所有物理量均已收敛 | 只用 total energy 替代 force/stress/phonon 收敛判断为 `WARN` |
+
 ### WARN 触发
 
 - 程序完成但电子收敛较慢、接近最大 iteration，或 convergence 余量很小。
@@ -48,6 +61,27 @@
 - `WARN`：参数调试、收敛测试、结构或赝势排错；不得作为最终 bands/DOS/phonon 依据。
 - `BLOCK`：不允许进入任何依赖波函数、电荷密度或总能的下游。
 
+## Ground-state convergence scan
+
+本节用于记录 `ecutwfc`、`ecutrho`、k-point mesh、smearing/degauss、force/stress 相关扫描。收敛测试审阅的是目标物理量，不是参数数值本身。
+
+| 检查项 | 从哪里看 | 能证明什么 | 不能证明什么 | WARN/BLOCK 触发 |
+|---|---|---|---|---|
+| 扫描变量 | input 文件组、record table | 每轮只改变一个主要变量，其他设置固定 | 该变量已经对所有下游足够 | 多个变量同时变化导致趋势不可解释为 `WARN/BLOCK` |
+| 实际使用参数 | 每个 output 的 cutoff、k-points、occupation summary | output 确实使用了计划扫描值 | 目标量已收敛 | input 与 output 数值不符或文件混入旧结果为 `BLOCK` |
+| 目标 observable | convergence table、output 摘录 | 判断标准绑定到 total energy、force、stress、band gap、DOS 或 phonon 等目标 | 一个目标量稳定可代表所有目标量稳定 | 只看总能却进入 force/stress/phonon 下游为 `WARN` |
+| 文件链隔离 | `prefix/outdir`、run directory、command record | 不同扫描点数据可追踪 | 没有任何 restart 或 scratch 风险 | 扫描点复用污染 scratch 且无法区分为 `BLOCK` |
+| 结论记录 | convergence report、PASS/WARN/BLOCK | 可说明允许进入哪些下游 | 参数是普适推荐值 | 没有目标量阈值或下游说明为 `WARN` |
+
+### Ground-state common BLOCK triggers
+
+- output 与 input、command、`prefix/outdir` 或记录表不能对应。
+- SCF 未收敛却被用于 cutoff/k-point/smearing 结论。
+- 更换赝势、泛函、结构或 cell 后沿用旧收敛结论。
+- 用 bands path 结果替代 uniform k-mesh 收敛判断。
+- 用 relax/vc-relax 中的临时电子步替代 final static SCF。
+- 用 `JOB DONE` 替代 output review、收敛测试或下游准入判断。
+
 ## NSCF
 
 ### Output 中要看
@@ -57,6 +91,16 @@
 - [ ] band 数量、占据、Fermi energy、能带范围满足后处理需求。
 - [ ] output 没有读取旧电荷密度、波函数或重启文件失败的证据。
 - [ ] 并行、diagonalization、memory warning 不影响当前数据完整性。
+
+### Evidence table
+
+| 检查项 | 从哪里看 | 能证明什么 | 不能证明什么 | WARN/BLOCK 触发 |
+|---|---|---|---|---|
+| 上游数据读取 | opening/read data-file、`prefix/outdir`、header | NSCF 读取的是已审阅 SCF 的数据链 | 上游 SCF 本身可信 | `prefix/outdir` 错配或读取失败为 `BLOCK` |
+| k-points 类型 | k-point summary、input echo | 使用 dense uniform mesh、Fermi surface mesh 或明确目标 k-list | mesh 已对积分量收敛 | 用路径型 k-list 支撑 DOS/PDOS 为 `BLOCK` |
+| band 数量 | output 中 bands/eigenvalues 范围、`nbnd` | 空带和目标能区覆盖可审阅 | 所有高能态性质均可靠 | 目标能区缺 band 或 `nbnd` 未记录为 `WARN/BLOCK` |
+| occupations / Fermi level | occupation summary、`Fermi energy` | 占据和费米能级与后处理目标一致 | smearing 参数已适合最终 DOS/EPC | 与 SCF 差异无法解释为 `WARN` |
+| warning / I/O | warning 区域、restart 信息 | 数据完整性没有明显破坏 | 后处理解释已经成立 | wavefunction/data-file warning 影响 eigenvalues 为 `BLOCK` |
 
 ### WARN 触发
 
@@ -89,6 +133,17 @@
 - [ ] final atomic positions 已明确来源于 output，而不是旧 input。
 - [ ] final structure 是否需要重新做 static SCF 已写入记录。
 
+### Evidence table
+
+| 检查项 | 从哪里看 | 能证明什么 | 不能证明什么 | WARN/BLOCK 触发 |
+|---|---|---|---|---|
+| ionic step 状态 | each ionic step、BFGS/CG summary | 优化路径可追踪 | 每个中间结构都可用于性质计算 | step 异常、回退或 restart 未记录为 `WARN` |
+| 每步电子 SCF | ionic step 内 SCF iteration 和 accuracy | 结构更新基于可接受的电子步 | cutoff/k-point/smearing 已对力收敛 | 关键电子步失败并继续优化为 `BLOCK` |
+| final forces | final force table、total force、force convergence message | internal coordinates 达到当前力阈值 | 结构已适合 phonon 或应力敏感性质 | 未达到力收敛或停止原因不可信为 `BLOCK` |
+| final coordinates | `Begin final coordinates` 或 final positions 区域 | 下游结构来源明确 | final electronic structure 已完成 | 下游仍使用旧 input 坐标为 `BLOCK` |
+| stress / pressure | stress tensor、pressure lines | fixed-cell relax 的残余应力可记录 | cell 已被优化 | 对应力敏感下游未审阅 stress 为 `WARN` |
+| final static SCF 计划 | calculation record、next action | 下游性质会基于优化后结构重算 | relax output 可直接替代 final SCF | 直接进入 bands/DOS/phonon 且无 final SCF 为 `WARN/BLOCK` |
+
 ### WARN 触发
 
 - 几何优化完成但 final force 接近阈值，或离目标精度仍有余量问题。
@@ -120,6 +175,16 @@
 - [ ] 晶胞没有非物理突变、体积塌缩、角度异常或单位混淆。
 - [ ] final cell + final positions 已用于独立 static SCF 计划或记录。
 
+### Evidence table
+
+| 检查项 | 从哪里看 | 能证明什么 | 不能证明什么 | WARN/BLOCK 触发 |
+|---|---|---|---|---|
+| cell/ionic step 状态 | vc-relax step summary、BFGS/CG information | 晶胞和原子优化路径可追踪 | final cell 一定是物理平衡态 | cell 突变、体积塌缩或 restart 未解释为 `WARN/BLOCK` |
+| force 与 stress | force table、stress tensor、pressure、convergence message | internal coordinates 和 cell stress 达到当前阈值 | 声子、弹性或相稳定性已可靠 | 力或应力未达目标却进入性质计算为 `BLOCK` |
+| final cell parameters | final cell/coordinates、volume、angles | 下游结构和晶胞来源明确 | k-point density 仍与旧 cell 匹配 | cell 改变后未重审 k 点密度为 `WARN` |
+| cell constraints | `CELL` 设置、`cell_dofree`、external pressure | 晶胞自由度与计算目标可复查 | 未放开的方向也被物理优化 | 约束与目标冲突或单位/外压错误为 `BLOCK` |
+| final static SCF 计划 | calculation record、next action | 后续性质将基于 final cell+positions 重新求静态电荷密度 | vc-relax output 可直接作为最终 electronic structure | 无 final SCF 直接进入 bands/DOS/phonon 为 `WARN/BLOCK` |
+
 ### WARN 触发
 
 - 力或应力接近阈值但仍可用于继续优化。
@@ -140,6 +205,18 @@
 - `PASS`：final static SCF、NSCF、bands、DOS、PDOS、phonon、应力敏感后处理。
 - `WARN`：继续 vc-relax、参数收敛排查、结构趋势探索；不得作为最终相稳定性或声子依据。
 - `BLOCK`：不允许进入依赖平衡晶胞和结构的下游。
+
+## Final static SCF after relaxation
+
+relax/vc-relax 的 output 是结构优化记录，不应直接替代基于最终结构的静态电子结构计算。进入 bands、DOS、PDOS、phonon、work function 或高级 workflow 前，应记录一次以 final coordinates/cell 为输入的 static SCF 审阅。
+
+| 检查项 | 从哪里看 | 能证明什么 | 不能证明什么 | WARN/BLOCK 触发 |
+|---|---|---|---|---|
+| final structure 输入 | final coordinates/cell、new `pw.scf.<system>.in` | static SCF 使用优化后的结构 | 优化本身没有残余问题 | final SCF 输入仍是旧结构为 `BLOCK` |
+| 文件链刷新 | 新的 `prefix/outdir` 或明确清理的 scratch | 下游读取的是 final static density | 所有下游参数已收敛 | 复用 relax scratch 且无法确认数据来源为 `WARN/BLOCK` |
+| SCF 电子收敛 | final static output 的 SCF iteration、accuracy | 最终结构上的 ground-state density 已自洽 | force/stress 已重新优化 | final static SCF 不收敛为 `BLOCK` |
+| 数值参数复查 | cutoff、k-points、occupations、symmetry | final structure 下参数与下游目标一致 | 参数对所有 observable 已自动收敛 | cell 改变后未复查 k-point density 为 `WARN` |
+| 下游准入 | calculation record、PASS/WARN/BLOCK | 可明确进入哪些 workflow | 结果可直接支撑所有物理结论 | 未写下游准入或不确定性说明为 `WARN` |
 
 ## Bands
 
