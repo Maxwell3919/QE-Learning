@@ -36,6 +36,10 @@ SCF 是 QE workflow 的基础数据边。relax、bands、DOS、PDOS、phonon、c
   -> downstream workflow
 ```
 
+![QE ground-state workflow chain](../../assets/diagrams/workflows/qe-ground-state-chain.svg)
+
+图：ground-state workflow 的数据边界示意。SCF 是下游数据链的入口，但 relaxed structure、final static SCF 和 NSCF 各自需要独立 output review；该图不替代本页后面的 evidence table。
+
 ## 需要的 QE 程序
 
 - `pw.x`：执行 `calculation='scf'`，生成 ground-state charge density、eigenvalues 和后续程序需要读取的 scratch 数据。

@@ -21,6 +21,12 @@
 
 一个合格的 workflow 页面至少要回答：本步骤想解决什么计算问题，上游依赖是什么，使用哪些 QE 程序，哪些 namelist/card 决定物理模型或数值精度，output 中哪些证据能支持 `PASS / WARN / BLOCK`，哪些 warning 会阻止下游，以及相关字段是否需要回到当前 QE 官方文档核验。
 
+Ground-state 主链可先参考下图，再进入具体页面审阅每一步的 input/output 证据。
+
+![QE ground-state workflow chain](../assets/diagrams/workflows/qe-ground-state-chain.svg)
+
+图：ground-state workflow 的数据边界示意。该图用于定位 SCF、收敛、relax/vc-relax、final static SCF 和 NSCF 的关系；正式准入仍以各页面的 output review 和 `PASS / WARN / BLOCK` 为准。
+
 ## 目录
 
 - `ground-state/`：SCF、NSCF、收敛、relax、vc-relax。
