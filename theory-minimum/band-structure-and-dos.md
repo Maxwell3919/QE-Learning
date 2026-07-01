@@ -4,6 +4,10 @@
 
 Band structure、DOS 和 PDOS 是 QE 电子结构分析中最常被同时使用、也最容易混淆的三类证据。它们都来自 Kohn-Sham eigenvalues 和 wavefunctions，但回答的问题不同：bands 观察 `E_n(k)` 沿特定路径如何变化，DOS 统计整个 Brillouin zone 中每个能量附近有多少态，PDOS 用投影方式给出态的原子/轨道成分线索。本页给出三者的最低物理图像、能量参考和 output review 关系。
 
+![Bands, DOS and PDOS evidence boundary](../assets/diagrams/theory-minimum/bands-dos-evidence-boundary.svg)
+
+图：bands、DOS 和 PDOS 的证据边界。它说明三类图像来自不同采样和投影对象；正式结论仍需要回到对应 workflow 的 output review。
+
 ## 物理图像
 
 周期晶体中的电子能量不是一个孤立数值，而是一组随 `k` 变化的函数 `E_n(k)`。每个 band index `n` 表示一个 Kohn-Sham 分支，每个 `k` 点表示一个 Bloch 相位。Band structure 沿高对称路径切开 Brillouin zone，展示这些分支在代表性方向上的色散、简并、交叉或开隙。
@@ -86,6 +90,7 @@ D(E) = sum_n integral_BZ delta(E - E_n(k)) dk
 - [Fermi surface](../workflows/electronic/fermi-surface.md)
 - [Kohn-Sham eigenvalue boundary](../physics-judgement/kohn-sham-eigenvalue-boundary.md)
 - [band gap problem](../physics-judgement/band-gap-problem-and-delocalization.md)
+- [derivative discontinuity and band-gap boundary](../physics-judgement/04-band-gap-problem-and-derivative-discontinuity.md)
 
 ## 资料来源
 

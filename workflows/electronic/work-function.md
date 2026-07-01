@@ -55,6 +55,8 @@ work function review 文件应记录：SCF output 中的 `E_F`、average profile
 
 电势平均的审阅顺序应保持固定：先确认 `pp.x` 读取的 `prefix/outdir` 与 SCF 一致，再确认 `plot_num` 和平均方向，随后检查 planar average 是否有 vacuum plateau，最后才选择 `E_vac` 并与 SCF 的 `E_F` 做差。若使用 macroscopic average、偶极修正、外电场或低维边界设置，应在记录中说明它们改变了什么边界条件，以及它们不能单独证明 slab 已经收敛。
 
+对绝缘体或半导体表面，`E_F` 可能反映占据约定、缺陷/表面态或绘图参考，而不一定等同于实验化学势位置。正式 work-function 陈述应说明采用的 Fermi-level 或 chemical-potential convention；若只给 `E_vac - E_F` 而没有该约定，本页最多进入 `WARN`。
+
 ## 通用审阅模板
 
 ```markdown

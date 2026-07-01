@@ -31,6 +31,10 @@ final static SCF on <uniform_k_mesh>
   -> output review
 ```
 
+![QE electronic workflow chain](../../assets/diagrams/workflows/qe-electronic-chain.svg)
+
+图：electronic workflow 的数据边界示意。Bands path 用于色散图；DOS、PDOS 和 Fermi surface 依赖 dense uniform mesh。该图不替代本页对 `K_POINTS`、`filband`、energy reference 和 warning 的 output review。
+
 ## 关键 QE 输入对象
 
 | 字段 / 设置 | 程序 | 控制什么 | 常见风险 | Output 中如何验证 |
@@ -97,6 +101,6 @@ bands 可进入 figures、band gap statement、DOS/PDOS cross-check、Wannier va
 - QE `bands.x` input reference: <https://www.quantum-espresso.org/Doc/INPUT_BANDS.html>
 - SeeK-path documentation: <https://seekpath.readthedocs.io/>
 - 本仓库规范：[standards/output-review-checklist.md](../../standards/output-review-checklist.md)
-- 物理边界：[physics-judgement/kohn-sham-eigenvalue-boundary.md](../../physics-judgement/kohn-sham-eigenvalue-boundary.md)、[physics-judgement/ground-state-vs-excited-state.md](../../physics-judgement/ground-state-vs-excited-state.md)
+- 物理边界：[physics-judgement/kohn-sham-eigenvalue-boundary.md](../../physics-judgement/kohn-sham-eigenvalue-boundary.md)、[physics-judgement/04-band-gap-problem-and-derivative-discontinuity.md](../../physics-judgement/04-band-gap-problem-and-derivative-discontinuity.md)、[physics-judgement/ground-state-vs-excited-state.md](../../physics-judgement/ground-state-vs-excited-state.md)
 
 参数定义以 QE `INPUT_PW` 和 `INPUT_BANDS` 为准；k-path 标准化和 KS eigenvalue 的物理解释属于边界判断，不能只靠 `bands.x` 正常结束来确认。

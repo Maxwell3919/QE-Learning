@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="470" viewBox="0 0 1080 470" role="img" aria-labelledby="title desc">
+  <title id="title">Bands, DOS and PDOS evidence boundary</title>
+  <desc id="desc">A schematic comparing band structure path evidence, density of states from a uniform mesh, and projected DOS from projector-defined channels.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#344054"/>
+    </marker>
+    <style>
+      .box { fill: #f8fafc; stroke: #344054; stroke-width: 2; rx: 10; }
+      .accent { fill: #eef6ff; stroke: #175cd3; stroke-width: 2; rx: 10; }
+      .warn { fill: #fff7ed; stroke: #c2410c; stroke-width: 2; rx: 10; }
+      .text { font-family: Arial, sans-serif; font-size: 18px; fill: #101828; }
+      .small { font-family: Arial, sans-serif; font-size: 14px; fill: #344054; }
+      .arrow { stroke: #344054; stroke-width: 2; fill: none; marker-end: url(#arrow); }
+      .axis { stroke: #667085; stroke-width: 2; }
+      .line1 { stroke: #175cd3; stroke-width: 3; fill: none; }
+      .line2 { stroke: #c2410c; stroke-width: 3; fill: none; }
+    </style>
+  </defs>
+  <rect x="40" y="55" width="280" height="300" class="box"/>
+  <text x="180" y="90" text-anchor="middle" class="text">Band structure</text>
+  <line x1="80" y1="300" x2="285" y2="300" class="axis"/>
+  <line x1="80" y1="300" x2="80" y2="125" class="axis"/>
+  <path d="M85,265 C120,210 160,180 205,230 C230,260 255,230 280,160" class="line1"/>
+  <path d="M85,195 C125,170 160,140 205,150 C235,155 250,130 280,115" class="line2"/>
+  <text x="180" y="330" text-anchor="middle" class="small">high-symmetry path</text>
+  <rect x="400" y="55" width="280" height="300" class="accent"/>
+  <text x="540" y="90" text-anchor="middle" class="text">DOS</text>
+  <line x1="445" y1="300" x2="640" y2="300" class="axis"/>
+  <line x1="445" y1="300" x2="445" y2="125" class="axis"/>
+  <path d="M450,285 C490,280 500,245 520,230 C555,205 545,160 575,155 C610,150 605,115 635,110" class="line1"/>
+  <text x="540" y="330" text-anchor="middle" class="small">uniform BZ mesh + broadening</text>
+  <rect x="760" y="55" width="280" height="300" class="warn"/>
+  <text x="900" y="90" text-anchor="middle" class="text">PDOS</text>
+  <line x1="805" y1="300" x2="1000" y2="300" class="axis"/>
+  <line x1="805" y1="300" x2="805" y2="125" class="axis"/>
+  <path d="M810,285 C850,260 855,220 890,210 C930,198 925,150 990,135" class="line1"/>
+  <path d="M810,292 C835,288 865,270 900,250 C940,225 960,200 997,185" class="line2"/>
+  <text x="900" y="330" text-anchor="middle" class="small">projector-defined channels</text>
+  <path d="M320,205 C350,205 370,205 400,205" class="arrow"/>
+  <path d="M680,205 C710,205 730,205 760,205" class="arrow"/>
+  <rect x="120" y="390" width="840" height="55" class="box"/>
+  <text x="540" y="414" text-anchor="middle" class="small">Cross-check bands, DOS and PDOS with the same energy reference.</text>
+  <text x="540" y="437" text-anchor="middle" class="small">Agreement supports a DFT-level interpretation; it does not turn KS eigenvalues into experimental spectra.</text>
+</svg>

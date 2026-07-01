@@ -29,6 +29,10 @@ final static SCF
   -> output review
 ```
 
+![Bands, DOS and PDOS evidence boundary](../../assets/diagrams/theory-minimum/bands-dos-evidence-boundary.svg)
+
+图：bands、DOS 和 PDOS 的证据边界。DOS 来自 uniform BZ sampling 和 broadening；它可以与 bands/PDOS 交叉审阅，但不能用平滑曲线替代 k-mesh、smearing 和 energy reference 检查。
+
 ## 关键 QE 输入对象
 
 | 字段 / 设置 | 程序 | 控制什么 | 常见风险 | Output 中如何验证 |
@@ -107,4 +111,4 @@ DOS 可用于 figures、DOS/PDOS interpretation、Fermi-level analysis、Fermi s
 - QE `dos.x` input reference: <https://www.quantum-espresso.org/Doc/INPUT_DOS.html>
 - QE `pw.x` input reference: <https://www.quantum-espresso.org/Doc/INPUT_PW.html>
 - 本仓库规范：[standards/output-review-checklist.md](../../standards/output-review-checklist.md)
-- 物理边界：[physics-judgement/kmesh-smearing-sensitivity.md](../../physics-judgement/kmesh-smearing-sensitivity.md)、[physics-judgement/kohn-sham-eigenvalue-boundary.md](../../physics-judgement/kohn-sham-eigenvalue-boundary.md)
+- 物理边界：[physics-judgement/kmesh-smearing-sensitivity.md](../../physics-judgement/kmesh-smearing-sensitivity.md)、[physics-judgement/kohn-sham-eigenvalue-boundary.md](../../physics-judgement/kohn-sham-eigenvalue-boundary.md)、[physics-judgement/04-band-gap-problem-and-derivative-discontinuity.md](../../physics-judgement/04-band-gap-problem-and-derivative-discontinuity.md)
