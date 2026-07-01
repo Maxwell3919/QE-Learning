@@ -18,9 +18,9 @@
 
 声子是晶体中原子集体振动的正则模式。在 Born-Oppenheimer 图像下，电子先在给定原子结构上达到基态，原子核在这个电子基态能量面上运动。若原子只在平衡位置附近小幅振动，可以把能量面对原子位移展开到二阶；二阶曲率决定 force constants，进一步决定 dynamical matrix 和 phonon frequencies。
 
-频率平方可以看成能量曲率的符号和大小。正的曲率对应稳定振动模式；接近零的 acoustic branch 反映整体平移；负的曲率在输出中通常表现为 imaginary 或 negative frequency，需要判断它来自数值误差、结构未充分优化、边界条件、q-grid 插值问题，还是可能的真实软模和动力学不稳定。
+频率平方可以看成能量曲率的符号和大小。正的曲率对应稳定振动模式；接近零的 acoustic branch 反映整体平移；负的曲率在输出中通常表现为 imaginary 或 negative frequency，需要判断它来自数值误差、结构未充分优化、边界条件、q-grid 插值问题，还是可能的真实软模和动力学不稳定。频率本身只告诉我们“某个 q 点某个模式的曲率符号和大小”，而 mode eigenvector 才告诉我们这个模式主要对应哪些原子、方向和相对位移。因此解释 soft mode 时，频率表和 eigenvector / displacement pattern 应一起审阅。
 
-DFPT 的价值在于不用显式构造巨大超胞，也能在给定 q point 上计算原子位移微扰的线性响应。`ph.x` 计算 q 点上的 dynamical matrix；q-grid 的 dynamical matrices 经 `q2r.x` 转换为 real-space interatomic force constants，再由 `matdyn.x` 插值到 band path 或 DOS mesh。这个链条让 phonon 比普通 bands/DOS 更依赖上游 SCF、结构、cutoff、k mesh、smearing 和文件一致性。
+DFPT 的价值在于不用显式构造巨大超胞，也能在给定 q point 上计算原子位移微扰的线性响应。`ph.x` 计算 q 点上的 dynamical matrix；q-grid 的 dynamical matrices 经 `q2r.x` 转换为 real-space interatomic force constants，再由 `matdyn.x` 插值到 band path 或 DOS mesh。这个链条让 phonon 比普通 bands/DOS 更依赖上游 SCF、结构、cutoff、k mesh、smearing 和文件一致性。需要特别区分 direct q-point result 与 interpolation result：`ph.x` 直接求得的 q 点 dynamical matrix 是一类证据，`matdyn.x` 沿 path 插值得到的频率是另一类证据；当可疑虚频只出现在插值路径上时，应回到相近 q 点和 IFC/q-grid 审查，而不是只修改绘图。
 
 ## 最低数学结构
 
@@ -30,7 +30,9 @@ DFPT 的价值在于不用显式构造巨大超胞，也能在给定 q point 上
 E = E0 + (1/2) sum Phi u u + higher-order terms
 ```
 
-`Phi` 是 force constants。经过质量归一化和 Fourier transform 后得到 dynamical matrix `D(q)`，对角化得到 `omega^2(q)` 和 mode eigenvectors。Acoustic sum rule 来自整体平移不应改变能量；ASR 可以约束 acoustic 行为，但不能替代结构、SCF、q-grid 和 response convergence。
+`Phi` 是 force constants。经过质量归一化和 Fourier transform 后得到 dynamical matrix `D(q)`，对角化得到 `omega^2(q)` 和 mode eigenvectors。Acoustic branches 对应长波极限下的整体平移；optical branches 对应原胞内不同原子或不同自由度之间的相对运动。Acoustic sum rule 来自整体平移不应改变能量；ASR 可以约束 acoustic 行为并暴露平移不变性误差，但不能替代结构、SCF、q-grid 和 response convergence。
+
+`q2r.x` 与 `matdyn.x` 的物理含义是把有限 q-grid 上的 dynamical matrices 转换为有限范围的 real-space IFC，再用这些 IFC 插值回任意 q 点。q-grid 太粗时，real-space IFC 的有效范围和插值质量都会受限；这类误差可能表现为 acoustic branch 漂移、局部虚频或 phonon DOS 低频端异常。
 
 ## QE 中的对应对象
 
@@ -43,6 +45,7 @@ E = E0 + (1/2) sum Phi u u + higher-order terms
 | `q2r.x` / `flfrc` | `q2r.x` | dyn matrices -> real-space IFC | IFC 文件、q-grid 读取完整性 |
 | `matdyn.x` / `asr` | `matdyn.x` | q-path interpolation 或 phonon DOS | frequencies、acoustic branches、DOS |
 | `dynmat.x` | `dynmat.x` | Gamma mode analysis | mode list、Gamma frequencies |
+| mode eigenvectors | `ph.x` / `dynmat.x` / `matdyn.x` | 判断振动模式的位移图像 | eigenvector、mode pattern、单位和坐标约定 |
 
 相关 workflow：[Gamma phonon](../workflows/phonon/gamma-phonon.md)、[phonon dispersion DFPT](../workflows/phonon/phonon-dispersion-dfpt.md)、[phonon debugging](../workflows/phonon/phonon-debugging.md)。
 
@@ -65,6 +68,7 @@ final static SCF
 - q-grid dispersion 需要 `ldisp=.true.` 和 `nq1/nq2/nq3`；单个 Gamma 不足以审阅全 BZ。
 - `fildyn`、`flfrc`、`flfrq`、`fldos` 是文件链参数，必须避免混用不同结构、q-grid 或 ASR 设置。
 - `asr/zasr` 要记录层级和方案；它是约束/诊断，不是万能修复。
+- 可疑 soft mode 应尽量区分 direct `ph.x` q-point 结果和 `matdyn.x` interpolation 结果；若只看插值曲线，容易把 IFC/q-grid 误差误判成真实软模。
 - 金属 phonon 需要特别审阅 k mesh、smearing 和 Fermi-surface sampling。
 
 ## 对 output review 的影响
@@ -77,6 +81,7 @@ final static SCF
 | dyn 文件完整性 | 后处理有完整输入 | dyn 来自正确结构 |
 | `q2r.x` IFC | force constants 文件可追踪 | IFC 截断误差已可忽略 |
 | `matdyn.x` frequency | q-path/DOS 数据生成 | 虚频来源已判定 |
+| mode eigenvectors | 可疑模式的位移方向可审阅 | 虚频一定是真实不稳定 |
 | acoustic branches | 平移模式和 ASR 状态 | 结构和 SCF 无误差 |
 | warnings | response、symmetry、file-chain 风险 | warning 可忽略 |
 
