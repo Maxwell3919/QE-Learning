@@ -1,80 +1,92 @@
 # SOC and Symmetry Boundary
 
-## 1. 核心判断结论
+## 本页解决什么问题
 
-- **Strong:** SOC/noncollinear 不是只打开 `lspinorb`。
-- **Strong:** SOC 判断需要 fully relativistic pseudopotential、`noncolin`、symmetry、磁构型和 bands/Wannier 后处理一致。
-- **Boundary:** topology、magnetic anisotropy 和 spin texture 结论需要额外 invariant、surface state 或有效模型证据。
-- **Version-sensitive:** noncollinear/SOC 字段和输出格式需查当前 `INPUT_PW`。
+本页用于判断 SOC / noncollinear 计算是否足以支撑 band splitting、band gap、magnetic anisotropy、spin texture、degeneracy 或拓扑相关解释。SOC 是 relativistic model choice，不是普通后处理开关；启用 SOC 后，pseudopotential、symmetry、k-path、spin setting、bands、DOS、PDOS 和下游数据链都需要重新审阅。
 
-## 2. 这个问题为什么会出现在 DFT/QE 中？
+## 典型 output 现象
 
-SOC 改变 Hamiltonian 的自旋空间结构和对称性；noncollinear magnetism 又改变磁矩表达方式。许多 band degeneracy、splitting 和 topology 解释都依赖相对论 pseudo 与对称性处理。
-
-## 3. 相关 QE input 字段
-
-| 字段/设置 | 程序 | 判断意义 | 常见误用 |
-|---|---|---|---|
-| `noncolin` | `pw.x` | 启用 noncollinear 计算 | 只改一个开关不改磁构型审阅 |
-| `lspinorb` | `pw.x` | 启用 SOC | 无 fully relativistic pseudo |
-| `starting_magnetization` | `pw.x` | 初始磁矩 | 当作最终磁性 |
-| `noinv/nosym` 等 symmetry 设置 | `pw.x` | 影响 degeneracy 和 band interpretation | 未记录 symmetry reduction |
-
-## 4. output review 迹象
-
-| output 迹象 | 可能原因 | 回查动作 |
+| output 现象 | 可能含义 | 回查动作 |
 |---|---|---|
-| magnetization components 改变 | noncollinear 态与初态不同 | 审阅总磁矩和局域磁矩 |
-| band degeneracy lifted | SOC/symmetry 改变 | 比较 SOC/non-SOC 数据链 |
-| topological claim 缺少 invariant | 解释层不足 | 转 Wannier/topology 边界 |
+| output 回显 `noncolin` / spinor / SOC 设置 | 计算进入 noncollinear/SOC 分支 | 核对 PP、symmetry、磁性设置和下游数据链 |
+| irreducible k-points 或 symmetry operation 改变 | SOC 或磁构型改变可用对称性 | 重新审阅 k-path 和 degeneracy |
+| band degeneracy lifted 或 gap 改变 | SOC / symmetry / magnetic model 影响 eigenvalues | 与 non-SOC 结果分开记录，检查 energy zero |
+| magnetization 分量复杂或不稳定 | noncollinear 态、初态或 occupation 敏感 | 回查 starting magnetization、SCF convergence、smearing |
+| warning 涉及 pseudopotential、spin-orbit、symmetry | 模型前提可能不满足 | 进入 `WARN/BLOCK` 审阅 |
 
-## 5. PASS / WARN / BLOCK
+## 可能原因
+
+- 数值误差：kmesh、smearing、SCF threshold、`nbnd` 或 mixing 对 SOC bands/DOS 不足。
+- 模型误差：SOC、magnetism、DFT+U 或 hybrid 共同改变 Hamiltonian。
+- 赝势误差：未使用 fully relativistic / SOC-capable pseudopotential，或 PP 与 functional 不一致。
+- 边界条件误差：surface、low-dimensional 或 broken inversion 情境下 symmetry 和 degeneracy 解释复杂。
+- 后处理误差：SOC/non-SOC bands、DOS、PDOS 或 Wannier files 混用。
+- workflow 传播误差：SCF 是 SOC，bands/DOS 却读取非 SOC `prefix/outdir`，或反向混用。
+- 真实物理效应：SOC splitting、magnetic anisotropy、spin texture 或 band inversion 可能真实存在，但需要额外证据。
+
+## 必查 QE input/output
+
+| 对象 | 程序 | 判断意义 | 常见误用 |
+|---|---|---|---|
+| fully relativistic PP | `ATOMIC_SPECIES` / UPF | SOC 计算前提 | 只看元素名，不看 UPF capability |
+| `noncolin` | `pw.x` | 启用 noncollinear spinor 框架 | 只改 bands input，不重做 SCF |
+| `lspinorb` | `pw.x` | 启用 spin-orbit coupling | 当作后处理绘图选项 |
+| `starting_magnetization` / constraints | `pw.x` | 初始磁构型和约束 | 初始磁矩当最终磁性 |
+| symmetry settings | `pw.x` | 影响 irreducible k-points、degeneracy、path 解释 | SOC 后沿用旧 symmetry 判断 |
+| `K_POINTS` path / mesh | `pw.x` | SOC 后的 bands/DOS 数据链 | non-SOC k-path 解释不重审 |
+| `projwfc.x` spinor output | `projwfc.x` | SOC/非共线投影解释 | 仍按普通 up/down PDOS 解释 |
+
+## 判断规则
+
+- SOC 计算必须从 SCF 数据链开始，而不是对已有无 SOC output 做后处理。
+- SOC 需要 fully relativistic / SOC-capable PP；若 PP 证据不清，SOC 结果不能进入定量解释。
+- SOC 会改变可用 symmetry、irreducible k-points、band degeneracy 和 k-path 解释；结构或模型改变后应重审路径来源。
+- SOC 的重要性不能按元素名或方法标签一刀切。应根据目标 observable、近简并、磁性、能带交叉和相对论 PP 证据判断。
+- 拓扑、spin texture 和 magnetic anisotropy 结论需要额外 invariant、有效模型、角度/构型对照或 Wannier 等证据，本页只给边界。
+
+## PASS / WARN / BLOCK
 
 | 状态 | 条件 | 是否允许进入下游 |
 |---|---|---|
-| PASS | pseudo、SOC 字段、symmetry、磁构型和下游数据链一致 | 允许进入 SOC 分析 |
-| WARN | SOC 结果可追踪但 topology/MAE 等解释证据不足 | 只能写边界性结论 |
-| BLOCK | 无相对论 pseudo 或混用 SOC/non-SOC bands 解释 | 停止结论 |
+| PASS | fully relativistic PP、`noncolin/lspinorb`、spin/magnetic setup、symmetry、k-path、SCF/NSCF/bands/DOS 数据链全部一致且可追踪 | 允许进入带 SOC 边界的 bands/DOS/PDOS 和进一步模型分析 |
+| WARN | SOC 数据链可追踪，但 symmetry、磁构型、topology 或 MAE 证据不足 | 只允许定性对照或内部判断 |
+| BLOCK | PP 不支持 SOC；SOC/non-SOC 文件混用；未重算下游却比较 SOC 结论；symmetry/k-path 未重审 | 不允许进入 SOC 相关科研结论 |
 
-## 6. 常见误区
+## 不能做出的过度结论
 
-- 初始磁矩等于最终磁性
-- SOC 只是 `lspinorb` 开关
-- 无 SOC bands 解释拓扑
-- 忽略多个磁构型比较
-- 未记录 symmetry 改变
+- 不能把 SOC 当作只需打开 `lspinorb` 的开关。
+- 不能在未确认 fully relativistic PP 的情况下解释 SOC splitting。
+- 不能沿用无 SOC 的 band degeneracy、k-path 或 PDOS 通道解释。
+- 不能把一次 SOC bands 图直接写成拓扑结论。
+- 不能把 SOC 对某类体系的重要性写成无条件规则。
 
-## 7. 应回写到哪些 workflow 页面？
+## 下游影响
 
-- [workflows/advanced/noncollinear-soc.md](../workflows/advanced/noncollinear-soc.md)
-- [workflows/advanced/spin-polarization.md](../workflows/advanced/spin-polarization.md)
-- [workflows/advanced/wannier90-overview.md](../workflows/advanced/wannier90-overview.md)
+- `bands`：SOC 改变 splitting、degeneracy 和可能的 band inversion。
+- `DOS/PDOS`：spinor 和 noncollinear 输出改变投影标签和分量解释。
+- `Fermi surface`：SOC 和磁性会改变 crossing 和 degeneracy。
+- `phonon/electronic downstream`：若目标属性对 SOC 敏感，下游应保持 SOC 数据链一致。
+- `Wannier/topology`：需要回对 SOC QE bands，并补充 invariant 或有效模型验证。
 
-## 8. 应回写到哪些 theory-minimum 页面？
+## 与 theory-minimum / workflows / standards 的关系
 
-- [theory-minimum/magnetism-soc-dftu.md](../theory-minimum/magnetism-soc-dftu.md)
-- [theory-minimum/kpoints-symmetry-kpath.md](../theory-minimum/kpoints-symmetry-kpath.md)
+- 理论回查：[Magnetism, SOC and DFT+U](../theory-minimum/magnetism-soc-dftu.md)、[K-points, symmetry and k-path](../theory-minimum/kpoints-symmetry-kpath.md)
+- Workflow 回查：[Noncollinear SOC overview](../workflows/advanced/noncollinear-soc.md)、[bands](../workflows/electronic/bands.md)、[PDOS](../workflows/electronic/pdos.md)
+- 相关判断：[Pseudopotential transferability](pseudopotential-transferability-and-functional-consistency.md)、[Kohn-Sham eigenvalue boundary](kohn-sham-eigenvalue-boundary.md)
+- 记录规范：[output review checklist](../standards/output-review-checklist.md)
 
+## 来源与结论强度
 
-## 结论强度
+| 结论 | 强度 | 来源边界 |
+|---|---|---|
+| SOC 改变 Hamiltonian 和 symmetry 审阅 | Strong | relativistic DFT / QE official docs |
+| fully relativistic PP 是 SOC 数据链前提 | Strong | QE PP 和 `INPUT_PW` 文档 |
+| topology / spin texture 需要额外证据 | Boundary | advanced electronic-structure literature |
+| `noncolin/lspinorb` 字段和输出格式 | Version-sensitive | 当前 QE `INPUT_PW` |
 
-- Strong：本页中由经典理论、方法论文或官方文档直接支持的判断。
-- Moderate：本页中由摘要、综述或多个方法来源共同支持，但细节需要回到正文或官方文档核验的判断。
-- Boundary：本页中用于限制解释范围的判断，不作为定量结论。
-- Version-sensitive：涉及 QE、PHonon、Wannier90、EPW、Yambo 或其他工具字段和行为的判断，必须按当前官方文档复查。
+## 资料来源
 
-## 结论来源
-
-| 结论 | 强度 | 支撑文献/文档 | 是否需要全文核验 |
-|---|---|---|---|
-| 本页核心判断需要写入 output review，而不是只作为理论背景 | Strong | 官方文档 / 方法论文 | 否 |
-| 具体字段、默认值和版本行为必须回查当前官方文档 | Version-sensitive | QE INPUT_* / 工具官方文档 | 是 |
-
-## 9. 资料来源
-
-- Hohenberg and Kohn, *Inhomogeneous Electron Gas*：ground-state DFT 边界。
-- Kohn and Sham, *Self-Consistent Equations Including Exchange and Correlation Effects*：KS 辅助体系。
-- Quantum ESPRESSO official documentation and `INPUT_*` references：QE 字段和程序行为核验。
-- Giannozzi et al., Quantum ESPRESSO code papers：QE 方法和模块边界。
-- [references/canonical-literature.md](../references/canonical-literature.md)：本仓库 canonical literature 分级。
-- [references/source-index.md](../references/source-index.md)：公开来源入口。
+- QE INPUT_PW reference: <https://www.quantum-espresso.org/Doc/INPUT_PW.html>
+- QE pseudopotentials page: <https://www.quantum-espresso.org/pseudopotentials/>
+- Giannozzi et al., Quantum ESPRESSO code papers.
+- 本仓库：[canonical literature](../references/canonical-literature.md)、[source index](../references/source-index.md)
