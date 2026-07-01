@@ -1,80 +1,152 @@
 # Uncertainty Statement Template
 
-## 1. 核心判断结论
+## 本页解决什么问题
 
-- **Strong:** DFT 结论应区分 numerical uncertainty、model uncertainty、pseudopotential uncertainty、finite-size/boundary uncertainty 和 workflow propagation error。
-- **Strong:** 没有 uncertainty statement 的定量结论只能视为弱结论。
-- **Moderate:** 结论强度应随目标 observable、上游质量和模型适用性分级。
-- **Boundary:** AiiDA/provenance 工具可辅助记录，但不替代物理判断。
+本页给出 DFT/QE 结果陈述的 uncertainty statement 模板。目标是把“算出来了”改写成可复查的科研表述：说明计算层级、输入模型、收敛证据、output 证据、限制和下游准入。
 
-## 2. 这个问题为什么会出现在 DFT/QE 中？
+不确定性说明不是空泛免责声明。它应告诉读者哪些误差已经通过收敛测试降低，哪些来自模型选择，哪些来自边界条件或后处理，哪些仍然限制结论强度。
 
-可复现性不只是保存 input/output，还要说明哪些误差已经通过收敛测试降低，哪些误差来自模型选择，哪些仍是边界条件或版本敏感风险。
+## 典型 output 现象
 
-## 3. 相关 QE input 字段
-
-| 字段/设置 | 程序 | 判断意义 | 常见误用 |
-|---|---|---|---|
-| `prefix/outdir` | all | 数据链可追踪 | 混用 scratch |
-| QE version / command | all | 程序和运行环境可复查 | 不记录版本 |
-| pseudo source / `input_dft` | `pw.x` | 模型来源 | 只给文件名 |
-| convergence table | workflow record | 数值误差证据 | 只有最终数值 |
-
-## 4. output review 迹象
-
-| output 迹象 | 可能原因 | 回查动作 |
+| 现象 | 可能提示 | 不能直接说明什么 |
 |---|---|---|
-| 只有单个结果无 sensitivity | uncertainty 不足 | 补 convergence/model table |
-| 来源不可追踪 | provenance BLOCK | 停止定量结论 |
-| 不同模型结果差异大 | model uncertainty 主导 | 写强度限制 |
+| 只报告一个最终数值 | 缺少 sensitivity 和 provenance | 不能判断结论强度 |
+| convergence table 只覆盖 total energy | force、stress、phonon、DOS 或 work function 仍可能不稳 | 不能把所有 observable 都判为 PASS |
+| PP、functional、U、SOC、vdW 来源不清 | model uncertainty 不可追踪 | 不能做跨模型定量比较 |
+| 下游结果读取旧 `prefix/outdir` | workflow propagation error | 不能写正式结论 |
+| output 有 warning 但陈述未提及 | 证据与结论不匹配 | 不能通过审阅 |
 
-## 5. PASS / WARN / BLOCK
+## 可能原因
+
+- 数值误差：cutoff、k mesh、smearing、q-grid、SCF threshold、force/stress threshold 或 broadening 未审阅。
+- 模型误差：functional、DFT+U、hybrid、SOC、vdW、magnetic state 或 excited-state method 选择影响结论。
+- 赝势误差：PP provenance、functional consistency、relativistic treatment 或 transferability 未记录。
+- 边界条件误差：finite-size、vacuum、dipole、slab、charged state、dimensionality 或 pressure/temperature boundary 不清。
+- 后处理误差：bands/DOS/PDOS、potential、Wannier、EPC、phonon DOS 或 spectra 的解释越界。
+- workflow 传播误差：relax、final SCF、NSCF、phonon、post-processing 来自不同模型或旧 scratch。
+- 真实物理效应：soft mode、magnetism、Fermi surface、polar response、anharmonicity 或 excitonic effects 需要在结论中单独标注。
+
+## 必查 QE input/output
+
+| 类别 | 必查记录 | 用途 |
+|---|---|---|
+| 计算层级 | SCF、relax、NSCF、bands、phonon、Wannier、EPW、GW/BSE 等 | 防止把不同层级结论混写 |
+| 输入模型 | `input_dft`、PP、U、SOC、vdW、occupation、smearing | 说明模型边界 |
+| 数值证据 | cutoff、k mesh、q-grid、threshold、broadening convergence | 说明 numerical uncertainty |
+| output 证据 | warning、SCF accuracy、force/stress、Fermi energy、frequency、tensor、potential plateau | 说明结论来源 |
+| 文件链 | `prefix/outdir`、input/output 文件名、post-processing files | 防止下游读错数据 |
+| 来源 | 官方文档、canonical literature、内部 workflow/standards | 支撑边界判断 |
+
+## 判断规则
+
+1. 每个正式结论至少要说明计算层级、模型、收敛证据、output 证据和限制。
+2. 数值收敛 statement 只能覆盖已测试 observable，不能自动扩展到 phonon、work function、EPC 或 spectra。
+3. 模型选择 statement 应写明 functional、PP、U、SOC、vdW、excited-state method 等边界。
+4. 若结论依赖可视化或后处理，必须说明上游数据链和后处理解释边界。
+5. 未完成审阅的结果可以写成 internal note 或 exploratory trend，不能写成无边界定量结论。
+
+## PASS / WARN / BLOCK
 
 | 状态 | 条件 | 是否允许进入下游 |
 |---|---|---|
-| PASS | 数值、模型、pseudo、边界和 provenance 均有记录 | 允许正式结论 |
-| WARN | 部分 uncertainty 未量化但边界已说明 | 只写条件结论 |
-| BLOCK | 关键来源、参数或 output review 缺失 | 不得写定量结论 |
+| PASS | statement 包含来源、模型、convergence evidence、output evidence、限制和 downstream permission | 可进入报告、论文草稿或长期记录 |
+| WARN | statement 可用于内部讨论，但缺少部分 sensitivity 或模型对照 | 只允许写条件结论或趋势 |
+| BLOCK | statement 写成无边界绝对结论；关键来源、参数、output review 或文件链缺失 | 不得作为正式科研结论 |
 
-## 6. 常见误区
+## 不能做出的过度结论
 
-- 只报告一个最终数字
-- 把收敛表当模型验证
-- 不记录 pseudo/functional/U/SOC/vdW 来源
-- 不说明 finite-size/boundary
-- 把 provenance 工具当物理审稿人
+- 避免写“DFT 证明……”，除非后面明确计算层级和模型边界。
+- 避免写“该体系一定……”，应说明模型、温度、压力、结构和方法范围。
+- 避免写“计算结果与实验完全一致……”，应说明比较对象和不确定性。
+- 避免写“该参数已经足够……”，除非有目标 observable 的 convergence evidence。
+- 避免用 `JOB DONE`、平滑图像、small spread、单个 `lambda` 或单点 total energy 替代完整证据。
 
-## 7. 应回写到哪些 workflow 页面？
+## 下游影响
 
-- [standards/output-review-checklist.md](../standards/output-review-checklist.md)
-- [standards/calculation-record-template.md](../standards/calculation-record-template.md)
-- [workflows/README.md](../workflows/README.md)
+Uncertainty statement 应出现在以下记录中：
 
-## 8. 应回写到哪些 theory-minimum 页面？
+- energy difference / formation-energy-like statement；
+- band structure、band gap、DOS、PDOS statement；
+- phonon stability、phonon DOS、Born charge、IR/Raman statement；
+- work function、electrostatic potential statement；
+- DFT+U、SOC、vdW、hybrid、low-dimensional statement；
+- Wannier、EPC、excited-state、free-energy statement。
 
-- [theory-minimum/README.md](../theory-minimum/README.md)
-- [theory-minimum/dft-ks-scf.md](../theory-minimum/dft-ks-scf.md)
+## 与 theory-minimum / workflows / standards 的关系
 
+- 最低理论回查：[theory-minimum/README.md](../theory-minimum/README.md)、[theory-minimum/dft-ks-scf.md](../theory-minimum/dft-ks-scf.md)、[theory-minimum/dfpt-phonons.md](../theory-minimum/dfpt-phonons.md)。
+- workflow 回查：[workflows/README.md](../workflows/README.md)、[workflows/ground-state/scf.md](../workflows/ground-state/scf.md)、[workflows/phonon/phonon-dispersion-dfpt.md](../workflows/phonon/phonon-dispersion-dfpt.md)。
+- 记录规范：[standards/output-review-checklist.md](../standards/output-review-checklist.md)、[standards/calculation-record-template.md](../standards/calculation-record-template.md)、[standards/pass-warn-block.md](../standards/pass-warn-block.md)。
 
-## 结论强度
+## 可复用 statement 模板
 
-- Strong：本页中由经典理论、方法论文或官方文档直接支持的判断。
-- Moderate：本页中由摘要、综述或多个方法来源共同支持，但细节需要回到正文或官方文档核验的判断。
-- Boundary：本页中用于限制解释范围的判断，不作为定量结论。
-- Version-sensitive：涉及 QE、PHonon、Wannier90、EPW、Yambo 或其他工具字段和行为的判断，必须按当前官方文档复查。
+### Energy Difference
 
-## 结论来源
+```markdown
+本结论是 `<method_level>` 层级下的 energy difference 判断。输入模型为 `<functional>` / `<pseudopotential_set>` / `<spin_or_soc_or_u_or_vdw_setting>`，结构状态为 `<structure_state>`。数值收敛已针对 `<target_observable>` 检查，包括 `<cutoff_evidence>`、`<kmesh_evidence>` 和 `<force_stress_evidence>`。output 证据包括 `<total_energy_lines>`、`<scf_accuracy>`、`<warnings>`。该结论不包含 `<finite_temperature_or_free_energy_effects>`；允许进入 `<allowed_downstream>`。
+```
 
-| 结论 | 强度 | 支撑文献/文档 | 是否需要全文核验 |
-|---|---|---|---|
-| 本页核心判断需要写入 output review，而不是只作为理论背景 | Strong | 官方文档 / 方法论文 | 否 |
-| 具体字段、默认值和版本行为必须回查当前官方文档 | Version-sensitive | QE INPUT_* / 工具官方文档 | 是 |
+### Band Structure / Gap
 
-## 9. 资料来源
+```markdown
+本结论是 `<functional_level>` 的 Kohn-Sham electronic structure 判断。bands 使用 `<k_path_source>`，DOS 使用 `<uniform_mesh>`，能量参考为 `<fermi_or_vbm_reference>`。output 已审阅 `<nbnd>`、`<occupations>`、`<fermi_energy>`、`<warnings>`。band gap 仅作为 `<DFT_level_or_trend>` 表述，不写成 quasiparticle 或 optical gap；允许进入 `<allowed_downstream>`。
+```
 
-- Hohenberg and Kohn, *Inhomogeneous Electron Gas*：ground-state DFT 边界。
-- Kohn and Sham, *Self-Consistent Equations Including Exchange and Correlation Effects*：KS 辅助体系。
-- Quantum ESPRESSO official documentation and `INPUT_*` references：QE 字段和程序行为核验。
-- Giannozzi et al., Quantum ESPRESSO code papers：QE 方法和模块边界。
-- [references/canonical-literature.md](../references/canonical-literature.md)：本仓库 canonical literature 分级。
-- [references/source-index.md](../references/source-index.md)：公开来源入口。
+### DOS / PDOS
+
+```markdown
+DOS/PDOS 结论基于 `<SCF_to_NSCF_to_postproc_chain>`。已记录 `<kmesh>`、`<smearing_or_tetrahedron>`、`<degauss_or_broadening>`、`<energy_reference>` 和 `<projection_basis>`。PDOS 被解释为 projector-dependent analysis，不作为排他性化学分解；允许进入 `<figure_or_trend_or_quantitative_statement>`。
+```
+
+### Phonon Stability
+
+```markdown
+phonon 结论基于 `<final_static_scf>`、`<ph_q_grid>`、`<q2r_matdyn_chain>`。已审阅 `<ph_convergence>`、`<acoustic_modes>`、`<ASR_setting>`、`<imaginary_frequency_triage>` 和 `<warnings>`。若存在 `<imaginary_modes>`，其来源被归类为 `<numerical_or_structural_or_physical>`；允许进入 `<stability_statement_or_followup>`。
+```
+
+### Work Function
+
+```markdown
+work function 结论基于 `<slab_model>` 的 `<SCF_to_pp_to_average_chain>`。已记录 `<surface_direction>`、`<vacuum_region>`、`<dipole_or_boundary_setting>`、`<fermi_energy>`、`<potential_plateau_evidence>` 和 `<warnings>`。该数值只在 `<boundary_condition>` 下成立；允许进入 `<trend_or_quantitative_report>`。
+```
+
+### DFT+U / SOC
+
+```markdown
+本结论使用 `<DFT_plus_U_or_SOC_setting>` 模型。U/SOC provenance 为 `<u_source_or_relativistic_pp_source>`，并记录 `<projector_or_manifold>`、`<functional>`、`<pseudopotential>`、`<spin_state>` 和 `<symmetry_review>`。输出已审阅 `<magnetization>`、`<Hubbard_or_SOC_messages>`、`<warnings>`。结论不跨 `<different_model_chain>` 比较。
+```
+
+### vdW / Low-Dimensional
+
+```markdown
+本结论使用 `<vdw_or_nonlocal_model>` 与 `<low_dimensional_boundary>`。已记录 `<functional>`、`<pseudopotential>`、`<cell_or_vacuum>`、`<dipole_or_isolated_setting>`、`<force_stress_review>` 和 `<downstream_recalculation>`。结论只在该 model/boundary 下成立，不作为所有 vdW 模型的普适排序。
+```
+
+### EPC
+
+```markdown
+EPC 结论基于 `<SCF_to_DFPT_to_Wannier_to_EPW_chain>`。已审阅 `<phonon_convergence>`、`<Wannier_band_validation>`、`<coarse_dense_kq_grids>`、`<smearing_broadening>`、`<lambda_alpha2F_linewidth_or_mobility_output>` 和 `<warnings>`。该结果用于 `<screening_or_quantitative_observable>`，并保留 `<remaining_uncertainty>`。
+```
+
+### Free Energy
+
+```markdown
+热力学结论层级为 `<static_energy_or_harmonic_free_energy_or_QHA_or_MD>`。已记录 `<temperature_pressure_boundary>`、`<phonon_or_sampling_evidence>`、`<imaginary_mode_status>`、`<model_assumptions>` 和 `<convergence_evidence>`。本结论不把单点电子能量直接写成有限温自由能；允许进入 `<allowed_thermodynamic_statement>`。
+```
+
+## 来源与结论强度
+
+| 结论 | 强度 | 来源边界 |
+|---|---|---|
+| numerical uncertainty 与 model uncertainty 必须分开记录 | Strong | reproducibility literature 与本仓库 standards |
+| statement 只能覆盖已审阅的 workflow 和 observable | Strong | output review 规范 |
+| 具体 QE 字段和工具行为需查当前官方文档 | Version-sensitive | QE / PHonon / Wannier90 / EPW / Yambo docs |
+| 缺少 evidence 的结果只能作为探索或内部记录 | Boundary | PASS/WARN/BLOCK 规范 |
+
+## 资料来源
+
+- Lejaeghere et al., reproducibility in DFT calculations of solids：可复现性与方法比较边界。
+- [standards/output-review-checklist.md](../standards/output-review-checklist.md)：本仓库 output review 入口。
+- [standards/calculation-record-template.md](../standards/calculation-record-template.md)：calculation record 模板。
+- [references/canonical-literature.md](../references/canonical-literature.md)：canonical literature 分级。
+- [references/source-index.md](../references/source-index.md)：公开来源索引。
