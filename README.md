@@ -30,6 +30,8 @@ structure + pseudopotential
 
 需要按问题快速查阅时，先看 [HANDBOOK_INDEX.md](HANDBOOK_INDEX.md)。从 [learn/00-start-here.md](learn/00-start-here.md) 开始，先建立 QE 原生命令行 workflow 的整体图景，再进入 [workflows/](workflows/) 阅读具体计算步骤。遇到最低理论概念时查 [theory-minimum/](theory-minimum/)，需要解释物理近似和失败模式时查 [physics-judgement/](physics-judgement/)，需要外部资料时查 [references/](references/)，每次学习或计算记录按 [standards/](standards/) 执行。读完页面只代表完成阅读，是否掌握需要由 output review、收敛记录和 `PASS / WARN / BLOCK` 判断来证明。
 
+v0.2 内容完成版补充了跨目录导航、原创 SVG 学习图、批次 QA 报告和发布说明。需要了解当前手册完成范围、验证方式和已知限制时，阅读 [RELEASE_NOTES_v0.2.md](RELEASE_NOTES_v0.2.md)；需要查图像资源时，阅读 [assets/diagrams/README.md](assets/diagrams/README.md)。
+
 ## 边界说明
 
 本仓库保存通用参考手册、学习路线、审阅框架和记录规范；个人计算的完整 input/output、scratch、restart 和大文件应留在个人项目或计算环境中。QE 参数定义和程序行为仍以 QE 官方文档和 `INPUT_*` reference 为准，本仓库负责中文导读和科研判断框架。

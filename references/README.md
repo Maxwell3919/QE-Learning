@@ -31,3 +31,5 @@ AiiDA 保持 optional advanced reference：它适合用来理解 workflow/proven
 - [references/source-index.md](source-index.md)
 - [references/canonical-literature.md](canonical-literature.md)
 - [references/reading-maintenance-policy.md](reading-maintenance-policy.md)
+
+v0.2 发布状态、验证范围和已知限制见 [RELEASE_NOTES_v0.2.md](../RELEASE_NOTES_v0.2.md)。该文件记录版本边界，不替代 source index 或 canonical literature。

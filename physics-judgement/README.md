@@ -6,6 +6,8 @@
 
 本目录重点区分六类风险：数值误差、模型误差、赝势误差、边界条件误差、后处理误差和 workflow 传播误差。每类风险都应尽量回到 QE input/output 证据，而不是只用文字解释。
 
+v0.2 增加了判断类图像，包括误差来源地图、`PASS / WARN / BLOCK` gate 和 uncertainty statement chain。图像入口见 [assets/diagrams/README.md](../assets/diagrams/README.md)；图像用于帮助定位审阅层级，不替代本目录的 `PASS / WARN / BLOCK` 和来源边界。
+
 ## 阅读方式
 
 如果 output 中出现虚频、带隙异常、磁矩异常、DOS 与 bands 不一致、SCF 振荡、work function 不稳定、Born charge 不合理，不应只调参数。先确认 workflow 记录完整，再回到本目录查可能的物理原因：泛函、赝势、边界条件、维度、smearing、SOC、DFT+U、vdW、DFPT 响应或后处理近似。需要从异常现象快速定位入口时，可使用 [HANDBOOK_INDEX.md](../HANDBOOK_INDEX.md) 的 Physics Judgement 路径。

@@ -10,6 +10,8 @@
 
 本目录不提供具体材料案例，也不把某一种材料的参数写成通用答案。页面中的模板、检查项和判断词只用于建立可复用的输入审阅、输出复查和下游准入框架；真实计算仍需根据材料、赝势、目标 observable 和收敛测试重新确定参数。
 
+v0.2 图像资产提供 ground-state、electronic 和 phonon/DFPT 三条主链的学习图，入口见 [assets/diagrams/README.md](../assets/diagrams/README.md)。图像只用于定位程序链和文件链，正式判断仍以各 workflow 页面中的 output review 和 `PASS / WARN / BLOCK` 为准。
+
 每页应重点看：
 
 - 计算目标：本步骤产出的物理量或中间状态是什么。
