@@ -1,102 +1,222 @@
 # Bands workflow
 
-## 本页解决什么问题
-
-本页说明如何审阅 QE 的 bands workflow：沿 high-symmetry k-path 计算 Kohn-Sham eigenvalue dispersion，并判断 band data 是否可以进入能带图、band gap 趋势、带交叉和与 DOS/PDOS 的交叉解释。bands workflow 不是 Brillouin zone 积分，不替代 DOS 的 uniform k mesh，也不自动给出实验 quasiparticle gap 或 optical spectrum。
-
-在 QE 主线中，bands 应接在已审阅的 final static SCF 之后。若结构来自 relax/vc-relax，应先用最终结构重新做 static SCF，再基于同一 `prefix/outdir` 进行 bands 计算。
-
 ## 页面定位
 
 - 对应学习路线：[learn/05-electronic-structure-loop.md](../../learn/05-electronic-structure-loop.md)
-- 上游依赖：[workflows/ground-state/scf.md](../ground-state/scf.md)；若来自优化结构，还依赖 [workflows/ground-state/relax.md](../ground-state/relax.md) 或 [workflows/ground-state/vc-relax.md](../ground-state/vc-relax.md) 后的 final static SCF
-- 理论边界：[theory-minimum/kpoints-symmetry-kpath.md](../../theory-minimum/kpoints-symmetry-kpath.md)、[physics-judgement/kohn-sham-eigenvalue-boundary.md](../../physics-judgement/kohn-sham-eigenvalue-boundary.md)
-- 规范入口：[standards/output-review-checklist.md](../../standards/output-review-checklist.md)、[standards/pass-warn-block.md](../../standards/pass-warn-block.md)
+- 结构输入边界：k-path 依赖结构标准化；本页只说明 QE 对 k-path 输入的要求。
+- 规范入口：[standards/calculation-record-template.md](../../standards/calculation-record-template.md)、[standards/pass-warn-block.md](../../standards/pass-warn-block.md)
 
-## 上游依赖
+## 计算目标
 
-- 结构、赝势、泛函、spin/SOC/DFT+U/vdW 设置已经在 SCF 记录中明确。
-- `prefix/outdir` 指向已通过 output review 的 SCF ground state；不能混用不同结构、赝势、泛函或自旋设置的 scratch。
-- k-path 与当前 cell convention 一致，并记录路径来源、坐标基底、端点标签和是否人工修改。
-- `nbnd` 覆盖关注的价带和导带能量窗口。
-- 若启用 spin polarization、noncollinear 或 SOC，图例、能带分支和简并解释必须与该模型一致。
+Bands workflow 沿 Brillouin zone 高对称路径计算 Kohn-Sham eigenvalues，用于判断带隙、直接/间接跃迁、能带交叉、简并，以及 SOC、磁性、DFT+U 等设置对电子结构的影响。
+
+Bands 使用路径采样；DOS/PDOS 通常使用均匀且更密的 k 网格。两类 workflow 的输入和输出判断不能互相替代。
+
+## 输入前提
+
+- `<structure>` 已经优化或来自可信结构来源。
+- 已完成并审阅 SCF，`prefix/outdir` 可被 bands 计算读取。
+- cutoff、SCF k 点和 occupation/smearing 策略已有基本收敛证据。
+- 已明确 primitive cell / conventional cell 的选择。
+- 已生成或人工确认 `<k_path>`，并记录路径来源和坐标基底。
 
 ## 计算图
 
 ```text
-final static SCF on <uniform_k_mesh>
-  -> pw.x calculation='bands' on <k_path>
+<structure> + <pseudo>
+  -> pw.x scf on <uniform_k_mesh>
+  -> k-path generation / validation
+  -> pw.x bands on <k_path>
   -> bands.x
-  -> filband / filband.gnu / optional symmetry labels
-  -> output review
+  -> band data / figure / interpretation
 ```
 
-## 关键 QE 输入对象
+## 需要的 QE 程序
 
-| 字段 / 设置 | 程序 | 控制什么 | 常见风险 | Output 中如何验证 |
-|---|---|---|---|---|
-| `calculation='bands'` | `pw.x` | 在给定 k-path 上求 eigenvalues | 当作新的 SCF 或 DOS mesh | `pw.x` output 的 calculation 类型和 k 点列表 |
-| `prefix/outdir` | `pw.x`, `bands.x` | 连接 SCF、bands 和后处理数据 | 读取旧 scratch 或其他结构数据 | output 中读取目录、data-file 和 prefix |
-| `K_POINTS crystal_b` / `tpiba_b` | `pw.x` | 定义 high-symmetry path | cell convention 与 k-path 不一致 | output 中 k 点序列、路径点数量 |
-| `nbnd` | `pw.x` | 输出 bands 数量 | 导带窗口不够，图像截断 | output 中 number of Kohn-Sham states |
-| `filband` | `bands.x` | band data 输出前缀 | 绘图文件来源不可追踪 | `bands.x` output 和生成的 `filband*` |
-| `lsym`, `no_overlap` | `bands.x` | 对称性分类或 band ordering | band crossing 或分支解释错误 | `filband.rap`、排序行为和 warning |
+- `pw.x`：先跑 `calculation='scf'`，再跑 `calculation='bands'`。
+- `bands.x`：整理 bands 计算结果，输出绘图数据。
+- 可选辅助：SeeK-path、spglib、Python/matplotlib。
 
-## 命令与文件边界
+## 通用输入模板
 
-```bash
-pw.x -in pw.bands.<system>.in > pw.bands.<system>.out
-bands.x -in bands.<system>.in > bands.<system>.out
+SCF：
+
+```fortran
+&CONTROL
+  calculation = 'scf',
+  prefix = '<system>',
+  outdir = '<scratch_dir>',
+  pseudo_dir = '<pseudo_dir>',
+/
+&SYSTEM
+  ibrav = 0,
+  nat = <number_of_atoms>,
+  ntyp = <number_of_species>,
+  ecutwfc = <wavefunction_cutoff>,
+  ecutrho = <charge_density_cutoff>,
+  occupations = '<occupation_scheme>',
+/
+&ELECTRONS
+  conv_thr = <scf_threshold>,
+/
+ATOMIC_SPECIES
+  <Element> <Mass> <Pseudo.UPF>
+
+ATOMIC_POSITIONS <coordinate_type>
+  <Element> <x> <y> <z>
+
+K_POINTS automatic
+  <nk1> <nk2> <nk3> <sk1> <sk2> <sk3>
+
+CELL_PARAMETERS <unit>
+  <a1x> <a1y> <a1z>
+  <a2x> <a2y> <a2z>
+  <a3x> <a3y> <a3z>
 ```
 
-`pw.bands.<system>.out` 记录 k-path 上的 eigenvalues；`bands.x` 将其整理为绘图数据。人工文件名不决定数据链，真正的数据边是 `prefix/outdir` 和 `filband`。`K_POINTS` path 只适合展示路径色散；若后续需要 DOS、PDOS 或 Fermi surface，应回到 uniform mesh 的 NSCF。
+Bands：
 
-## Output review
+```fortran
+&CONTROL
+  calculation = 'bands',
+  prefix = '<system>',
+  outdir = '<scratch_dir>',
+  pseudo_dir = '<pseudo_dir>',
+/
+&SYSTEM
+  ibrav = 0,
+  nat = <number_of_atoms>,
+  ntyp = <number_of_species>,
+  ecutwfc = <wavefunction_cutoff>,
+  ecutrho = <charge_density_cutoff>,
+  nbnd = <number_of_bands>,
+  occupations = '<occupation_scheme>',
+/
+&ELECTRONS
+  conv_thr = <scf_threshold>,
+/
+ATOMIC_SPECIES
+  <Element> <Mass> <Pseudo.UPF>
 
-| 检查项 | 从哪里看 | 能证明什么 | 不能证明什么 | WARN/BLOCK 触发 |
-|---|---|---|---|---|
-| 上游读取 | `pw.bands` output header、data-file 读取信息、`prefix/outdir` | bands 读取的是目标 SCF 数据 | SCF 本身已经对所有 observable 收敛 | `prefix/outdir` 错配、读取失败或结构不一致为 `BLOCK` |
-| k-path | `K_POINTS` echo、k 点数量、路径标签记录 | 路径与本次输入可复查 | k-path 符合当前结构标准化 | 路径来源不明为 `WARN`；cell convention 错配为 `BLOCK` |
-| bands 数量 | number of bands / Kohn-Sham states | 能量窗口覆盖程度可审阅 | 空带足以支撑所有 excited-state 解释 | 目标能区缺 bands 为 `BLOCK` |
-| energy reference | Fermi energy、VBM/CBM 记录、绘图脚本 | 图中零点来源可复查 | DFT gap 等于实验 gap | 能量零点不明为 `BLOCK` |
-| spin/SOC/symmetry | output 中 spin、noncollinear、SOC、symmetry 信息 | 模型分支与图例一致 | 简并或拓扑结论已成立 | SOC/磁性设置与标签不一致为 `WARN/BLOCK` |
-| `bands.x` 输出 | `bands.<system>.out`、`filband`、`filband.gnu`、warning | 绘图数据来自当前计算 | 图像解释不需要人工审阅 | `filband` 缺失或 warning 未解释为 `BLOCK` |
+ATOMIC_POSITIONS <coordinate_type>
+  <Element> <x> <y> <z>
 
-## 收敛与可靠性
+K_POINTS crystal_b
+  <number_of_path_points>
+  <kx_1> <ky_1> <kz_1> <npoints_to_next> ! <label_1>
+  <kx_2> <ky_2> <kz_2> <npoints_to_next> ! <label_2>
 
-- bands 的可信度继承上游 SCF、cutoff、k-point、occupation/smearing 和结构状态。
-- k-path 不做 BZ 积分，不能证明 DOS、Fermi surface 或积分型 observable 收敛。
-- semilocal DFT bands 可用于 Kohn-Sham eigenvalue 趋势和 workflow 交叉检查；band gap 定量、quasiparticle gap、optical spectrum 和拓扑解释需要额外物理边界。
-- relax/vc-relax 后若 cell 或 symmetry 改变，k-path 必须重新生成或重新审阅。
-- energy zero 必须明确：Fermi energy、VBM/CBM 或自定义参考不能混写。
+CELL_PARAMETERS <unit>
+  <a1x> <a1y> <a1z>
+  <a2x> <a2y> <a2z>
+  <a3x> <a3y> <a3z>
+```
 
-## PASS / WARN / BLOCK
+`bands.x`：
 
-| 状态 | 条件 | 是否允许进入下游 |
+```fortran
+&BANDS
+  prefix = '<system>',
+  outdir = '<scratch_dir>',
+  filband = 'bands.<system>.dat',
+/
+```
+
+## 输入字段说明
+
+| 字段 | 作用 | 常见风险 | 输出中如何验证 |
+|---|---|---|---|
+| `calculation='bands'` | 沿给定 k-path 计算 eigenvalues | 用它替代 SCF | bands run 会读取已有 SCF 数据 |
+| `prefix/outdir` | 连接 SCF 与 bands | 与 SCF 不一致 | 报找不到 charge density 或读取旧数据 |
+| `nbnd` | 控制输出能带数量 | 导带数量不够，图像截断 | output 中有 number of Kohn-Sham states |
+| `K_POINTS crystal_b` | 描述高对称路径 | 用 uniform mesh 画 bands | output k 点序列应对应路径 |
+| `nosym` | 特定非标准路径、低维或磁性场景可能需要 | 不分析对称性就开关 | 检查对称性和 k 点是否被改写 |
+
+## 通用输出审阅模板
+
+```markdown
+## Output Review
+
+- QE 程序:
+- 计算类型:
+- QE version:
+- SCF dependency:
+- `prefix/outdir` consistency:
+- Structure / cell convention:
+- K-path source:
+- K-path labels:
+- Number of bands:
+- Fermi energy reference:
+- Band data file:
+- Warnings:
+- PASS / WARN / BLOCK:
+- Reason:
+- Allowed downstream workflows:
+```
+
+## 输出判断标准
+
+- bands 计算应读取同一 `prefix/outdir` 下的 SCF ground state。
+- `<k_path>` 必须对应当前使用的 cell convention；primitive/conventional cell 混用会导致标签错误。
+- bands 图审阅的是 Kohn-Sham eigenvalues。它可以支持能带趋势、交叉检查和态成分讨论，但不能单独作为实验 quasiparticle gap、optical gap、excited-state spectrum 或拓扑结论。
+- 若研究目标超出普通 ground-state DFT，应回查 [physics-judgement/kohn-sham-eigenvalue-boundary.md](../../physics-judgement/kohn-sham-eigenvalue-boundary.md) 和 [physics-judgement/ground-state-vs-excited-state.md](../../physics-judgement/ground-state-vs-excited-state.md)。
+- `PASS` 只表示 bands workflow 数据链可用；若要写 gap 或 spectroscopy 定量结论，仍需要额外 model boundary 和 uncertainty statement。
+- `nbnd` 应覆盖关注的价带和导带范围。
+- 画图前必须明确能量零点：Fermi energy、VBM、CBM 或自定义参考。
+- 高对称点标签、路径段数量和绘图横轴应与 `<k_path>` 记录一致。
+- 若存在 band crossing 或异常跳变，需要检查 `bands.x` 排序和原始 eigenvalues。
+
+## 收敛性要求
+
+- 使用已经通过审阅的 SCF cutoff、k 点、赝势和 occupation 设置。
+- 对金属或小带隙体系，检查 smearing 和 SCF k 点对 Fermi 附近能带的影响。
+- 对 SOC、磁性、DFT+U、应变等体系，bands 设置应与 SCF 的物理模型保持一致。
+
+## 常见错误与诊断
+
+| 现象 | 可能原因 | 排查顺序 |
 |---|---|---|
-| `PASS` | 上游 SCF 为 `PASS`；k-path 来源清楚；`prefix/outdir` 一致；`nbnd` 覆盖目标窗口；energy reference 可复查；`bands.x` 输出完整 | 允许进入能带图、与 DOS/PDOS 交叉检查、谨慎的 KS eigenvalue 趋势解释 |
-| `WARN` | k-path 或能量零点可追踪但边界不足；`nbnd` 只够探索；SOC/磁性分支需人工复核 | 只允许探索性图像和内部诊断，不用于定量 gap 或拓扑结论 |
-| `BLOCK` | 上游 SCF 为 `BLOCK`；`prefix/outdir` 错配；k-path 与结构/cell convention 不一致；energy zero 不明；band data 缺失 | 不允许进入 bands 解释、图件归档或科研结论 |
+| `bands.x` 找不到数据 | `prefix/outdir` 不一致或 scratch 被清理 | 先看 SCF 和 bands 输入 |
+| 高对称点标签不对 | cell convention 或 k-path 坐标基底错误 | 重新检查结构标准化和路径来源 |
+| 导带不够 | `nbnd` 太小 | 增加 `nbnd` 并重跑 bands |
+| DOS 与 bands 金属性判断不一致 | DOS k mesh 不足或能量零点不一致 | 分别检查 DOS workflow 和 Fermi reference |
+| 能带跳变 | band crossing、排序、对称性或路径问题 | 检查 `bands.x` 输出和原始 eigenvalues |
 
-## 常见误区
+## 通用学习模板
 
-- 用 high-symmetry path bands 替代 DOS 或 Fermi surface 的 uniform mesh。
-- relax/vc-relax 后未做 final static SCF 就直接跑 bands。
-- 不记录 k-path 来源和 cell convention。
-- 把 Kohn-Sham gap 写成实验 band gap。
-- 绘图时移动 Fermi level 或 VBM/CBM 零点但不记录。
-- 对 SOC、磁性或 DFT+U 结果沿用无 SOC/无 U 的图例和解释。
+学习时应选择结构简单、电子状态明确、k-path 来源可靠的体系。具体体系不写入本仓库主文档；个人学习记录中应保留 input、output、路径来源、绘图脚本和 output review。
 
-## 下游影响
+## 记录模板
 
-bands 可进入 figures、band gap statement、DOS/PDOS cross-check、Wannier validation、EPC 或 GW/BSE 的前置审阅。进入 Wannier、EPC 或 excited-state 方法前，bands 只能作为上游质量检查，不能替代这些高级方法本身。
+```text
+pw.scf.<system>.in
+pw.scf.<system>.out
+pw.bands.<system>.in
+pw.bands.<system>.out
+bands.<system>.in
+bands.<system>.out
+bands.<system>.dat
+kpath-source.md
+record.md
+```
 
-## 来源与边界
+`kpath-source.md` 至少写明：结构标准化工具、cell convention、路径标签、坐标基底和是否人工修改。
 
-- QE `pw.x` input reference: <https://www.quantum-espresso.org/Doc/INPUT_PW.html>
+## 与其他 workflow 的关系
+
+- 与 SCF：bands 依赖 SCF ground state。
+- 与 DOS/PDOS：bands 解释路径色散，DOS/PDOS 解释态密度和轨道贡献。
+- 与 Wannier90：若需要高精度插值、Berry curvature、输运等，应进入 Wannier workflow。
+
+## 后续完善重点
+
+- 补充 k-path 来源记录规范。
+- 补充 band figure 能量零点和标签检查规范。
+- 补充 `nbnd`、SOC、磁性和 DFT+U 场景下的 bands 审阅要点。
+
+## 资料来源
+
 - QE `bands.x` input reference: <https://www.quantum-espresso.org/Doc/INPUT_BANDS.html>
+- QE `pw.x` input reference: <https://www.quantum-espresso.org/Doc/INPUT_PW.html>
 - SeeK-path documentation: <https://seekpath.readthedocs.io/>
-- 本仓库规范：[standards/output-review-checklist.md](../../standards/output-review-checklist.md)
-- 物理边界：[physics-judgement/kohn-sham-eigenvalue-boundary.md](../../physics-judgement/kohn-sham-eigenvalue-boundary.md)、[physics-judgement/ground-state-vs-excited-state.md](../../physics-judgement/ground-state-vs-excited-state.md)
-
-参数定义以 QE `INPUT_PW` 和 `INPUT_BANDS` 为准；k-path 标准化和 KS eigenvalue 的物理解释属于边界判断，不能只靠 `bands.x` 正常结束来确认。
+- Pranab Das QE tutorial: <https://pranabdas.github.io/espresso/>

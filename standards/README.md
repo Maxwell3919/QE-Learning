@@ -1,11 +1,11 @@
 # Standards
 
-`standards/` 是科研记录与可复查规范入口，用来把 QE 学习笔记和个人科研计算记录从“能跑出文件”推进到“能复查、能迁移、能判断下游是否可信”。本目录统一文件命名、calculation record、output review、source boundary、QA 检查和 `PASS / WARN / BLOCK` 记录方式。它服务两个场景：
+`standards/` 是本仓库的规范入口，用来把 QE 学习笔记和个人科研计算记录从“能跑出文件”推进到“能复查、能迁移、能判断下游是否可信”。它服务两个场景：
 
 - 个人学习：把 input、output、命令、参数来源和 review 结果写成可回看的记录，避免只记结论或只保存截图。
 - 科研计算：把结构、赝势、环境、`prefix/outdir`、收敛证据和下游准入状态分开记录，方便之后复算、排错、汇总和写作。
 
-本仓库不要求保存具体材料的 input/output 文件，也不要求把 scratch、wavefunction、restart 或大型中间文件纳入仓库。具体计算文件可以放在个人项目目录、集群工作目录或归档位置；本目录只规定这些文件应如何命名、记录、审阅和引用，并为后续 QA 提供统一检查口径。
+本仓库不要求保存具体材料的 input/output 文件，也不要求把 scratch、wavefunction、restart 或大型中间文件纳入仓库。具体计算文件可以放在个人项目目录、集群工作目录或归档位置；本仓库只规定这些文件应如何命名、记录、审阅和引用。
 
 ## 规范页面
 
@@ -21,19 +21,5 @@
 新增页面或修改页面前，先做三件事：
 
 1. 检查来源：确认内容来自官方文档、公开教程、论文、工具文档、QE output 证据或本仓库已有规范；不要写无法追踪的经验断言。
-2. 检查禁用词：避免使用无法追踪来源的经验性表述；如果是个人判断，必须写明依据和适用范围。
+2. 检查禁用词：避免使用“我记得”“网上常见说法”“一般都这样”等没有来源边界的表述；如果是个人判断，必须写明依据和适用范围。
 3. 检查链接：只保留必要链接，优先链接到本仓库对应规范页或公开原始来源；不要把页面写成链接堆，也不要引用本地私有路径。
-
-## Final QA checklist
-
-合并前至少检查：
-
-- 目录职责：`learn/` 是能力路径，`workflows/` 是 QE 原生命令行 workflow，`theory-minimum/` 是最低理论回查层，`physics-judgement/` 是可信度判断层，`references/` 是 source spine，`standards/` 是记录、审查和维护规范。
-- workflow 页面：主线页应有 `Output review`、`PASS / WARN / BLOCK`、下游准入和页末来源。
-- theory-minimum 页面：应能把概念映射到 QE input、output review 和对应 workflow。
-- physics-judgement 页面：应包含典型现象、误差来源区分、`PASS / WARN / BLOCK`、不能过度解释的结论和来源边界。
-- references 页面：每个来源说明支持什么判断，不堆 DOI，不用教程替代官方 `INPUT_*`。
-- standards 页面：`PASS / WARN / BLOCK`、output review、calculation record、文件命名、project layout 和 source policy 术语一致。
-- 全仓库 QA：Markdown 本地链接、私有路径、研究中间文件路径残留、自动化工具项目偏移、具体材料案例、万能参数、过度物理结论和 `git diff --check`。
-
-这些检查是合并前 gate，不替代后续逐页人工审稿。若发现无法自动判断的问题，应在阶段报告或 PR 描述中列为 remaining risk。

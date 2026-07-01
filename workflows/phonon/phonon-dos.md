@@ -1,107 +1,140 @@
-# Phonon DOS workflow
+# phonon DOS workflow
 
-## 本页解决什么问题
+## 页面定位
 
-Phonon DOS 描述声子频率在 q-space 中的态密度分布，用于审阅振动谱整体频率范围、低频区域、热力学输入数据和与 dispersion 的一致性。它来自 q-grid dynamical matrices 经 `q2r.x` 得到的 force constants，再由 `matdyn.x` 在 DOS q mesh 上采样或积分。Phonon DOS 不是单条 high-symmetry q-path，也不能用平滑曲线替代 dispersion 和虚频 triage。
+- 对应学习路线：[learn/06-phonon-dfpt-loop.md](../../learn/06-phonon-dfpt-loop.md)
+- 上游依赖：q-grid phonon dynamical matrices
+- 下游用途：phonon density of states
+- 规范入口：[standards/calculation-record-template.md](../../standards/calculation-record-template.md)、[standards/pass-warn-block.md](../../standards/pass-warn-block.md)
 
-## 上游依赖
+## 计算目标
 
-- 已通过 [phonon dispersion DFPT workflow](phonon-dispersion-dfpt.md) 中的 q-grid、dyn 文件、`q2r.x` 和 IFC 审阅。
-- `flfrc` 来自当前结构、当前 SCF 和当前 q-grid，不混用旧 force constants。
-- 低频、虚频、ASR 和 acoustic branches 已在 dispersion 或 debugging 页面中记录。
-- 如果用于热力学或自由能下游，q-grid 和 DOS mesh 需要按目标 observable 做进一步收敛审阅。
+从 q-grid dynamical matrices 生成 real-space force constants，再由 `matdyn.x` 在 DOS q mesh 上计算 phonon DOS。
+
+## 输入前提
+
+- 结构已充分优化，并通过 SCF output review。
+- SCF 的 cutoff、k 点、smearing 和 `conv_thr` 已按 phonon 目标审阅。
+- 已明确该页是 Gamma phonon、q-grid、DOS、响应张量还是 debugging 分支。
 
 ## 计算图
 
 ```text
-final static SCF
+pw.x scf
   -> ph.x ldisp=.true. on <q_grid>
-  -> q2r.x -> <system>.fc
-  -> matdyn.x with dos=.true. on <dos_q_mesh>
+  -> q2r.x force constants
+  -> matdyn.x dos mode
   -> phonon DOS
-  -> output review
 ```
 
-## 关键 QE 输入对象
+## 需要的 QE 程序
+
+`ph.x`、`q2r.x`、`matdyn.x`
+
+## 通用输入模板
 
 ```fortran
+&INPUTPH
+  prefix = '<system>',
+  outdir = '<scratch_dir>',
+  tr2_ph = <phonon_threshold>,
+  ldisp = .true.,
+  nq1 = <nq1>, nq2 = <nq2>, nq3 = <nq3>,
+  fildyn = '<system>.dyn',
+/
+
+&INPUT
+  fildyn = '<system>.dyn',
+  flfrc = '<system>.fc',
+  zasr = '<asr_scheme>',
+/
+
 &INPUT
   flfrc = '<system>.fc',
   asr = '<asr_scheme>',
   dos = .true.,
-  nk1 = <dos_nk1>,
-  nk2 = <dos_nk2>,
-  nk3 = <dos_nk3>,
-  deltaE = <frequency_step_cm_minus_1>,
+  nk1 = <dos_nk1>, nk2 = <dos_nk2>, nk3 = <dos_nk3>,
   fldos = 'phonon-dos.<system>.dat',
-  flfrq = 'phonon-dos.<system>.freq',
 /
 ```
 
-| 字段 | 程序 | 判断意义 | 联动对象 | output 中如何验证 |
+## 输入字段说明
+
+| 字段 | 所属程序 | 作用 | 常见风险 | 输出中如何验证 |
 |---|---|---|---|---|
-| `flfrc` | `matdyn.x` | 读取 real-space IFC | `q2r.x` 输出 | `matdyn.x` header 中读取的文件 |
-| `dos` | `matdyn.x` | 启用 phonon DOS 模式 | `nk1/nk2/nk3` | output 是否进入 DOS 计算 |
-| `nk1/nk2/nk3` | `matdyn.x` | DOS q mesh | 频率采样、热学下游 | output 中 q mesh 和 DOS 文件 |
-| `deltaE` | `matdyn.x` | DOS 频率步长，单位按 QE 文档记录 | `fldos` 曲线分辨率 | DOS 文件频率间隔 |
-| `fldos` | `matdyn.x` | phonon DOS 输出文件 | 记录和绘图 | 输出文件路径和列定义 |
-| `asr` | `matdyn.x` | DOS 计算中的 ASR 处理 | 低频 DOS、acoustic modes | ASR 设置和低频区域变化 |
+| `ldisp/nq1/nq2/nq3` | ph.x | 生成 uniform q-grid dyn 文件 | q-grid 不完整 | ph.x q 点列表和 dyn 文件 |
+| `fildyn` | ph.x/q2r.x | dyn 文件前缀 | q2r 读取不全 | q2r.x output |
+| `flfrc` | q2r.x/matdyn.x | force constants 文件 | matdyn 读错 fc | matdyn.x output |
+| `dos/nk1/nk2/nk3` | matdyn.x | phonon DOS mesh | mesh 太粗导致 DOS 不稳 | phonon DOS 输出 |
+| `asr/zasr` | q2r.x/matdyn.x | acoustic sum rule / ASR | 掩盖未收敛结构 | 低频 DOS 和 Gamma 声学支 |
 
-## 命令与文件边界
+## 通用输出审阅模板
 
-```bash
-matdyn.x -in matdyn.dos.<system>.in > matdyn.dos.<system>.out
+```markdown
+## output review
+
+- QE 程序:
+- 计算类型:
+- QE version:
+- Input dependency:
+- Structure summary:
+- Pseudopotentials loaded:
+- Cutoff reported:
+- K-points reported:
+- Convergence status:
+- 本 workflow 关键输出:
+- Warnings:
+- Scratch / restart status:
+- PASS / WARN / BLOCK:
+- Reason:
+- Allowed downstream workflows:
 ```
 
-`matdyn.x` 的 DOS 模式读取 `flfrc`，不直接重新计算 DFPT perturbations。若 `flfrc` 源自不完整 q-grid、不可信 `q2r.x` 或混用结构，phonon DOS 不能用于下游。建议将 dispersion line-mode 和 DOS-mode 的 `flfrq`、`fldos` 文件名分开，避免旧文件覆盖。
+## 输出判断标准
 
-## Output review
+- dyn 文件必须覆盖完整 q-grid。
+- q2r.x 应成功写出 force constants。
+- phonon DOS 低频区域应结合 acoustic modes 和 negative frequencies 审阅。
+- frequency range 和负频标记应进入 record。
 
-| 检查项 | 从哪里看 | 能证明什么 | 不能证明什么 |
-|---|---|---|---|
-| IFC 来源 | `matdyn.x` output 中 `flfrc` | DOS 使用了指定 force constants | IFC 来自可信上游 |
-| DOS q mesh | `nk1/nk2/nk3` 和 output | DOS 采样网格被记录 | mesh 对目标性质已收敛 |
-| frequency range | `fldos` 与 `flfrq` | DOS 覆盖的频率范围 | dispersion 中所有软模已解释 |
-| negative frequencies | DOS 文件、频率文件、dispersion review | 低频/负频风险是否进入记录 | 虚频来源已被判定 |
-| broadening / step | `deltaE`、绘图记录 | 曲线处理可复查 | 平滑程度代表物理可信 |
-| warnings | `matdyn.x` output | 程序边界或输入异常 | 上游没有 warning |
+## 收敛性要求
 
-## 收敛与可靠性
+- phonon DOS 依赖 q-grid 和 DOS mesh 收敛。
+- 结构残余力、SCF 阈值和 ASR 会影响低频区域。
+- 金属体系还需要 smearing/k 点敏感性检查。
 
-- Phonon DOS 依赖 q-grid、IFC 截断、DOS q mesh 和 `matdyn.x` 积分方式。
-- DOS 曲线平滑不说明 phonon dispersion 可信；必须回查 acoustic branches、关键 q-path 和虚频。
-- `matdyn.x` 的 DOS mesh 不是 `ph.x` DFPT q-grid；二者都需要记录。
-- 若用于热力学自由能、零点能或谱密度比较，低频区域和 imaginary modes 的处理必须明确。
+## 常见错误与诊断
 
-## PASS / WARN / BLOCK
-
-| 状态 | 条件 | 是否允许进入下游 |
+| 现象 | 可能原因 | 优先排查 |
 |---|---|---|
-| PASS | `flfrc` 来自 PASS 的 q-grid phonon；DOS q mesh、`deltaE`、ASR 和 frequency range 已记录；无未解释 imaginary modes | 可用于 phonon DOS 图件、初步热学输入和与 dispersion 的交叉审阅 |
-| WARN | DOS mesh 或 q-grid 尚未完成目标收敛；低频区域存在可追踪小异常；broadening/step 只适合探索 | 可用于诊断和敏感性测试，不应给定量热学结论 |
-| BLOCK | IFC 不可信或混用；imaginary modes 未解释；`matdyn.x` 读取错误 `flfrc`；用平滑 DOS 掩盖 dispersion 问题 | 不允许进入热学、稳定性声明、EPC 或发表图件 |
+| q2r 报 dyn 缺失 | ph.x q-grid 未完成 | 检查 dyn 文件列表 |
+| 低频 DOS 异常 | ASR、结构或 q mesh 问题 | 复查 Gamma acoustic modes |
+| DOS 峰形不稳定 | DOS mesh 或 q-grid 太粗 | 加密 q-grid/DOS mesh |
 
-## 常见误区
+## 通用学习模板
 
-- 用 band q-path 的频率文件当作 phonon DOS。
-- 只看 DOS 曲线平滑，不审阅 `ph.x -> q2r.x -> matdyn.x` 文件链。
-- 负频区域被绘图处理隐藏后仍写成稳定体系。
-- 未记录 `deltaE`、DOS q mesh 或 ASR。
-- 用未收敛 q-grid 支持热力学或自由能结论。
+使用 `<system>`、`<q_grid>`、`<q_path>`、`<asr_scheme>`、`<phonon_threshold>` 等占位符记录个人学习任务。本仓库提供通用审阅框架，不保存具体计算结果。
 
-## 下游影响
+## 记录模板
 
-Phonon DOS 可作为热力学、自由能、谱密度和低频振动分析的输入。它不能替代 [phonon dispersion workflow](phonon-dispersion-dfpt.md) 和 [phonon debugging workflow](phonon-debugging.md)。如果下游是 EPC 或超导，phonon DOS 只能作为辅助检查，不能替代电子-声子矩阵元和 dense k/q 数据链。
+```text
+ph.<system>.in
+q2r.<system>.in
+matdyn.dos.<system>.in
+phonon-dos.<system>.dat
+record.md
+```
 
-## 来源与边界
+## 与其他 workflow 的关系
 
-- Stable: `matdyn.x` 的 `dos`、`nk1/nk2/nk3`、`deltaE`、`fldos`、`flfrq`、`asr` 以 QE `INPUT_MATDYN` 为准。
-- Boundary: 本页不规定固定 DOS q mesh；是否足够取决于目标 observable 和低频区域稳定性。
-- Internal standard: phonon DOS review 应写入 [output-review-checklist.md](../../standards/output-review-checklist.md) 和 calculation record。
+- 与 phonon dispersion 共用 `ph.x -> q2r.x -> matdyn.x` 数据链。
+- phonon debugging 页面用于处理 negative frequency 和 ASR 异常。
 
 ## 资料来源
 
-- QE INPUT_MATDYN reference: <https://www.quantum-espresso.org/Doc/INPUT_MATDYN.html>
-- QE INPUT_Q2R reference: <https://www.quantum-espresso.org/Doc/INPUT_Q2R.html>
+- QE INPUT_PH reference: <https://www.quantum-espresso.org/Doc/INPUT_PH.html>
 - QE PHonon user guide: <https://www.quantum-espresso.org/Doc/ph_user_guide/>
-- 本仓库：[theory-minimum/dfpt-phonons.md](../../theory-minimum/dfpt-phonons.md)、[physics-judgement/09-phonons-soft-modes-and-dynamical-stability.md](../../physics-judgement/09-phonons-soft-modes-and-dynamical-stability.md)
+- Kyoto phonon DokuWiki: <https://www2.yukawa.kyoto-u.ac.jp/~koudai.sugimoto/dokuwiki/doku.php?id=quantumespresso%3Aphonon%3A%E3%83%95%E3%82%A9%E3%83%8E%E3%83%B3%E3%81%AE%E8%A8%88%E7%AE%97>
+- Pranab Das phonon tutorial: <https://pranabdas.github.io/espresso/hands-on/phonon/>
+- QE INPUT_Q2R reference: <https://www.quantum-espresso.org/Doc/INPUT_Q2R.html>
+- QE INPUT_MATDYN reference: <https://www.quantum-espresso.org/Doc/INPUT_MATDYN.html>

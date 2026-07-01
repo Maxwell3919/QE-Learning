@@ -1,94 +1,81 @@
 # Band Gap Problem and Delocalization
 
-## 本页解决什么问题
+## 1. 核心判断结论
 
-本页用于判断为什么 DFT band gap 是高风险结论。普通 bands/DOS workflow 给出的是 Kohn-Sham-level gap 或 Fermi-level crossing 证据；它可以服务趋势、模型对照和内部电子结构判断，但不能自动支撑准粒子、光学、输运或器件级结论。
+- **Strong:** 普通 LDA/GGA band gap problem 不是 k mesh 或 cutoff 不足的普通数值问题。
+- **Strong:** KS gap、fundamental gap、optical gap 需要区分。
+- **Moderate:** delocalization/self-interaction error 会影响局域态、缺陷态、电荷转移、磁矩和 PDOS 解释。
+- **Boundary:** 定量 gap、excited-state 或 spectroscopy 目标通常需要 hybrid/GW/BSE/TDDFT 或实验对照。
 
-## 典型 output 现象
+## 2. 这个问题为什么会出现在 DFT/QE 中？
 
-| output 现象 | 可能含义 | 回查动作 |
-|---|---|---|
-| bands 显示小 gap 或 near crossing | 可能是真实小 gap、k-path 未覆盖、SOC/U 缺失或 smearing 边界 | 交叉审阅 DOS、Fermi level、kmesh、SOC/U |
-| DOS 在 Fermi 附近接近零但 bands 有 crossing | uniform mesh、broadening、energy zero 或 path 覆盖不一致 | 回查 NSCF mesh、DOS 设置和 bands path |
-| semilocal DFT gap 与预期差异大 | functional / delocalization / derivative discontinuity 边界 | 写 model boundary，不用加密 kmesh 解释一切 |
-| DFT+U 或 hybrid 后 gap 变化 | 模型改变影响 localized states 或 exchange treatment | 记录 U/functional 来源和重新计算链 |
-| PDOS 中局域态过宽或磁矩偏小 | delocalization、self-interaction 或 projector 解释边界 | 回查 PP、DFT+U、hybrid、Wannier 或 charge density 证据 |
+近似 XC functional 的 delocalization 和 derivative-discontinuity 问题会使普通 KS gap 与实验 fundamental gap 不一致。加密 k mesh 可改善采样，但不能改变这种模型误差来源。
 
-## 可能原因
+## 3. 相关 QE input 字段
 
-- 数值误差：kmesh、`nbnd`、smearing、energy grid、cutoff 或 SCF threshold 不足。
-- 模型误差：semilocal functional 的 delocalization/self-interaction/derivative-discontinuity 边界。
-- 赝势误差：valence、semicore、relativistic treatment 或 PP/functional mismatch 改变 gap。
-- 边界条件误差：slab、charged system、有限尺寸或低维边界影响能级参考。
-- 后处理误差：绘图零点、DOS broadening、PDOS projection 或 band sorting 未记录。
-- workflow 传播误差：relax、SCF、NSCF、bands、DOS、PDOS 来自不同模型或 scratch。
-- 真实物理效应：磁性、SOC、结构畸变、强关联或拓扑相关的 gap opening/closing 可能真实存在，但需要独立证据。
-
-## 必查 QE input/output
-
-| 对象 | 程序 | 判断意义 | 常见误用 |
+| 字段/设置 | 程序 | 判断意义 | 常见误用 |
 |---|---|---|---|
-| `input_dft` | `pw.x` | XC 模型边界 | 只因 gap 不合预期就换 functional |
-| `K_POINTS` | `pw.x` | path 与 uniform mesh 覆盖 | 用 band path 替代 DOS mesh |
-| `occupations/smearing/degauss` | `pw.x` | Fermi 附近占据 | smearing 造成的填充被解释为金属性 |
-| `nbnd` | `pw.x` | 导带和目标窗口覆盖 | 空带不足仍给 gap 或高能结论 |
-| `noncolin/lspinorb` | `pw.x` | SOC 对 gap 和 degeneracy 的影响 | 重元素或近简并问题未做 SOC 边界 |
-| `HUBBARD` card | `pw.x` | localized manifold 修正 | 为匹配 gap 随意调 U |
-| PP loading | `pw.x` | valence / relativistic / functional consistency | 换 PP 后不重做收敛和 gap 审阅 |
-| `fildos/filpdos/filband` | 后处理 | 图件数据来源 | 旧文件或不同模型混入同一图 |
+| `input_dft` | `pw.x` | 决定 XC 模型 | 把 GGA gap 当实验 gap |
+| `HUBBARD` | `pw.x` | 修正局域子空间过度离域 | 为匹配 gap 随意调 U |
+| hybrid/GW/BSE 入口 | advanced tools | 进入准粒子/激发态边界 | 把普通 bands 当光谱 |
+| `projwfc.x` 投影设置 | `projwfc.x` | 检查局域态和 orbital contribution | 过度解释 Lowdin charge |
 
-## 判断规则
+## 4. output review 迹象
 
-- Kohn-Sham gap、fundamental gap 和 optical gap 是不同对象。普通 QE bands/DOS 直接给出的是 DFT 模型下的 eigenvalue gap 或 Fermi-level crossing 证据。
-- Semilocal functional 的 gap 问题不是普通 kmesh 或 cutoff 不足；数值收敛只能降低 numerical error，不能消除模型误差。
-- “semilocal 常低估 gap”是经验性边界，不是对所有体系、所有磁态、所有 SOC 情况的统一定律。
-- 小带隙、半金属、磁性、SOC、DFT+U、hybrid、GW/BSE 都会改变 gap 判断层级。
-- DOS 与 bands 不一致时，先排查文件链、energy reference、kmesh、smearing 和 projection，再讨论物理机制。
+| output 迹象 | 可能原因 | 回查动作 |
+|---|---|---|
+| gap 异常偏小或金属性矛盾 | functional / delocalization error 或 smearing/k mesh 问题 | 先排数值，再写模型边界 |
+| PDOS 局域态过宽或磁矩偏小 | 过度离域或投影定义问题 | 回查 DFT+U/hybrid/Wannier |
+| DOS 与 bands gap 不一致 | k mesh、zero、smearing 或数据链问题 | 交叉检查 SCF/NSCF/DOS |
 
-## PASS / WARN / BLOCK
+## 5. PASS / WARN / BLOCK
 
 | 状态 | 条件 | 是否允许进入下游 |
 |---|---|---|
-| PASS | 作为 DFT-level gap 或 metallicity statement：SCF/NSCF/bands/DOS/PDOS 数据链一致，k-path/mesh/energy reference/模型边界清楚 | 允许写带 DFT 模型边界的趋势、相对比较或交叉审阅结论 |
-| WARN | 数值链可追踪但 functional、SOC、U、hybrid/GW 或实验对照不足 | 只允许趋势或内部判断，不给定量激发态结论 |
-| BLOCK | 直接把普通 DFT gap 写成准粒子、光学、实测或器件级结论；用 U/hybrid/GW 结果但不说明模型和收敛边界 | 停止发布 gap 结论，回到模型和来源审阅 |
+| PASS | 只做 KS 趋势、态成分或相对比较，且解释边界明确 | 允许进入电子结构讨论 |
+| WARN | 讨论 gap 数值但未使用更高层方法或实验对照 | 只能写趋势 |
+| BLOCK | 用普通 DFT gap 支撑定量光学、输运或激发态结论 | 转 advanced/excited-state |
 
-## 不能做出的过度结论
+## 6. 常见误区
 
-- 不能说加密 k 点可以修复 semilocal band-gap problem。
-- 不能只看 band plot 或 DOS 平滑曲线就给定量 gap。
-- 不能没有 SOC 边界却讨论对 SOC 敏感的 gap、简并或 band inversion。
-- 不能用 DFT+U/hybrid 改变 gap 后不记录模型来源和下游重算链。
-- 不能把 PDOS 中某个峰的宽窄单独写成电荷局域或价态证据。
+- 写“加密 k 点修复 GGA gap”
+- 把 zero DOS at EF 直接当 experimental gap
+- 用 U 只调 gap 不记录来源
+- 忽略小带隙体系 smearing 风险
+- PDOS 图像替代电荷局域性审查
 
-## 下游影响
+## 7. 应回写到哪些 workflow 页面？
 
-- `bands/DOS/PDOS`：决定 gap、metallicity 和态成分解释能否进入记录。
-- `Fermi surface`：小 gap 或半金属边界不清时，费米面图像可能不可定量解释。
-- `DFT+U/SOC/hybrid`：gap 变化必须作为模型变化记录。
-- `GW/BSE/TDDFT/XSpectra`：若研究目标是准粒子或光学响应，应进入 excited-state 边界。
+- [workflows/electronic/bands.md](../workflows/electronic/bands.md)
+- [workflows/electronic/dos.md](../workflows/electronic/dos.md)
+- [workflows/electronic/pdos.md](../workflows/electronic/pdos.md)
+- [workflows/advanced/hybrid-functional-overview.md](../workflows/advanced/hybrid-functional-overview.md)
 
-## 与 theory-minimum / workflows / standards 的关系
+## 8. 应回写到哪些 theory-minimum 页面？
 
-- 理论回查：[DFT, Kohn-Sham and SCF](../theory-minimum/dft-ks-scf.md)、[Smearing and metals](../theory-minimum/smearing-metals.md)、[Magnetism, SOC and DFT+U](../theory-minimum/magnetism-soc-dftu.md)
-- Workflow 回查：[bands](../workflows/electronic/bands.md)、[DOS](../workflows/electronic/dos.md)、[PDOS](../workflows/electronic/pdos.md)、[Fermi surface](../workflows/electronic/fermi-surface.md)
-- 相关判断：[Kohn-Sham eigenvalue boundary](kohn-sham-eigenvalue-boundary.md)、[Functional choice and sensitivity](functional-choice-and-sensitivity.md)、[U value provenance](u-value-provenance-and-boundary.md)
-- 记录规范：[output review checklist](../standards/output-review-checklist.md)、[pass-warn-block](../standards/pass-warn-block.md)
+- [theory-minimum/dft-ks-scf.md](../theory-minimum/dft-ks-scf.md)
+- [theory-minimum/magnetism-soc-dftu.md](../theory-minimum/magnetism-soc-dftu.md)
 
-## 来源与结论强度
 
-| 结论 | 强度 | 来源边界 |
-|---|---|---|
-| KS gap、fundamental gap、optical gap 需要区分 | Strong | KS 与 excited-state canonical literature |
-| delocalization/self-interaction/derivative discontinuity 是模型误差来源 | Strong | Mori-Sanchez/Cohen/Yang、DFT error literature |
-| semilocal gap 判断不能靠 kmesh 修复 | Boundary | 数值误差与模型误差区分 |
-| U、SOC、hybrid、GW/BSE 的字段和 workflow | Version-sensitive | 当前 QE / external tool docs |
+## 结论强度
 
-## 资料来源
+- Strong：本页中由经典理论、方法论文或官方文档直接支持的判断。
+- Moderate：本页中由摘要、综述或多个方法来源共同支持，但细节需要回到正文或官方文档核验的判断。
+- Boundary：本页中用于限制解释范围的判断，不作为定量结论。
+- Version-sensitive：涉及 QE、PHonon、Wannier90、EPW、Yambo 或其他工具字段和行为的判断，必须按当前官方文档复查。
 
-- QE INPUT_PW reference: <https://www.quantum-espresso.org/Doc/INPUT_PW.html>
-- QE INPUT_BANDS reference: <https://www.quantum-espresso.org/Doc/INPUT_BANDS.html>
-- Mori-Sanchez, Cohen and Yang, Current limitations of density functional theory.
-- Perdew, Parr, Levy and Balduz, Density-functional theory for fractional particle number.
-- Onida, Reining and Rubio, Electronic excitations: density-functional versus many-body Green's-function approaches.
-- 本仓库：[canonical literature](../references/canonical-literature.md)、[source index](../references/source-index.md)
+## 结论来源
+
+| 结论 | 强度 | 支撑文献/文档 | 是否需要全文核验 |
+|---|---|---|---|
+| 本页核心判断需要写入 output review，而不是只作为理论背景 | Strong | 官方文档 / 方法论文 | 否 |
+| 具体字段、默认值和版本行为必须回查当前官方文档 | Version-sensitive | QE INPUT_* / 工具官方文档 | 是 |
+
+## 9. 资料来源
+
+- Hohenberg and Kohn, *Inhomogeneous Electron Gas*：ground-state DFT 边界。
+- Kohn and Sham, *Self-Consistent Equations Including Exchange and Correlation Effects*：KS 辅助体系。
+- Quantum ESPRESSO official documentation and `INPUT_*` references：QE 字段和程序行为核验。
+- Giannozzi et al., Quantum ESPRESSO code papers：QE 方法和模块边界。
+- [references/canonical-literature.md](../references/canonical-literature.md)：本仓库 canonical literature 分级。
+- [references/source-index.md](../references/source-index.md)：公开来源入口。

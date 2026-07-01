@@ -1,111 +1,129 @@
-# Phonon debugging and imaginary frequency triage
+# phonon debugging workflow
 
-## 本页解决什么问题
+## 页面定位
 
-Phonon debugging 用于审阅 `ph.x` 不收敛、Gamma acoustic modes 异常、negative frequency、q-grid 插值异常、Born/dielectric 分支异常和文件链混用等问题。Imaginary frequency triage 是 workflow 审查，不是自动判定真实不稳定。本页目标是把症状归入数值误差、结构问题、边界条件问题、文件链问题或可能的真实动力学不稳定，并决定 PASS / WARN / BLOCK。
+- 对应学习路线：[learn/06-phonon-dfpt-loop.md](../../learn/06-phonon-dfpt-loop.md)
+- 上游依赖：failed or suspicious phonon workflow
+- 下游用途：rerun strategy and PASS / WARN / BLOCK decision
+- 规范入口：[standards/calculation-record-template.md](../../standards/calculation-record-template.md)、[standards/pass-warn-block.md](../../standards/pass-warn-block.md)
 
-## 上游依赖
+## 计算目标
 
-- 原始 SCF、relax/vc-relax、ph.x、q2r.x、matdyn.x、dynmat.x 的 input/output 保留完整。
-- 结构残余力、应力、cell、SCF `conv_thr`、cutoff、k mesh、smearing、q-grid、ASR 和 `prefix/outdir` 均可回查。
-- Debugging rerun 使用新的记录和明确的受控变量；不要覆盖原始 output。
-- 对 2D、极性、金属、小带隙或磁性体系，应先记录特殊物理边界。
+按症状排查 phonon workflow：`ph.x` 不收敛、acoustic modes 不为零、negative frequency、q-grid 太粗、结构未充分优化、SCF threshold 太松、金属 smearing 和 2D 长程相互作用问题。
+
+## 输入前提
+
+- 结构已充分优化，并通过 SCF output review。
+- SCF 的 cutoff、k 点、smearing 和 `conv_thr` 已按 phonon 目标审阅。
+- 已明确该页是 Gamma phonon、q-grid、DOS、响应张量还是 debugging 分支。
 
 ## 计算图
 
 ```text
 suspicious phonon output
-  -> classify symptom
-  -> check upstream SCF / structure / q-grid / file chain
-  -> one-variable controlled rerun
-  -> compare frequencies, modes, warnings and convergence
-  -> PASS / WARN / BLOCK decision
+  -> identify symptom
+  -> check SCF / relax / ph.x / q2r.x / matdyn.x
+  -> decide PASS / WARN / BLOCK
+  -> rerun with isolated changed variable
 ```
 
-## 关键 QE 输入对象
+## 需要的 QE 程序
+
+`pw.x`、`ph.x`、`q2r.x`、`matdyn.x`、`dynmat.x`
+
+## 通用输入模板
 
 ```fortran
+# Debugging is record-driven. Keep the original input/output unchanged.
+# Create a new run with one controlled change at a time:
 &INPUTPH
-  prefix = '<debug_system>',
+  prefix = '<system_debug_run>',
   outdir = '<fresh_scratch_dir>',
-  tr2_ph = <controlled_phonon_threshold>,
-  ldisp = <same_or_controlled_change>,
-  nq1 = <same_or_controlled_change>,
-  nq2 = <same_or_controlled_change>,
-  nq3 = <same_or_controlled_change>,
-  fildyn = '<debug_system>.dyn',
+  tr2_ph = <stricter_phonon_threshold>,
   recover = .true.,
+  <same_q_point_or_q_grid> = <same_or_controlled_change>,
 /
 ```
 
-| 字段 | 程序 | 判断意义 | 联动对象 | output 中如何验证 |
+## 输入字段说明
+
+| 字段 | 所属程序 | 作用 | 常见风险 | 输出中如何验证 |
 |---|---|---|---|---|
-| `conv_thr` | `pw.x` | 上游 SCF 误差 | `tr2_ph`、phonon frequency | SCF estimated accuracy |
-| `ecutwfc` / `ecutrho` | `pw.x` | basis 收敛 | force constants、stress、phonon | SCF output 和 convergence record |
-| `K_POINTS` / smearing | `pw.x` | 金属和小带隙 phonon 敏感性 | Fermi surface、EPC 下游 | SCF output 中 k points / occupation |
-| `forc_conv_thr` / `press_conv_thr` | `pw.x` relax/vc-relax | 结构残余力/应力 | acoustic/soft modes | relax/vc-relax final forces/stress |
-| `tr2_ph` | `ph.x` | perturbation 收敛 | q point / irrep | `ph.x` convergence 段落 |
-| `nq1/nq2/nq3` | `ph.x` | q-grid 完整性和插值质量 | `q2r.x` IFC | dyn 文件列表和 `q2r.x` output |
-| `asr` / `zasr` | `dynmat.x` / `q2r.x` / `matdyn.x` | ASR 诊断 | acoustic modes | ASR 前后频率对比 |
-| `epsil` | `ph.x` | polar response 分支 | LO-TO、non-analytic | dielectric/Born output |
+| `tr2_ph` | ph.x | 响应收敛阈值 | 只调阈值不看 SCF | perturbation convergence |
+| `conv_thr` | pw.x | 上游 SCF 阈值 | SCF 太松进入 phonon | SCF estimated accuracy |
+| `forc_conv_thr` | pw.x relax | 结构残余力 | 未优化结构导致虚频 | relax output final forces |
+| `asr/zasr` | q2r.x/matdyn.x/dynmat.x | acoustic sum rule / ASR | 用 ASR 掩盖真实问题 | ASR 前后频率对比 |
+| `nq1/nq2/nq3` | ph.x | q-grid 尺寸 | 粗 q-grid 解释细节 | dyn 文件和插值结果 |
 
-## 命令与文件边界
+## 通用输出审阅模板
 
-Debugging 不应覆盖原始计算。每次复查只改变一个变量，并使用可区分的 `prefix/outdir`、`fildyn`、`flfrc` 和输出文件名。需要比较原始输出与 controlled rerun 的同一 q point、同一 branch、同一 ASR 设置和同一单位。
+```markdown
+## output review
 
-## Output review
+- QE 程序:
+- 计算类型:
+- QE version:
+- Input dependency:
+- Structure summary:
+- Pseudopotentials loaded:
+- Cutoff reported:
+- K-points reported:
+- Convergence status:
+- 本 workflow 关键输出:
+- Warnings:
+- Scratch / restart status:
+- PASS / WARN / BLOCK:
+- Reason:
+- Allowed downstream workflows:
+```
 
-| 症状 | 从哪里看 | 可能原因 | 回查动作 |
-|---|---|---|---|
-| `ph.x` 不收敛 | perturbation convergence、warning | SCF 太松、smearing/mixing、metal response、内存或 restart | 回查 SCF、occupation、`tr2_ph`、restart 文件 |
-| Gamma acoustic modes 不为零 | `dynmat.x` 或 `matdyn.x` Gamma 频率 | 结构残余力、ASR、cutoff/k mesh、数值噪声 | 比较 ASR 前后，检查 final forces/stress |
-| 单个小虚频 | q-position、branch、magnitude | 插值、q-grid、结构边界、近软模 | 复算关键 q point，检查 eigenvector |
-| 整条 branch 虚频 | dispersion 文件 | 真实不稳定、错误结构、错误 q-grid 或极性修正缺失 | 回查结构、IFC、ASR、物理模型 |
-| q2r dyn 缺失 | `q2r.x` output | q-grid 未完成、`fildyn` 前缀错 | 检查 dyn 文件列表和 q-grid 记录 |
-| LO-TO 异常 | polar branch、frequency splitting | dielectric/Born 缺失或不适用 | 回查 `epsil` 输出和 non-analytic 设置 |
-| 2D Gamma 附近异常 | 低 q 频率、边界设置 | 周期镜像、真空、长程相互作用 | 回查边界条件和低维处理策略 |
+## 输出判断标准
 
-## 收敛与可靠性
+- ph.x 不收敛先回查 SCF、smearing、mixing 和 perturbation 输出。
+- acoustic modes 不为零时比较 ASR 前后，并复查结构残余力。
+- negative frequency 要记录位置、大小、参数敏感性和是否稳定存在。
+- 2D 体系需检查真空、长程库仑和边界处理设置。
 
-- 数值噪声：通常表现为 acoustic modes 小偏离、参数敏感、ASR 前后变化明显，需要收敛复查。
-- 结构未充分优化：常见于残余力/应力较大、relax 后未做 final static SCF 或 cell 与 q-path 不一致。
-- 真实动力学不稳定：应表现为在更严格参数、关键 q point 复算、合理 ASR 和结构审阅后仍稳定存在，并有可解释 eigenvector。
-- ASR 可以作为诊断和约束，不是把错误上游变成可信结果的工具。
-- 对金属、极性和低维体系，smearing、k mesh、non-analytic correction 和边界条件会放大 phonon 误差。
+## 收敛性要求
 
-## PASS / WARN / BLOCK
+- 每次 debug 只改变一个变量。
+- 新测试使用 fresh `prefix/outdir`，避免旧 scratch 污染。
+- PASS / WARN / BLOCK 应写明证据和下一步，不用单次粗结果定性稳定性。
 
-| 状态 | 条件 | 是否允许进入下游 |
+## 常见错误与诊断
+
+| 现象 | 可能原因 | 优先排查 |
 |---|---|---|
-| PASS | 症状已定位；复查结果显示文件链一致、上游可信、perturbation 收敛；虚频或 acoustic 异常有明确处理和边界 | 可进入对应 phonon workflow 或有限边界的结论 |
-| WARN | 可能是数值伪影或边界问题，但仍缺少一个以上敏感性检查；结果只适合诊断 | 可继续 controlled rerun，不应进入最终稳定性、热学或谱学结论 |
-| BLOCK | 未定位虚频来源；关键 q point 未收敛；结构/SCF 为 BLOCK；文件链混用；用 ASR 直接消除问题后宣称可信 | 不允许进入图件归档、稳定性声明、EPC、热学或发表结论 |
+| ph.x 不收敛 | SCF 太松、smearing/mixing 不合适 | 先复查 SCF output 和 ph perturbation |
+| acoustic modes 不为零 | 结构残余力、ASR、cutoff/k 点问题 | 检查 relax、ASR 前后、收敛参数 |
+| negative frequency | 数值误差或真实不稳定 | 做参数和关键 q 点复查 |
+| q2r dyn 不全 | q-grid 未完成 | 检查 dyn 文件列表 |
+| 2D Gamma 附近异常 | 周期镜像或长程相互作用 | 检查真空和 2D 边界策略 |
 
-## 常见误区
+## 通用学习模板
 
-- 看到小虚频后跳过 triage，写成相变或真实不稳定。
-- 用 ASR 消掉 acoustic 异常后不复查结构和 SCF。
-- 对 q-grid 不完整的 dispersion 进行物理解释。
-- 不检查 eigenvector 或 displacement pattern。
-- 在金属中忽略 smearing/k mesh 对 phonon 的影响。
-- 将 2D 或极性体系的长程相互作用问题当作普通数值噪声。
-- Debugging 时同时改变多个变量，导致无法判断原因。
+使用 `<system>`、`<q_grid>`、`<q_path>`、`<asr_scheme>`、`<phonon_threshold>` 等占位符记录个人学习任务。本仓库提供通用审阅框架，不保存具体计算结果。
 
-## 下游影响
+## 记录模板
 
-Phonon debugging 影响 [Gamma phonon workflow](gamma-phonon.md)、[phonon dispersion DFPT workflow](phonon-dispersion-dfpt.md)、[phonon DOS workflow](phonon-dos.md)、[dielectric/Born workflow](dielectric-born-effective-charge.md) 和 IR/Raman。EPC、热学、自由能和结构稳定性声明都不能绕过本页的 WARN/BLOCK 结论。
+```text
+debug-notes.<system>.md
+original-inputs/
+controlled-rerun-inputs/
+controlled-rerun-outputs/
+record.md
+```
 
-## 来源与边界
+## 与其他 workflow 的关系
 
-- Stable: `ph.x` q-grid、`tr2_ph`、restart 与 `q2r.x`/`matdyn.x` 文件语义以 QE 官方 input references 为准。
-- Boundary: 本页给出 triage 框架，不替代体系特定的物理建模、有限温非谐分析或相变理论。
-- Internal standard: 复查记录必须写入 [calculation-record-template.md](../../standards/calculation-record-template.md) 和 [output-review-checklist.md](../../standards/output-review-checklist.md)。
+- 服务 Gamma phonon、phonon dispersion、phonon DOS 和 dielectric/Born 分支。
+- SCF、relax 和 convergence 页面是 phonon debug 的上游。
 
 ## 资料来源
 
 - QE INPUT_PH reference: <https://www.quantum-espresso.org/Doc/INPUT_PH.html>
+- QE PHonon user guide: <https://www.quantum-espresso.org/Doc/ph_user_guide/>
+- Kyoto phonon DokuWiki: <https://www2.yukawa.kyoto-u.ac.jp/~koudai.sugimoto/dokuwiki/doku.php?id=quantumespresso%3Aphonon%3A%E3%83%95%E3%82%A9%E3%83%8E%E3%83%B3%E3%81%AE%E8%A8%88%E7%AE%97>
+- Pranab Das phonon tutorial: <https://pranabdas.github.io/espresso/hands-on/phonon/>
 - QE INPUT_Q2R reference: <https://www.quantum-espresso.org/Doc/INPUT_Q2R.html>
 - QE INPUT_MATDYN reference: <https://www.quantum-espresso.org/Doc/INPUT_MATDYN.html>
-- QE PHonon user guide: <https://www.quantum-espresso.org/Doc/ph_user_guide/>
-- Baroni et al., phonons and related crystal properties from DFPT, Reviews of Modern Physics.
-- 本仓库：[physics-judgement/09-phonons-soft-modes-and-dynamical-stability.md](../../physics-judgement/09-phonons-soft-modes-and-dynamical-stability.md)、[physics-judgement/10-dfpt-response-and-polar-materials.md](../../physics-judgement/10-dfpt-response-and-polar-materials.md)

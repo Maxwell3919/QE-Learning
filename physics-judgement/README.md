@@ -1,10 +1,8 @@
 # Physics Judgement
 
-`physics-judgement/` 是 DFT/QE 结果可信度判断参考层。它连接 DFT 近似、QE 输入字段、output review、workflow 依赖和 `PASS / WARN / BLOCK` 判断，帮助学习者解释为什么某些计算结果可能不可信，以及哪些物理效应会改变结论。
+`physics-judgement/` 用于补充 DFT/QE 计算判断所需的物理理论背景。它连接 DFT 近似、QE 输入字段、output review、workflow 依赖和 `PASS / WARN / BLOCK` 判断，帮助学习者解释为什么某些计算结果可能不可信，以及哪些物理效应会改变结论。
 
 本目录与 `theory-minimum/` 的区别在于：`theory-minimum/` 回答正确使用 QE 的最低理论；本目录回答如何形成更可靠的 DFT 物理判断。它也不替代 `workflows/`：具体怎么运行仍回到 workflow 页面，本目录只解释判断背后的物理原因、近似来源和失败模式。
-
-本目录重点区分六类风险：数值误差、模型误差、赝势误差、边界条件误差、后处理误差和 workflow 传播误差。每类风险都应尽量回到 QE input/output 证据，而不是只用文字解释。
 
 ## 阅读方式
 

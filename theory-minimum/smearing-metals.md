@@ -1,98 +1,101 @@
 # Smearing and metals
 
-## 本页解决什么问题
+## QE 中对应的问题
 
-本页解释 `occupations`、`smearing` 和 `degauss` 在 QE 中如何影响金属、小带隙体系、DOS、Fermi surface、force、phonon 和 EPC 前置判断。它帮助用户判断 output 中的 Fermi energy、occupation、DOS broadening 和 smearing 设置是否能支撑下游，而不是把更平滑的曲线当成更可信的物理结论。
+`occupations`、`smearing` 和 `degauss` 共同决定 QE 如何给 Kohn-Sham 能级分配电子占据。它们是影响 SCF 收敛、Fermi energy、总能、力、DOS 和 phonon/DFPT 结果的数值策略，不能当作孤立的输入装饰。
+
+在 QE workflow 中，这一页主要回答以下问题：
+
+- 体系应按金属、绝缘体还是小带隙/边界体系处理？
+- `occupations='fixed'`、`occupations='smearing'` 或 tetrahedron 类方法是否与计算目标一致？
+- `smearing` 函数和 `degauss` 宽度是否只作为 Brillouin zone 积分和占据平滑的数值设置，而不是被误读为材料真实温度？
+- Fermi energy、number of electrons、band occupation 和 DOS 近 Fermi 能级行为是否互相一致？
+- SCF、relax、NSCF/DOS、phonon 中的 occupation 策略是否可追溯，是否允许进入下游？
+
+最低理论判断是：金属在 Fermi 面附近有部分占据态，离散 k mesh 下占据会随能级微小移动突变，smearing 用平滑占据改善积分和 SCF 稳定性；绝缘体有明确能隙，通常不需要用 smearing 来制造分数占据；小带隙、半金属、掺杂、电荷态或带隙接近数值误差的体系必须作为边界情况记录，不能只靠一次 Fermi energy 输出下结论。
+
+## 输入字段表
+
+| 字段 | 所属程序/位置 | 作用 | input 判断 | output 中如何核对 | 常见风险 |
+|---|---|---|---|---|---|
+| `occupations` | `pw.x` / `&SYSTEM` | 选择电子占据策略，如 `fixed`、`smearing`、`tetrahedra`、`tetrahedra_opt`、`from_input` | 金属通常需要显式考虑 smearing 或适合目标的 Brillouin zone 积分；有清楚能隙的绝缘体通常应避免无理由 smearing | 输出中的 occupation scheme、band occupation、number of electrons、Fermi energy | 金属用 `fixed` 导致 SCF 振荡；绝缘体用 smearing 后把分数占据当作物理结论 |
+| `smearing` | `pw.x` / `&SYSTEM` | 指定展宽函数，如 Gaussian、Methfessel-Paxton、cold smearing、Fermi-Dirac | 仅在 `occupations='smearing'` 等需要展宽策略时才有实际意义；不同 workflow 若改变函数需记录理由 | 输出中的 smearing type 或 occupation summary | 只记录 `degauss` 不记录函数；不同步骤混用函数导致能量、力或 DOS 不可比 |
+| `degauss` | `pw.x` / `&SYSTEM` | 展宽宽度，单位 Ry，用于金属 Brillouin zone 积分 | 必须与 k mesh、体系金属性判断和下游目标一起收敛检查；本页不提供默认推荐值 | 输出中的 smearing width、SCF 稳定性、总能/力随宽度变化 | 宽度过大改变能量、力、Fermi 面和 DOS 形状；把 Ry 当 eV |
+| `K_POINTS` | `pw.x` card | 决定 Brillouin zone 采样；金属和小带隙体系通常更敏感 | occupation/smearing scan 不能脱离 k mesh scan；tetrahedron 方法要求合适的 uniform k grid | 输出中的 k points、irreducible k points、weights | 用粗 k mesh 掩盖 smearing 问题；DOS/phonon 沿用不合适的 k mesh |
+| `nbnd` | `pw.x` / `&SYSTEM` | 控制计算能带数量 | 金属、DOS、NSCF、带结构或 `from_input` 占据时需确认空带是否足够 | 输出中的 highest occupied / lowest unoccupied、band list、occupation | 空带不足导致 Fermi 附近态、DOS 或后处理范围不可靠 |
+| `tot_charge` | `pw.x` / `&SYSTEM` | 改变总电子数 | 带电、掺杂或电子数非中性任务必须把 Fermi energy 解释为该输入模型下的结果 | 输出中的 number of electrons 和 charge summary | 把带电模型的 Fermi level 当作中性体相性质 |
+| `bz_sum` | `dos.x` / `&DOS` | DOS 的 Brillouin zone 求和策略 | DOS 积分策略应与 SCF/NSCF 数据和解释目标一致 | `dos.x` output 中的求和方式；DOS 数据文件 | 把 DOS 后处理 broadening 当作 SCF smearing；tetrahedron 与 smearing 条件混淆 |
+| `ngauss` | `dos.x` / `&DOS` | DOS Gaussian broadening 类型 | 只控制 DOS 后处理展宽，不自动证明 SCF occupation 合理 | `dos.x` output 和 DOS 曲线平滑程度 | 用图像平滑度代替 k mesh / occupation 收敛性 |
+| `degauss` | `dos.x` / `&DOS` | DOS broadening，单位 Ry | 与 `pw.x` 的 `degauss` 分开记录；若覆盖默认读取行为需说明 | `dos.x` output、DOS 文件近 Fermi 能级形状 | 忽略单位；修改 DOS broadening 后仍声称与 SCF energy/force 可直接比较 |
+| `DeltaE` | `dos.x` / `&DOS` | DOS 能量网格步长，单位 eV | 与目标能区分辨率匹配；不替代 broadening 或 k mesh 收敛 | DOS 文件能量间隔 | 过粗丢峰，过细放大离散 k mesh 噪声 |
+
+## output review
+
+阅读 `pw.x` output 时，先确认 input 是否真的被 QE 读成预期策略，再判断物理解释：
+
+- `number of electrons` 是否与结构、电荷态、赝势价电子数和 `tot_charge` 一致。
+- occupation scheme 是否与 input 中 `occupations`、`smearing`、`degauss` 一致。
+- Fermi energy 是否出现；若出现，它是该计算设置下的电子化学势/占据参考，不自动等于可跨体系比较的绝对能级。
+- band occupation 是否显示 Fermi 附近存在部分占据；若有分数占据，需要判断它来自真实金属性、边界小带隙、带电模型还是 smearing 过大。
+- SCF iteration 是否出现由占据变化引起的振荡、缓慢收敛或重复 charge sloshing。
+- 总能、力和应力是否对 `degauss` 或 k mesh 变化敏感；如果敏感，不能只用一次 SCF 收敛作为 PASS。
+
+对 energy/force 的判断：
+
+- 总能比较必须使用相同 occupation policy、smearing function、`degauss`、k mesh 和可比结构设置，除非记录中明确说明变更目的。
+- relax 或 vc-relax 的力/应力可能受 smearing 影响；若 `degauss` scan 中力的方向或大小明显改变，应标记为 WARN 或 BLOCK，而不是只看 `convergence has been achieved`。
+- tetrahedron 类方法适合某些 DOS/积分任务，但 QE 官方说明中普通 tetrahedron 不适合 force/optimization/dynamics；用于结构优化前必须回到 workflow 复查。
+
+对 DOS 的判断：
+
+- `dos.x` 必须读取目标 NSCF 数据，而不是旧 `prefix/outdir`。
+- DOS 近 Fermi energy 的非零态密度、能隙、伪隙或尖峰要与 bands、Fermi energy 和 k mesh 一起判断。
+- DOS 曲线更平滑不等于更物理；平滑可能来自更密 k mesh，也可能来自过大的后处理 broadening。
+- 若 `dos.x` 中单独设置 `degauss` 或 `ngauss`，应把它记为 DOS broadening，不回写为 SCF occupation 结论。
+
+对 phonon/DFPT 的判断：
+
+- 金属 phonon 对 Fermi 面采样、k mesh、occupation 和 smearing 可能敏感。
+- 若 phonon 频率、虚频或 electron-phonon 相关量随 `degauss` 明显变化，应先归类为数值敏感，不直接解释为稳定性结论。
+- phonon workflow 使用的 SCF charge density 必须能追溯 occupation policy；改变 smearing 后应确认是否需要重新生成上游 SCF 数据。
+
+## 常见错误
+
+| 现象 | 可能原因 | 优先排查 | 判定倾向 |
+|---|---|---|---|
+| 金属 SCF 振荡或难收敛 | `occupations='fixed'`、k mesh 太粗、smearing 策略不合适 | output occupation scheme、Fermi energy、SCF residual、k mesh | 未解决前 BLOCK |
+| 绝缘体出现分数占据 | 无理由使用 smearing、`degauss` 过大、带隙太小或 k mesh 不足 | band occupation、DOS/bands、`degauss` scan | 解释不清为 WARN/BLOCK |
+| Fermi energy 被当作绝对能级比较 | 未说明能量零点、体系电荷态或计算设置 | record 中的 reference、DOS/bands 对齐方式 | 缺少零点说明为 WARN |
+| DOS 显示金属性但 bands 显示有隙 | 能量零点不一致、DOS broadening 过大、NSCF k mesh/路径不同 | `dos.x` broadening、bands reference、NSCF mesh | 需复查，通常 WARN |
+| DOS 很平滑但特征消失 | 后处理 `degauss` 或 `DeltaE` 设置不合适 | `bz_sum`、`ngauss`、`degauss`、`DeltaE`、k mesh | 不能作为最终图，WARN |
+| relax 后结构或力随 smearing 明显变 | occupation 数值策略影响势能面 | 同结构下 energy/force 对比、k mesh 对比 | 下游 phonon 前 BLOCK |
+| phonon 虚频随 smearing 消失或出现 | Fermi 面采样/occupation 未收敛 | 上游 SCF、k mesh、smearing policy、phonon output | 先标数值敏感，BLOCK |
+| 不同 workflow 结果不可比 | SCF/relax/NSCF/DOS/phonon 中 occupation 或 broadening 未统一或未记录 | input 文件、record、output review | 缺少记录为 WARN |
 
 ## 最低掌握深度
 
-最低需要知道：
+完成本页后，学习者至少应能做到：
 
-- 金属在 Fermi level 附近存在部分占据态，离散 k mesh 下 BZ integration 对 occupation 处理敏感。
-- Smearing 是数值积分和占据平滑策略，不应直接当作材料真实热状态。
-- `degauss` 会影响 energy、force、DOS、Fermi surface、phonon 和 EPC 相关量。
-- SCF smearing 与 DOS 后处理 broadening 是不同层面的设置，必须分开记录。
+- 解释 `occupations` 是电子占据策略，`smearing` 是展宽函数，`degauss` 是展宽宽度，三者不是同一个概念。
+- 说明金属为什么常需要 smearing：Fermi 面附近部分占据使离散 k mesh 积分和 SCF 迭代对能级微小变化敏感。
+- 说明绝缘体为什么通常不应无理由 smearing：清楚能隙下 `fixed` 占据已经给出整数占据，额外展宽可能制造不必要的分数占据。
+- 识别金属/绝缘体/小带隙边界不是只看一个标签，而要联合 Fermi energy、band occupation、DOS/bands、k mesh 和 smearing 敏感性。
+- 区分 SCF smearing 与 DOS broadening：前者影响电子密度、总能、力和下游 charge density，后者影响 DOS 图像和积分展示。
+- 对 energy、force、DOS、phonon 分别说明 smearing 可能影响什么，以及 output review 中应保留哪些证据。
+- 在记录中把 occupation policy 写入 PASS / WARN / BLOCK：只有当 input、output、收敛性和下游用途一致时才允许 PASS。
 
-## QE 中的对应对象
+## 对应 workflow
 
-| 对象 | QE 位置 | 判断意义 | output 证据 |
-|---|---|---|---|
-| `occupations='fixed'` | `&SYSTEM` / `pw.x` | 整数占据，常用于有清楚 gap 的体系 | occupation scheme、band occupation |
-| `occupations='smearing'` | `&SYSTEM` / `pw.x` | 使用 smearing 处理部分占据 | smearing type、Fermi energy |
-| `smearing` | `&SYSTEM` / `pw.x` | 展宽函数 | output 中 occupation summary |
-| `degauss` | `&SYSTEM` / `pw.x` | 展宽宽度，单位 `Ry` | smearing width、energy/force sensitivity |
-| `K_POINTS` | card / `pw.x` | 金属 BZ integration 与 smearing 强耦合 | k-point summary、irreducible k-points |
-| `bz_sum` / `degauss` / `DeltaE` | `dos.x` | DOS integration 和 broadening | `dos.x` output、DOS 文件 |
-
-相关 workflow：[smearing and occupations](../workflows/ground-state/smearing-and-occupations.md)、[DOS](../workflows/electronic/dos.md)、[Fermi surface](../workflows/electronic/fermi-surface.md)、[phonon dispersion](../workflows/phonon/phonon-dispersion-dfpt.md)。
-
-## 核心概念
-
-Smearing 用连续函数替代 Fermi level 附近的阶跃占据，使有限 k mesh 下的积分和 SCF 迭代更稳定。它是数值策略，不是材料真实热状态的默认解释。金属通常需要同时审阅 k mesh 和 smearing；绝缘体通常不需要无理由引入分数占据；小带隙或半金属问题需要边界化记录。
-
-## 对 input 的影响
-
-- `occupations` 的选择应与金属/绝缘体/小带隙判断一致。
-- 使用 `smearing` 时必须记录函数和 `degauss`，并在 convergence 中和 k mesh 一起审阅。
-- DOS 的 `dos.x` broadening 不应回写成 SCF occupation 结论。
-- Phonon/EPC 前置 SCF 改变 smearing 后，需要重新生成一致的 `prefix/outdir` 数据链。
-- `tetrahedra` 等积分方式适用边界应回到官方文档和具体 workflow 审阅，不能机械替代 smearing。
-
-## 对 output review 的影响
-
-| output 证据 | 支持的判断 | 不能证明什么 |
-|---|---|---|
-| occupation scheme | QE 按预期处理占据 | 体系金属性已最终判定 |
-| Fermi energy | 本次设置下的电子化学势参考 | 可跨体系直接比较的绝对能级 |
-| band occupation | 是否存在部分占据 | 部分占据一定是真实金属性 |
-| total energy vs smearing | 数值敏感性 | 物理温度效应 |
-| force/stress vs smearing | relax/vc-relax 是否受占据影响 | 结构模型已无误差 |
-| DOS shape vs broadening | 图像处理和 Fermi-level 附近特征 | 更平滑即更可信 |
-| phonon frequency vs smearing | 金属 response 敏感性 | 虚频物理来源已确定 |
-
-## 常见误区
-
-- smearing 越大图越平滑，所以越可信。
-- `degauss` 不记录，导致 DOS、force 或 phonon 不可复查。
-- 金属 DOS 不做 k mesh / smearing 敏感性。
-- 把 smearing 当作材料真实热状态。
-- 绝缘体无理由使用 smearing 后解释分数占据。
-- 用 DOS broadening 掩盖 k mesh 不足。
-- phonon 虚频随 smearing 变化时直接写物理不稳定。
-
-## PASS / WARN / BLOCK 关联
-
-| 状态 | 理论依据 | 下游准入 |
-|---|---|---|
-| PASS | occupation policy 与体系和 workflow 目标一致；k mesh/smearing 敏感性已记录；Fermi energy 和 occupation 可解释 | 可进入 DOS、Fermi surface、relax、phonon 或对应后处理 |
-| WARN | SCF 可运行但 smearing/k mesh 对目标量仍敏感，或小带隙边界未充分说明 | 可进入探索，不应给定量 DOS/Fermi surface/phonon 结论 |
-| BLOCK | 金属使用不合适占据导致 SCF/force/phonon 失败；`degauss` 未记录；DOS/bands 冲突未解释 | 不允许进入相关下游 |
-
-## 下游影响
-
-- `SCF/relax/vc-relax`：occupation 影响总能、力和应力。
-- `DOS/Fermi surface`：Fermi level、DOS near Fermi 和图像形状依赖 k mesh/smearing。
-- `phonon/DFPT`：金属 phonon 对 Fermi-surface sampling 和 smearing 敏感。
-- `EPC`：更依赖 dense k/q 和 smearing 数据链，本页只给最低边界。
-
-## 与 physics-judgement 的边界
-
-本页只解释 smearing 的最低使用。以下问题转到：
-
-- [kmesh and smearing sensitivity](../physics-judgement/kmesh-smearing-sensitivity.md)
-- [metals, Fermi surface and smearing](../physics-judgement/08-metals-fermi-surface-and-smearing.md)
-- [EPC data chain and convergence](../physics-judgement/epc-data-chain-and-convergence.md)
-
-## 来源与边界
-
-- Stable: `occupations`、`smearing`、`degauss` 以 QE `INPUT_PW` 为准；DOS broadening 字段以 QE `INPUT_DOS` 为准。
-- Boundary: 本页不提供材料无关的 `degauss` 数值；宽度由 k mesh、目标 observable 和 convergence evidence 决定。
-- Internal standard: smearing policy 应写入 [output review checklist](../standards/output-review-checklist.md)。
+- [Smearing and occupations workflow](../workflows/ground-state/smearing-and-occupations.md)
+- [DOS workflow](../workflows/electronic/dos.md)
+- [Phonon dispersion DFPT workflow](../workflows/phonon/phonon-dispersion-dfpt.md)
+- [Calculation record template](../standards/calculation-record-template.md)
+- [PASS / WARN / BLOCK](../standards/pass-warn-block.md)
+- [physics-judgement/kmesh-smearing-sensitivity.md](../physics-judgement/kmesh-smearing-sensitivity.md)
 
 ## 资料来源
 
 - QE INPUT_PW reference: <https://www.quantum-espresso.org/Doc/INPUT_PW.html>
 - QE INPUT_DOS reference: <https://www.quantum-espresso.org/Doc/INPUT_DOS.html>
-- Methfessel and Paxton, High-precision sampling for Brillouin-zone integration.
-- Blochl, Jepsen and Andersen, improved tetrahedron method.
-- 本仓库：[smearing workflow](../workflows/ground-state/smearing-and-occupations.md)
+- [Smearing and occupations workflow](../workflows/ground-state/smearing-and-occupations.md)
+- [DOS workflow](../workflows/electronic/dos.md)

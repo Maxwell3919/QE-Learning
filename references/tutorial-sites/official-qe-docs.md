@@ -20,7 +20,6 @@
 
 - 使用 `INPUT_*` 页面核对参数名称、类型和适用程序。
 - 使用 package user guide 核对程序链和文件依赖。
-- 将 `INPUT_PW`、`INPUT_PH`、`INPUT_PP`、`INPUT_BANDS`、`INPUT_DOS`、`INPUT_PROJWFC`、`INPUT_Q2R`、`INPUT_MATDYN`、`INPUT_DYNMAT` 分别对应到 `pw.x`、PHonon、PostProc、electronic 和 phonon workflow 页面。
 
 ## 只适合作为参考的部分
 
@@ -42,9 +41,3 @@
 - [INPUT_PW](https://www.quantum-espresso.org/Doc/INPUT_PW.html)
 - [INPUT_PH](https://www.quantum-espresso.org/Doc/INPUT_PH.html)
 - [INPUT_PP](https://www.quantum-espresso.org/Doc/INPUT_PP.html)
-- [INPUT_BANDS](https://www.quantum-espresso.org/Doc/INPUT_BANDS.html)
-- [INPUT_DOS](https://www.quantum-espresso.org/Doc/INPUT_DOS.html)
-- [INPUT_PROJWFC](https://www.quantum-espresso.org/Doc/INPUT_PROJWFC.html)
-- [INPUT_Q2R](https://www.quantum-espresso.org/Doc/INPUT_Q2R.html)
-- [INPUT_MATDYN](https://www.quantum-espresso.org/Doc/INPUT_MATDYN.html)
-- [INPUT_DYNMAT](https://www.quantum-espresso.org/Doc/INPUT_DYNMAT.html)

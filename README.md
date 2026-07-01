@@ -1,6 +1,6 @@
 # QE Learning
 
-QE-Learning 是面向科研计算的 Quantum ESPRESSO（QE）中文参考手册与 DFT / DFPT / 固体计算知识体系。它用于长期查阅 QE 原生命令行 workflow、input/output 阅读、数值收敛、后处理、理论边界、结果可靠性判断和科研记录规范。
+面向 Quantum ESPRESSO（QE）科研计算的中文参考手册与 DFT 学习知识库，内容围绕原生命令行 workflow、input/output 阅读、数值收敛、后处理、DFT 理论边界和结果可靠性判断组织。
 
 ## 内容范围
 
@@ -28,11 +28,9 @@ structure + pseudopotential
 
 ## 使用方式
 
-从 [learn/00-start-here.md](learn/00-start-here.md) 开始，先建立 QE 原生命令行 workflow 的整体图景，再进入 [workflows/](workflows/) 阅读具体计算步骤。遇到最低理论概念时查 [theory-minimum/](theory-minimum/)，需要解释物理近似和失败模式时查 [physics-judgement/](physics-judgement/)，需要外部资料时查 [references/](references/)，每次学习或计算记录按 [standards/](standards/) 执行。读完页面只代表完成阅读，是否掌握需要由 output review、收敛记录和 `PASS / WARN / BLOCK` 判断来证明。
+从 [learn/00-start-here.md](learn/00-start-here.md) 开始，先建立 QE 原生命令行 workflow 的整体图景，再进入 [workflows/](workflows/) 阅读具体计算步骤。遇到最低理论概念时查 [theory-minimum/](theory-minimum/)，需要解释物理近似和失败模式时查 [physics-judgement/](physics-judgement/)，需要外部资料时查 [references/](references/)，每次学习或计算记录按 [standards/](standards/) 执行。
 
 ## 边界说明
-
-本仓库保存通用参考手册、学习路线、审阅框架和记录规范；个人计算的完整 input/output、scratch、restart 和大文件应留在个人项目或计算环境中。QE 参数定义和程序行为仍以 QE 官方文档和 `INPUT_*` reference 为准，本仓库负责中文导读和科研判断框架。
 
 结构构建、CIF 操作、对称性标准化、超胞、缺陷和 slab 构建会在独立 Structure-Learning 项目中展开；本仓库只说明 QE workflow 对结构输入的要求。
 

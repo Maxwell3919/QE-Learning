@@ -1,53 +1,34 @@
 # Electrostatic potential workflow
 
-## 本页解决什么问题
-
-本页说明如何审阅 `pp.x` 和 `average.x` 的 electrostatic/local potential 后处理。potential profile 常用于 slab、surface、interface、band alignment 和 work function 前置分析。电势有零点/规范选择和边界条件问题；profile 图像不能脱离上游 SCF、平均方向、真空平台和能量参考直接解释。
-
 ## 页面定位
 
 - 对应学习路线：[learn/07-postprocessing-loop.md](../../learn/07-postprocessing-loop.md)
-- 上游依赖：[workflows/ground-state/scf.md](../ground-state/scf.md)
-- 下游：[workflows/electronic/work-function.md](work-function.md)
-- 物理边界：[physics-judgement/work-function-and-electrostatic-boundary.md](../../physics-judgement/work-function-and-electrostatic-boundary.md)
+- 上游依赖：SCF ground state and pp.x potential output
+- 下游用途：potential profile and work-function pre-analysis
+- 规范入口：[standards/calculation-record-template.md](../../standards/calculation-record-template.md)、[standards/pass-warn-block.md](../../standards/pass-warn-block.md)
 
-## 上游依赖
+## 计算目标
 
-- SCF output 已通过 review，结构、赝势、k mesh、smearing 和边界条件记录完整。
-- 已明确要提取的 potential 类型，并按当前 `INPUT_PP` 核对 `plot_num`。
-- 若用于 slab/work function，必须记录表面法向、平均方向、真空区域、是否有偶极修正或低维边界设置。
-- `average.x` 的输入格式和单位应按当前 QE PostProc 文档核对；不同版本或构建可能有差异。
+用 `pp.x` 提取势相关网格，再用 `average.x` 得到方向平均电势，用于界面、slab 和功函数分析前置检查。
+
+## 输入前提
+
+- 上游 input、output、`record.md` 已可追溯。
+- `<system>`、`<structure>`、`<pseudo>`、cutoff、k 点和 occupation 设置已记录。
+- 已明确本 workflow 输出如何进入下游或图像解释。
 
 ## 计算图
 
 ```text
-final static SCF
-  -> pp.x potential plot_num
-  -> potential filplot
+pw.x scf
+  -> pp.x potential output
   -> average.x along <direction>
-  -> planar / averaged potential profile
-  -> output review
+  -> planar/macro averaged potential profile
 ```
 
-## 关键 QE 输入对象
+## 需要的 QE 程序
 
-| 字段 / 设置 | 程序 | 控制什么 | 常见风险 | Output 中如何验证 |
-|---|---|---|---|---|
-| `prefix/outdir` | `pp.x` | 读取 SCF 势和密度数据 | 旧 scratch 或错误结构 | `pp.x` output |
-| `plot_num` | `pp.x` | 选择 potential 类型 | 混淆 electrostatic/local/total potential | `INPUT_PP` 与 output |
-| `filplot` | `pp.x` | average.x 读取的中间文件 | 文件覆盖或来源不明 | `filplot` 生成记录 |
-| `iflag/output_format` | `pp.x` | 输出维度和格式 | 与 average.x 或可视化不匹配 | output 和文件头 |
-| average direction | `average.x` | 方向平均 | 与 slab 法向不一致 | averaged profile 横轴 |
-| boundary / dipole settings | `pw.x` | slab/低维静电边界 | 忽略偶极场或周期镜像 | SCF output 和 input record |
-
-## 命令与文件边界
-
-```bash
-pp.x -in pp.potential.<system>.in > pp.potential.<system>.out
-average.x < average.<system>.in > average.<system>.out
-```
-
-`average.x` 在 QE PostProc 中常以 line-based 输入读取 `filplot` 并输出平均 profile；具体输入顺序应按当前 PostProc 文档核对。不要把 `pp.x` 三维势文件、`average.x` 平均 profile 和绘图后的能量零点混成一个不可追踪文件。
+`pp.x`、`average.x`
 
 ## 通用输入模板
 
@@ -59,54 +40,91 @@ average.x < average.<system>.in > average.<system>.out
   filplot = 'potential.<system>.dat',
 /
 &PLOT
-  iflag = <plot_dimension>,
+  iflag = 3,
   output_format = <output_format>,
   fileout = 'potential.<system>.<format>',
 /
+
+&AVERAGE
+  input_file = 'potential.<system>.dat',
+  output_file = 'potential-average.<system>.dat',
+  idir = <average_direction>,
+/
 ```
 
-`average.x` 输入请按当前 QE PostProc 文档记录为 line-based 文件，并在 record 中写明 `input_file`、`output_file`、平均方向和 profile 横轴单位。
+## 输入字段说明
 
-## Output review
-
-| 检查项 | 从哪里看 | 能证明什么 | 不能证明什么 | WARN/BLOCK 触发 |
+| 字段 | 所属程序 | 作用 | 常见风险 | 输出中如何验证 |
 |---|---|---|---|---|
-| 上游读取 | `pp.x` output、`prefix/outdir` | potential 来自目标 SCF | SCF 和 slab 边界已可信 | 读取错误数据为 `BLOCK` |
-| potential 类型 | `plot_num`、`INPUT_PP`、output | 提取的势类型可复查 | 不同势类型可混用 | 势类型未说明为 `WARN`；选错为 `BLOCK` |
-| 平均方向 | average input/output、cell 方向记录 | profile 方向与目标一致 | profile 已有真空平台 | 法向/方向不清为 `WARN/BLOCK` |
-| 真空平台 | averaged profile、绘图脚本 | 是否存在平坦参考区 | work function 已定量可信 | 平台不平坦且仍读数为 `BLOCK` |
-| 能量零点 | SCF Fermi energy、profile offset、record | 能量参考可复查 | 零点选择无影响 | Fermi/profile 参考混乱为 `BLOCK` |
-| warning / file overwrite | `pp.x`/`average.x` output、文件时间戳 | 文件链没有明显破坏 | 图像解释完成 | 输出文件缺失或覆盖风险为 `WARN/BLOCK` |
+| `plot_num` | pp.x | 选择势相关物理量 | 混淆 electrostatic/local/total potential | pp.x output |
+| `idir` | average.x | 平均方向 | 方向与 slab 法向不一致 | average profile |
+| `output_format` | pp.x | 输出格式 | average.x 或可视化工具无法读取 | 生成文件 |
+| `prefix/outdir` | pp.x | 读取 SCF 数据 | 旧 scratch | pp.x output |
 
-## 收敛与可靠性
+## 通用输出审阅模板
 
-- potential profile 继承 SCF、结构、边界条件和真空设置的误差。
-- slab 或 surface 判断必须审阅真空平台、平均方向、偶极效应和周期镜像。
-- potential 的零点不是绝对物理量；跨计算比较必须说明参考和同一数据链。
+```markdown
+## output review
 
-## PASS / WARN / BLOCK
+- QE 程序:
+- 计算类型:
+- QE version:
+- Input dependency:
+- Structure summary:
+- Pseudopotentials loaded:
+- Cutoff reported:
+- K-points reported:
+- Convergence status:
+- 本 workflow 关键输出:
+- Warnings:
+- Scratch / restart status:
+- PASS / WARN / BLOCK:
+- Reason:
+- Allowed downstream workflows:
+```
 
-| 状态 | 条件 | 是否允许进入下游 |
+## 输出判断标准
+
+- 确认势类型、单位和方向。
+- 平均方向应与目标表面/界面法向一致。
+- slab/work function 分析需看到足够平坦的真空平台。
+- 若电势 profile 用于 work function、band alignment、slab 或 interface 判断，应同时记录边界条件、真空平台和能量零点；物理边界见 [physics-judgement/work-function-and-electrostatic-boundary.md](../../physics-judgement/work-function-and-electrostatic-boundary.md)。
+
+## 收敛性要求
+
+- 势 profile 对 slab 厚度、真空、偶极修正和 SCF 收敛敏感。
+- work function 前应先完成 potential profile 审阅。
+
+## 常见错误与诊断
+
+| 现象 | 可能原因 | 优先排查 |
 |---|---|---|
-| `PASS` | 上游 SCF 为 `PASS`；potential 类型、平均方向、文件链、单位和能量参考可复查；若用于 slab，真空平台存在 | 允许进入 work-function pre-analysis、band alignment 草图或 potential figure |
-| `WARN` | profile 可读但平台、方向、边界或单位仍需复核 | 只允许探索性图像，不写定量 work function |
-| `BLOCK` | 上游为 `BLOCK`；`plot_num` 错误；方向不明；无真空平台却读 vacuum level；文件链错配 | 不允许进入 work-function 或 electrostatic interpretation |
+| 没有真空平台 | 真空不足或 slab 设置不合理 | 回到结构和 SCF 输入检查 |
+| 方向错误 | idir 与表面法向不一致 | 检查 CELL_PARAMETERS 和平均方向 |
+| 势类型混淆 | plot_num 未核对 | 查 INPUT_PP 并记录定义 |
 
-## 常见误区
+## 通用学习模板
 
-- 混淆 local potential、electrostatic potential 和绘图后平移过的 potential。
-- 不记录 average direction。
-- 真空平台不平坦仍直接读 work function。
-- 将不同计算的 Fermi energy 和 potential profile 混用。
-- 把可视化曲线平滑程度当成静电边界可信度。
+使用 `<system>`、`<structure>`、`<pseudo>`、`<k_mesh>`、`<energy_window>`、`<output_format>` 等占位符记录个人学习任务。本仓库提供通用审阅框架，不保存具体计算结果。
 
-## 下游影响
+## 记录模板
 
-electrostatic potential 是 work function、slab electrostatics、interface alignment 和部分 charged-state 讨论的前置证据。若本页为 `WARN` 或 `BLOCK`，下游 work-function 也不能升级为定量结论。
+```text
+pw.scf.<system>.out
+pp.potential.<system>.in
+pp.potential.<system>.out
+average.<system>.in
+average.<system>.out
+potential-average.<system>.dat
+record.md
+```
 
-## 来源与边界
+## 与其他 workflow 的关系
 
-- QE `pp.x` input reference: <https://www.quantum-espresso.org/Doc/INPUT_PP.html>
+- work-function 依赖本页 profile。
+- charge-density/ELF 共享 pp.x 数据边。
+
+## 资料来源
+
+- QE INPUT_PP reference: <https://www.quantum-espresso.org/Doc/INPUT_PP.html>
 - QE PostProc guide: <https://www.quantum-espresso.org/Doc/pp_user_guide/>
-- 物理边界：[physics-judgement/work-function-and-electrostatic-boundary.md](../../physics-judgement/work-function-and-electrostatic-boundary.md)
-- 本仓库规范：[standards/output-review-checklist.md](../../standards/output-review-checklist.md)

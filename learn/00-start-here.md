@@ -2,7 +2,7 @@
 
 ## 如何使用本仓库
 
-本仓库是 QE 科研计算参考手册和 DFT/DFPT/固体计算知识库的入口，不把学习目标定义为“找到一个 input 并跑起来”。建议先读 `learn/` 建立主线，再进入 `workflows/` 的具体页面，并用 `standards/` 固化命名、记录和 output review。
+本仓库按 QE 实际使用流程组织，不把学习目标定义为“找到一个 input 并跑起来”。建议先读 `learn/` 建立主线，再进入 `workflows/` 的具体页面，并用 `standards/` 固化命名、记录和 output review。
 
 每一轮学习都应形成一个闭环：
 
@@ -12,8 +12,6 @@
 4. 阅读 output 中的关键证据；
 5. 给出 PASS / WARN / BLOCK；
 6. 决定是否允许进入下游。
-
-读完页面不等于完成学习。只有当 input、command、environment、output review、收敛判断和下游准入都能被记录并复查时，当前阶段才算形成了可用闭环。
 
 ## 为什么先学 QE 原生 workflow？
 

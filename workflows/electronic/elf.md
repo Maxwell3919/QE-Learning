@@ -1,49 +1,44 @@
 # ELF workflow
 
-## 本页解决什么问题
-
-本页说明如何审阅 `pp.x` electron localization function（ELF）后处理。ELF 用于辅助观察电子局域化空间分布，可与结构、charge density、DOS/PDOS 等证据交叉讨论。ELF 是函数定义和可视化阈值共同决定的图像证据，不能单独作为键强度、键级或电荷转移的定量结论。
-
 ## 页面定位
 
 - 对应学习路线：[learn/07-postprocessing-loop.md](../../learn/07-postprocessing-loop.md)
-- 上游依赖：[workflows/ground-state/scf.md](../ground-state/scf.md)、[workflows/electronic/charge-density.md](charge-density.md)
-- 规范入口：[standards/output-review-checklist.md](../../standards/output-review-checklist.md)
+- 上游依赖：SCF ground-state density
+- 下游用途：ELF grid and visualization
+- 规范入口：[standards/calculation-record-template.md](../../standards/calculation-record-template.md)、[standards/pass-warn-block.md](../../standards/pass-warn-block.md)
 
-## 上游依赖
+## 计算目标
 
-- SCF density 已通过 review。
-- `plot_num` 已按当前 QE `INPUT_PP` 核对为 ELF。
-- `iflag`、`output_format`、`fileout` 与可视化目标一致。
-- 可视化等值面、切片、色标和软件版本会写入 record。
+用 `pp.x` 输出 electron localization function，用于辅助判断电子局域化和成键特征。ELF 是可视化/定性分析工具，不应被直接当作定量键强度。
+
+## 输入前提
+
+- 上游 input、output、`record.md` 已可追溯。
+- `<system>`、`<structure>`、`<pseudo>`、cutoff、k 点和 occupation 设置已记录。
+- 已明确本 workflow 输出如何进入下游或图像解释。
 
 ## 计算图
 
 ```text
-final static SCF density
+pw.x scf
   -> pp.x ELF plot_num
-  -> ELF grid / slice file
+  -> ELF grid file
   -> visualization
-  -> output review
 ```
 
-## 关键 QE 输入对象
+## 需要的 QE 程序
 
-| 字段 / 设置 | 程序 | 控制什么 | 常见风险 | Output 中如何验证 |
-|---|---|---|---|---|
-| `prefix/outdir` | `pp.x` | 读取 SCF 数据 | 读取旧 density | `pp.x` output |
-| `plot_num` | `pp.x` | 选择 ELF 输出 | 编号未核对或选错场 | `INPUT_PP` 和 output |
-| `iflag` | `pp.x` | 输出维度 | 切片被解释为整体 3D 信息 | output/grid |
-| `output_format` | `pp.x` | 可视化格式 | 工具读取后丢失单位或网格 | `fileout` 和工具记录 |
-| visualization settings | 外部工具 | 等值面、色标、切片方向 | 图像不可复现 | figure script / record |
+`pp.x`
 
-## 命令与文件边界
+## Command boundary
 
-```bash
-pp.x -in pp.elf.<system>.in > pp.elf.<system>.out
-```
-
-ELF 文件来自 `prefix/outdir` 中的 SCF 数据。不同等值面、色标或切片方向会改变视觉印象，因此 figure record 必须保存可视化设置。不要把外部工具渲染结果当作 QE output 证据。
+| 对象 | 要求 |
+|---|---|
+| 上游命令 | 已审阅的 `pw.x scf` |
+| 本步命令 | `pp.x -in pp.elf.<system>.in > pp.elf.<system>.out` |
+| 必须读取 | SCF charge density 和对应的 `prefix/outdir` |
+| 主要输出 | ELF grid 或切片文件 |
+| 不应混用 | 不同等值面、不同色标、不同网格的可视化结果作为定量比较 |
 
 ## 通用输入模板
 
@@ -55,50 +50,91 @@ ELF 文件来自 `prefix/outdir` 中的 SCF 数据。不同等值面、色标或
   filplot = 'elf.<system>.dat',
 /
 &PLOT
-  iflag = <plot_dimension>,
+  iflag = 3,
   output_format = <output_format>,
   fileout = 'elf.<system>.<format>',
 /
 ```
 
-## Output review
+## 输入字段说明
 
-| 检查项 | 从哪里看 | 能证明什么 | 不能证明什么 | WARN/BLOCK 触发 |
+| 字段 | 所属程序 | 作用 | 常见风险 | 输出中如何验证 |
 |---|---|---|---|---|
-| 上游读取 | `pp.x` output、`prefix/outdir` | ELF 来自目标 SCF | SCF 模型已适合成键解释 | 上游为 `BLOCK` 或读取旧数据为 `BLOCK` |
-| `plot_num` | input、`INPUT_PP`、output | 输出对象确为 ELF | ELF 图像已经可定量解释 | 编号未核对为 `WARN`；选错输出为 `BLOCK` |
-| grid / format | `iflag`、`output_format`、file header | 文件可用于目标可视化 | 网格足以做所有比较 | 维度/格式不匹配为 `WARN/BLOCK` |
-| visualization record | figure script、等值面、色标、方向 | 图像可复现 | 视觉差异代表物理差异 | 未记录设置为 `WARN` |
-| 交叉证据 | charge density、PDOS、结构记录 | ELF 解释有辅助证据 | ELF 单独证明键强度 | 单独用 ELF 做定量结论为 `WARN/BLOCK` |
+| `plot_num` | pp.x | 选择 ELF 输出 | 未核对官方 plot_num | pp.x output |
+| `iflag` | pp.x / &PLOT | 输出维度 | 只输出切片却解释整体空间 | 输出网格维度 |
+| `output_format` | pp.x / &PLOT | 可视化格式 | 格式不被工具支持 | 生成文件 |
+| `prefix/outdir` | pp.x | 读取 SCF 密度 | 未收敛或旧密度 | pp.x output |
 
-## 收敛与可靠性
+## 通用输出审阅模板
 
-- ELF 继承 SCF density、cutoff、FFT grid 和模型设置的误差。
-- 可视化阈值会改变图像印象；跨体系或跨参数比较必须统一设置。
-- ELF 适合辅助讨论局域化图像，不适合作为唯一化学键定量指标。
+```markdown
+## output review
 
-## PASS / WARN / BLOCK
+- QE 程序:
+- 计算类型:
+- QE version:
+- Input dependency:
+- Structure summary:
+- Pseudopotentials loaded:
+- Cutoff reported:
+- K-points reported:
+- Convergence status:
+- 本 workflow 关键输出:
+- Warnings:
+- Scratch / restart status:
+- PASS / WARN / BLOCK:
+- Reason:
+- Allowed downstream workflows:
+```
 
-| 状态 | 条件 | 是否允许进入下游 |
+## 输出判断标准
+
+- 确认 ELF 文件来自目标 SCF。
+- `pp.x` output 应显示对应 `plot_num`、`filplot`、`iflag`、`output_format` 和 `fileout` 已处理。
+- 可视化前记录等值面、切片方向、色标、单位和软件版本。
+- ELF 解释应结合 charge density、PDOS 或结构信息。
+- ELF 只支持“电子局域化图像”的定性讨论；不能单独给出键强度、键级或电荷转移的定量结论。
+
+## 收敛性要求
+
+- ELF 对 SCF 密度质量和网格分辨率敏感。
+- 不同可视化等值面不能直接比较为定量键强度。
+
+## 常见错误与诊断
+
+| 现象 | 可能原因 | 优先排查 |
 |---|---|---|
-| `PASS` | 上游 SCF 为 `PASS`；ELF `plot_num`、grid、format 和可视化设置可复查；解释有结构/charge/DOS/PDOS 交叉证据 | 允许进入定性 ELF 图像和受限局域化讨论 |
-| `WARN` | 图像可用但可视化设置或交叉证据不足 | 只允许预览或内部比较 |
-| `BLOCK` | 读取错误数据；`plot_num` 选错；图像被单独用作定量键强度或电荷转移结论 | 不允许进入 ELF 解释或图件归档 |
+| ELF 图像异常 | plot_num 或输出格式错误 | 核对 INPUT_PP |
+| 解释过度 | 把 ELF 当定量键级 | 回到 PDOS/charge density 对照 |
+| 不同体系图不可比 | 等值面/色标/网格不同 | 统一可视化设置并记录 |
 
-## 常见误区
+## 通用学习模板
 
-- 把 ELF 等值面大小当成键强度。
-- 不记录等值面、色标和切片方向。
-- 用不同可视化设置比较不同计算。
-- 不看 `pp.x` output，只保存截图。
-- 用 ELF 替代 PDOS、charge density 或结构证据。
+使用 `<system>`、`<structure>`、`<pseudo>`、`<k_mesh>`、`<energy_window>`、`<output_format>` 等占位符记录个人学习任务。本仓库提供通用审阅框架，不保存具体计算结果。
 
-## 下游影响
+## 记录模板
 
-ELF 可进入 figures、charge-density/PDOS cross-check 和 publication record 的定性图像部分。若用于强结论，应有其他证据链支持。
+```text
+pw.scf.<system>.out
+pp.elf.<system>.in
+pp.elf.<system>.out
+elf.<system>.<format>
+record.md
+```
 
-## 来源与边界
+## 与其他 workflow 的关系
 
-- QE `pp.x` input reference: <https://www.quantum-espresso.org/Doc/INPUT_PP.html>
-- QE PostProc guide: <https://www.quantum-espresso.org/Doc/pp_user_guide/>
-- 本仓库规范：[standards/output-review-checklist.md](../../standards/output-review-checklist.md)
+- 依赖 SCF。
+- 与 charge density、PDOS 配合解释电子局域化。
+
+## 资料来源
+
+- QE INPUT_PP reference: <https://www.quantum-espresso.org/Doc/INPUT_PP.html>
+
+## Source / version boundary
+
+| 项目 | 边界 |
+|---|---|
+| ELF `plot_num` | 以当前 QE `INPUT_PP` 为准 |
+| 文件格式 | 以当前 QE PostProc 文档和可视化工具支持为准 |
+| 物理解释 | 属于定性后处理，必须与结构、charge density、DOS/PDOS 或其他证据交叉审阅 |

@@ -1,28 +1,46 @@
 # IR and Raman workflow
 
-## 本页解决什么问题
+## 页面定位
 
-IR / Raman workflow 用于把 Gamma phonon modes 与电场响应、Born effective charge、dielectric tensor、Raman tensor 和对称性选择定则联系起来。它不是只计算频率，也不是完整实验光谱模拟。本页只给出 QE/PHonon 中 IR/Raman 相关结果的最低审阅框架，帮助判断输出是否足以支持活性、模式归属和谱峰边界说明。
+- 对应学习路线：[learn/06-phonon-dfpt-loop.md](../../learn/06-phonon-dfpt-loop.md)
+- 上游依赖：Gamma phonon and response tensors
+- 下游用途：IR/Raman activity interpretation boundary
+- 规范入口：[standards/calculation-record-template.md](../../standards/calculation-record-template.md)、[standards/pass-warn-block.md](../../standards/pass-warn-block.md)
 
-## 上游依赖
+## 计算目标
 
-- Gamma phonon 已通过 [Gamma phonon workflow](gamma-phonon.md) 审阅。
-- IR 相关解释需要可信 Born effective charge 和 dielectric tensor。
-- Raman 相关解释需要当前 QE 版本、编译能力和 `INPUT_PH` 中对应分支支持。
-- 结构对称性、mode degeneracy 和 mode mixing 已记录；若结构或对称性改变，应重新审阅模式编号。
-- 若与实验谱比较，必须记录 harmonic approximation、温度、anharmonicity、broadening、LO-TO splitting 和 functional 边界。
+整理 IR/Raman 相关响应性质的最低学习边界：依赖 Gamma phonon、dielectric/Born effective charge 或 Raman 分支，输出解释必须核对 PHonon 文档。
+
+## 输入前提
+
+- 结构已充分优化，并通过 SCF output review。
+- SCF 的 cutoff、k 点、smearing 和 `conv_thr` 已按 phonon 目标审阅。
+- 已明确该页是 Gamma phonon、q-grid、DOS、响应张量还是 debugging 分支。
 
 ## 计算图
 
 ```text
-final static SCF
-  -> ph.x at Gamma with response branch
-  -> Gamma modes + response tensors
+pw.x scf
+  -> ph.x Gamma response
   -> dynmat.x mode analysis
-  -> IR / Raman activity boundary review
+  -> IR/Raman-related quantities when supported and valid
 ```
 
-## 关键 QE 输入对象
+## 需要的 QE 程序
+
+`ph.x`、`dynmat.x`
+
+## Command boundary
+
+| 对象 | 要求 |
+|---|---|
+| 上游命令 | 已审阅的 `pw.x scf` 和 Gamma phonon 前置条件 |
+| 本步命令 | `ph.x -in ph.ir-raman.<system>.in > ph.ir-raman.<system>.out`，必要时接 `dynmat.x` |
+| 必须读取 | SCF `prefix/outdir`、Gamma dynamical matrix、响应张量输出 |
+| 主要输出 | Gamma modes、dielectric/Born branch、IR/Raman 相关响应量 |
+| 不应混用 | q-grid dispersion 的插值结果与 Gamma response tensor 解释 |
+
+## 通用输入模板
 
 ```fortran
 &INPUTPH
@@ -31,76 +49,92 @@ final static SCF
   tr2_ph = <phonon_threshold>,
   trans = .true.,
   epsil = <true_for_ir_related_branch>,
-  lraman = <true_if_supported_and_needed>,
+  lraman = <true_if_raman_branch_is_supported>,
   fildyn = '<system>.dynG',
 /
-0.0 0.0 0.0
 ```
 
-| 字段 | 程序 | 判断意义 | 联动对象 | output 中如何验证 |
+## 输入字段说明
+
+| 字段 | 所属程序 | 作用 | 常见风险 | 输出中如何验证 |
 |---|---|---|---|---|
-| `epsil` | `ph.x` | 请求 dielectric/Born response，支撑 IR 与 LO-TO 相关解释 | 绝缘体条件、Gamma limit | dielectric tensor 和 Born tensors 输出 |
-| `lraman` | `ph.x` | 请求 Raman 相关 response 分支 | QE 版本、编译和方法支持 | Raman tensor 或 activity 相关输出 |
-| `trans` | `ph.x` | 计算 phonon perturbations | Gamma modes | irreducible representations 收敛 |
-| `fildyn` | `ph.x` / `dynmat.x` | 保存 Gamma dynamical matrix | mode analysis | `dynmat.x` 读取当前文件 |
-| `asr` | `dynmat.x` | 模式频率和 acoustic modes 后处理 | Gamma acoustic modes | ASR 设置与 mode list |
+| `epsil` | ph.x | IR 相关介电/Born 分支 | 未检查适用条件 | ph.x dielectric/Born output |
+| `lraman` | ph.x | Raman 相关响应请求 | 未核对编译和适用条件 | ph.x Raman output |
+| `fildyn` | ph.x/dynmat.x | Gamma modes 文件 | 读取错误 dyn | dynmat.x output |
 
-## 命令与文件边界
+## 通用输出审阅模板
 
-```bash
-ph.x -in ph.ir-raman.<system>.in > ph.ir-raman.<system>.out
-dynmat.x -in dynmat.<system>.in > dynmat.<system>.out
+```markdown
+## output review
+
+- QE 程序:
+- 计算类型:
+- QE version:
+- Input dependency:
+- Structure summary:
+- Pseudopotentials loaded:
+- Cutoff reported:
+- K-points reported:
+- Convergence status:
+- 本 workflow 关键输出:
+- Warnings:
+- Scratch / restart status:
+- PASS / WARN / BLOCK:
+- Reason:
+- Allowed downstream workflows:
 ```
 
-`ph.x` 是否输出 IR/Raman 相关量取决于输入字段、体系条件和当前 QE 功能支持。`dynmat.x` 可帮助审阅 Gamma modes、频率和模式信息，但不能凭频率表本身推出 IR/Raman activity。记录中应保留 mode 编号、频率、单位、张量/强度输出是否存在、broadening 或绘图处理方式。
+## 输出判断标准
 
-## Output review
+- 先确认 Gamma phonon modes 和 perturbations 收敛。
+- `ph.x` output 应明确显示 `epsil`、`lraman` 或相关响应分支是否被执行；缺少分支输出时不能补写强度结论。
+- IR/Raman 输出的单位、模式编号、张量和选择定则解释应回到官方 PHonon 文档。
+- 没有响应张量或强度输出时，不应从频率表直接推断活性。
+- 金属、smearing 较强或电场响应条件不成立时，应将 dielectric/Born/IR/Raman 解释降级为 WARN 或 BLOCK。
 
-| 检查项 | 从哪里看 | 能证明什么 | 不能证明什么 |
-|---|---|---|---|
-| Gamma phonon 状态 | `ph.x` / `dynmat.x` mode list | 基础 modes 已计算 | 谱学强度已可信 |
-| `epsil` / Born 输出 | `ph.x` response 段落 | IR 相关 response 数据存在 | 金属或边界体系可解释 |
-| Raman 输出 | `ph.x` Raman tensor/activity 段落 | Raman 分支被执行 | 当前结果能直接复现实验谱 |
-| mode symmetry / degeneracy | `dynmat.x`、symmetry 输出 | 模式归属和简并关系 | mode mixing 已完全解决 |
-| units / sign convention | 频率和强度输出 | 数值可复查 | 与实验单位、温度条件一致 |
-| warnings | `ph.x` / `dynmat.x` output | 功能、收敛或 response 异常 | warning 可以忽略 |
+## 收敛性要求
 
-## 收敛与可靠性
+- IR/Raman 对结构、SCF 和 Gamma phonon 收敛敏感。
+- Raman 分支应按当前 QE build 和官方文档核对能力。
 
-- IR/Raman 解释继承 Gamma phonon、SCF、response tensor 和结构对称性的全部误差。
-- Harmonic DFPT 频率和强度不自动等同有限温实验光谱；温度、anharmonicity、样品取向、broadening 和 selection rules 都是解释边界。
-- 没有 response tensor 或 activity 输出时，不能只凭频率表判断模式 IR/Raman 活性。
-- mode degeneracy 或 mode mixing 会影响峰归属，应结合 symmetry 和 eigenvectors 审阅。
+## 常见错误与诊断
 
-## PASS / WARN / BLOCK
-
-| 状态 | 条件 | 是否允许进入下游 |
+| 现象 | 可能原因 | 优先排查 |
 |---|---|---|
-| PASS | Gamma phonon 为 PASS；所需 IR/Raman response 分支执行并收敛；mode symmetry、单位、张量和边界已记录 | 可进入受限的谱峰归属、图件整理或与实验的边界化比较 |
-| WARN | Gamma modes 可信但 response tensor、symmetry、degeneracy 或 broadening 仍需复查 | 可用于学习和诊断，不应给强定量强度或实验对照结论 |
-| BLOCK | Gamma phonon 为 BLOCK；response 分支未输出或未收敛；在不适用体系中解释 IR/Born；只凭频率表推断活性 | 不允许写入 IR/Raman 活性、强度或谱学结论 |
+| 没有强度输出 | 未开启对应分支或功能不支持 | 核对 INPUT_PH 和 build |
+| 模式编号混乱 | dynmat 与 ph 输出未对应 | 对照 dynmat mode list |
+| 把频率当强度 | 输出解释越界 | 回到官方 PHonon 文档 |
 
-## 常见误区
+## 通用学习模板
 
-- 把 harmonic DFPT peak position 当作实验光谱峰位。
-- 没有响应张量输出却写 IR/Raman activity。
-- 不记录 mode degeneracy、mode mixing 和 symmetry 边界。
-- 忽略 LO-TO splitting、Born charge 或 dielectric tensor 的适用条件。
-- 用绘图 broadening 掩盖模式归属不清。
+使用 `<system>`、`<q_grid>`、`<q_path>`、`<asr_scheme>`、`<phonon_threshold>` 等占位符记录个人学习任务。本仓库提供通用审阅框架，不保存具体计算结果。
 
-## 下游影响
+## 记录模板
 
-本页依赖 [Gamma phonon workflow](gamma-phonon.md) 和 [dielectric tensor and Born effective charge workflow](dielectric-born-effective-charge.md)。若目标是完整光谱、温度效应或强非谐性，需要转入更高级的 spectroscopy 或 finite-temperature 方法；本页只提供 QE/PHonon output review 和边界框架。
+```text
+ph.ir-raman.<system>.in
+ph.ir-raman.<system>.out
+dynmat.<system>.out
+record.md
+```
 
-## 来源与边界
+## 与其他 workflow 的关系
 
-- Stable: `ph.x` 中 `epsil`、`lraman`、`fildyn` 和 response 输出边界以 QE `INPUT_PH` 和 PHonon guide 为准。
-- Version-sensitive: Raman 支持、输出格式、张量语义和编译条件需核对当前 QE 版本。
-- Boundary: harmonic DFPT 与实验有限温 spectrum 之间需要额外近似边界说明。
+- 依赖 Gamma phonon。
+- dielectric/Born effective charge 页面提供 IR 相关前提。
 
 ## 资料来源
 
 - QE INPUT_PH reference: <https://www.quantum-espresso.org/Doc/INPUT_PH.html>
-- QE INPUT_DYNMAT reference: <https://www.quantum-espresso.org/Doc/INPUT_DYNMAT.html>
 - QE PHonon user guide: <https://www.quantum-espresso.org/Doc/ph_user_guide/>
-- 本仓库：[theory-minimum/dfpt-phonons.md](../../theory-minimum/dfpt-phonons.md)、[theory-minimum/dielectric-born-charge.md](../../theory-minimum/dielectric-born-charge.md)
+- Kyoto phonon DokuWiki: <https://www2.yukawa.kyoto-u.ac.jp/~koudai.sugimoto/dokuwiki/doku.php?id=quantumespresso%3Aphonon%3A%E3%83%95%E3%82%A9%E3%83%8E%E3%83%B3%E3%81%AE%E8%A8%88%E7%AE%97>
+- Pranab Das phonon tutorial: <https://pranabdas.github.io/espresso/hands-on/phonon/>
+- QE INPUT_DYNMAT reference: <https://www.quantum-espresso.org/Doc/INPUT_DYNMAT.html>
+
+## Source / version boundary
+
+| 项目 | 边界 |
+|---|---|
+| `epsil` / `lraman` | 字段含义、适用条件和输出内容以当前 QE `INPUT_PH` 与 PHonon guide 为准 |
+| Raman 支持 | 与 QE build、版本和方法分支有关，不能只凭 input 字段存在判断 |
+| 强度解释 | 需要响应张量或强度输出；频率表本身不足以支持活性结论 |

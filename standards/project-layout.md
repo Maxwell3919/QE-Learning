@@ -17,7 +17,6 @@
   records/
   figures/
   notes/
-  references/
 ```
 
 这是建议模板，可以按实际项目缩减或增加子目录。目录名保持通用含义，不应依赖某个具体材料案例。
@@ -123,12 +122,6 @@ dos.<system>.in
 
 `notes/` 可以帮助回忆上下文，但不替代 calculation record。凡是影响下游判断的事实，都应整理进 `records/`。
 
-### `references/`
-
-保存项目内实际使用过的公开来源、论文条目、赝势库说明、工具文档入口或教程备注。它不要求复制外部文档全文；最低要求是让 calculation record 中的 source boundary 可以回查到公开来源。
-
-项目级 `references/` 不替代本仓库的 [../references/source-index.md](../references/source-index.md)。前者记录具体计算项目使用过什么来源，后者维护 QE-Learning 的公共 source spine。
-
 ## 3. 不应混入长期记录的大文件
 
 QE 会产生大量 side-effect 文件。以下内容通常不应直接混入长期记录目录，也不应默认提交到文档仓库：
@@ -160,7 +153,6 @@ Convergence status      -> outputs/ plus review notes
 Physical result         -> outputs/ and figures/
 Problems encountered    -> outputs/, scheduler logs, notes/
 Next action             -> records/ and downstream inputs/
-Source boundary         -> references/ plus public source spine
 ```
 
 最低要求：每次可复查计算都应有 input、output、record、赝势来源、运行命令和 output review。record 不要求所有文件都与它位于同一仓库，但必须让读者知道关键文件在哪里、哪些文件是长期证据、哪些只是 scratch。

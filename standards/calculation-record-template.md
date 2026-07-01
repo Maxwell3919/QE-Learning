@@ -16,7 +16,6 @@
 ## Goal
 
 - Workflow:
-- Workflow stage: SCF / convergence / relax / vc-relax / NSCF / bands / DOS / PDOS / pp.x / phonon / advanced
 - Target property:
 - Downstream dependency:
 - Acceptance criterion:
@@ -54,19 +53,6 @@
 - `pw.scf.<system>.in`:
 - Other inputs:
 - Parameter changes from previous run:
-- Human-readable file naming follows:
-- QE data chain (`prefix/outdir`) follows:
-
-## Key numerical settings
-
-- `ecutwfc`:
-- `ecutrho`:
-- K-point mesh / path:
-- Occupation scheme:
-- Smearing / `degauss`:
-- SCF threshold:
-- Force / stress threshold, if relevant:
-- q-grid / q-path, if relevant:
 
 ## Command
 
@@ -107,7 +93,6 @@ pw.x -in pw.scf.<system>.in > pw.scf.<system>.out
   - Warning review:
 - Downstream allowed:
 - Downstream blocked:
-- Source boundary:
 - Uncertainty statement:
 
 ## Convergence status

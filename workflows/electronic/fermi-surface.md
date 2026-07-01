@@ -1,54 +1,45 @@
 # Fermi surface workflow
 
-## 本页解决什么问题
-
-本页说明如何审阅 Fermi surface workflow：从 metallic system 的 dense uniform NSCF eigenvalues 生成 BXSF 或其他费米面可视化数据，并与 bands、DOS 和 occupations 交叉判断 Fermi-level 附近电子结构。Fermi surface 对 k mesh、smearing、Fermi energy、band crossings、SOC 和磁性分支非常敏感；粗网格图像不能作为定量结论。
-
 ## 页面定位
 
 - 对应学习路线：[learn/05-electronic-structure-loop.md](../../learn/05-electronic-structure-loop.md)
-- 上游依赖：[workflows/ground-state/scf.md](../ground-state/scf.md)、[workflows/ground-state/nscf.md](../ground-state/nscf.md)、[workflows/electronic/dos.md](dos.md)、[workflows/electronic/bands.md](bands.md)
-- 理论边界：[theory-minimum/smearing-metals.md](../../theory-minimum/smearing-metals.md)、[physics-judgement/kmesh-smearing-sensitivity.md](../../physics-judgement/kmesh-smearing-sensitivity.md)
-- 规范入口：[standards/output-review-checklist.md](../../standards/output-review-checklist.md)
+- 上游依赖：SCF -> dense NSCF for metallic system
+- 下游用途：BXSF or visualization data for Fermi surface
+- 规范入口：[standards/calculation-record-template.md](../../standards/calculation-record-template.md)、[standards/pass-warn-block.md](../../standards/pass-warn-block.md)
 
-## 上游依赖
+## 计算目标
 
-- SCF 与 dense NSCF 均已通过 review。
-- 体系确认为金属性或存在需要审阅的 Fermi-level crossing。
-- NSCF 使用 dense uniform mesh；high-symmetry bands path 不可生成费米面。
-- Fermi energy、occupations/smearing、band 数量、spin/SOC/磁性设置已记录。
-- 可视化工具和 BXSF 文件只用于显示，不能替代 k mesh sensitivity。
+从金属体系 dense k mesh eigenvalues 生成 Fermi surface 数据，用于与 bands/DOS 交叉验证 Fermi-level 附近电子结构。
+
+## 输入前提
+
+- 上游 input、output、`record.md` 已可追溯。
+- `<system>`、`<structure>`、`<pseudo>`、cutoff、k 点和 occupation 设置已记录。
+- 已明确本 workflow 输出如何进入下游或图像解释。
 
 ## 计算图
 
 ```text
-final static SCF
-  -> pw.x nscf on <dense_uniform_k_mesh>
+pw.x scf
+  -> pw.x nscf on dense uniform k mesh
   -> fs.x
-  -> BXSF / Fermi surface file
-  -> visualization
-  -> output review
+  -> <system>.bxsf
+  -> XCrySDen / viewer
 ```
 
-## 关键 QE 输入对象
+## 需要的 QE 程序
 
-| 字段 / 设置 | 程序 | 控制什么 | 常见风险 | Output 中如何验证 |
-|---|---|---|---|---|
-| `K_POINTS automatic` | `pw.x nscf` | dense uniform mesh | 用 bands path 或稀疏 mesh | NSCF output 的 k 点数量 |
-| `occupations/smearing/degauss` | `pw.x` | Fermi-level occupation | smearing artifact 被解释为费米面 | output 中 occupation 和 Fermi energy |
-| `nbnd` | `pw.x nscf` | 目标 band 覆盖 | band crossing 截断 | NSCF output 的 band 数和能量范围 |
-| `prefix/outdir` | `fs.x` | 读取 NSCF 数据 | 读取旧 eigenvalues | `fs.x` output |
-| `filfermi` 或 BXSF 输出名 | `fs.x` | 费米面文件 | 文件来源不可追踪 | BXSF 文件和 record |
-| visualization settings | XCrySDen / viewer | 费米面显示 | 图像设置被当作物理证据 | viewer 记录和截图说明 |
+`pw.x`、`fs.x`、XCrySDen 或其他可视化工具
 
-## 命令与文件边界
+## Command boundary
 
-```bash
-pw.x -in pw.nscf.<system>.in > pw.nscf.<system>.out
-fs.x -in fs.<system>.in > fs.<system>.out
-```
-
-`fs.x` 应读取 dense NSCF 数据并生成 BXSF 或等价输出。BXSF 文件必须与当前 `prefix/outdir`、Fermi energy 和 k mesh 对应。外部可视化工具只显示文件内容；图像不自动证明费米面拓扑或嵌套特征。
+| 对象 | 要求 |
+|---|---|
+| 上游命令 | 已审阅的 `pw.x scf`，随后是 dense uniform mesh 的 `pw.x nscf` |
+| 本步命令 | `fs.x -in fs.<system>.in > fs.<system>.out` |
+| 必须读取 | NSCF 的 eigenvalues、Fermi energy、band occupations 和 `prefix/outdir` |
+| 主要输出 | BXSF 文件，例如 `fermi-surface.<system>.bxsf` |
+| 不应混用 | bands high-symmetry path、稀疏 SCF mesh 或不同 Fermi-level reference |
 
 ## 通用输入模板
 
@@ -60,50 +51,88 @@ fs.x -in fs.<system>.in > fs.<system>.out
 /
 ```
 
-`fs.x` 输入字段应按当前 QE PostProc 文档核对；若本地版本使用不同字段名或 line-based 格式，应在 record 中按实际输入记录。
+## 输入字段说明
 
-## Output review
-
-| 检查项 | 从哪里看 | 能证明什么 | 不能证明什么 | WARN/BLOCK 触发 |
+| 字段 | 所属程序 | 作用 | 常见风险 | 输出中如何验证 |
 |---|---|---|---|---|
-| metallicity 前提 | SCF/NSCF/DOS/bands output | 费米面 workflow 有物理对象 | 费米面已定量可信 | 非金属或小 gap 状态不清为 `WARN/BLOCK` |
-| dense NSCF | NSCF k-point summary | 费米面来自 uniform mesh | k mesh 已足够 | mesh 太稀且用于定量形状为 `WARN/BLOCK` |
-| Fermi energy | SCF/NSCF output、BXSF header | 能量参考可复查 | Fermi level 对 smearing 不敏感 | Fermi energy 不稳定或未记录为 `BLOCK` |
-| band coverage | `nbnd`、eigenvalue range | crossing bands 被包含 | 所有相关 band 已正确连接 | band 数不足为 `BLOCK` |
-| `fs.x` 输出 | stdout、BXSF 文件 | 可视化文件来自当前运行 | 图像解释已完成 | 文件缺失或 prefix 错配为 `BLOCK` |
-| 与 DOS/bands 对照 | DOS at Fermi、bands crossing | 金属性判断可交叉检查 | DOS/bands 一致就完成所有收敛 | 图像与 bands/DOS 矛盾未解释为 `WARN/BLOCK` |
+| `prefix/outdir` | fs.x | 读取 dense NSCF 数据 | 读取旧或稀疏数据 | fs.x output |
+| `filfermi` | fs.x | BXSF 输出文件 | 文件名无法追踪 | 生成 BXSF |
+| `K_POINTS automatic` | pw.x nscf | dense uniform k mesh | 用 bands path 生成费米面 | NSCF output k 点数量 |
+| `Fermi energy` | pw.x output | 费米面能量参考 | 与 DOS/bands 零点混用 | output Fermi energy |
 
-## 收敛与可靠性
+## 通用输出审阅模板
 
-- Fermi surface 对 k mesh、smearing、Fermi energy 和 band crossing 位置敏感。
-- 小带隙、半金属、磁性或 SOC 体系需要特别审阅 degeneracy、spin splitting 和 band index。
-- BXSF 图像粗糙、破碎或随 smearing 大幅改变时，不应写定量结论。
-- Fermi surface 若用于 EPC、transport 或 nesting 解释，需要进入更严格的 k/q mesh sensitivity 和高级 workflow。
+```markdown
+## output review
 
-## PASS / WARN / BLOCK
+- QE 程序:
+- 计算类型:
+- QE version:
+- Input dependency:
+- Structure summary:
+- Pseudopotentials loaded:
+- Cutoff reported:
+- K-points reported:
+- Convergence status:
+- 本 workflow 关键输出:
+- Warnings:
+- Scratch / restart status:
+- PASS / WARN / BLOCK:
+- Reason:
+- Allowed downstream workflows:
+```
 
-| 状态 | 条件 | 是否允许进入下游 |
+## 输出判断标准
+
+- 仅对有 Fermi surface 的体系有意义。
+- `fs.x` output 和 BXSF 文件应能追踪到正确的 dense NSCF 数据。
+- 确认 NSCF k mesh 足够密，并记录 shifted/unshifted mesh 与 Fermi energy 来源。
+- BXSF 可视化应与 bands crossing 和 DOS at Fermi level 对照。
+- BXSF 只是一种可视化数据格式；费米面拓扑或嵌套判断需要额外 k mesh sensitivity。
+
+## 收敛性要求
+
+- Fermi surface 对 k mesh、smearing 和 Fermi level 敏感。
+- 应先完成 bands 和 DOS 的基本一致性检查。
+
+## 常见错误与诊断
+
+| 现象 | 可能原因 | 优先排查 |
 |---|---|---|
-| `PASS` | SCF/NSCF 为 `PASS`；体系金属性明确；dense uniform mesh、Fermi energy、bands 数和 BXSF 文件可复查；与 bands/DOS 不冲突或差异已解释 | 允许进入定性 Fermi surface 图、与 DOS/bands 交叉检查、后续高级 workflow 前置记录 |
-| `WARN` | mesh 或 smearing 只适合探索；小 gap/semimetal 边界不清；图像仅作预览 | 只允许内部诊断，不用于定量拓扑、nesting 或 transport 结论 |
-| `BLOCK` | 上游为 `BLOCK`；非金属前提错误；k mesh 不是 uniform dense；Fermi level 未定义；band 数不足；图像与 DOS/bands 冲突未排查 | 不允许进入 Fermi surface 解释或高级下游 |
+| BXSF 不显示或破碎 | k mesh 太稀或文件格式问题 | 加密 NSCF 并检查 fs.x 输出 |
+| 与 bands 不一致 | 能量零点或 band index 混乱 | 对照 Fermi energy 和 bands crossing |
+| 用于非金属体系 | 物理前提错误 | 回到 DOS/bands 判断 |
+| 费米面形状随 smearing 大幅变化 | k mesh 或占据设置不稳 | 回到 smearing/k-point convergence |
 
-## 常见误区
+## 通用学习模板
 
-- 用 bands path 或 SCF 稀疏 mesh 生成费米面。
-- 只看 BXSF 图像，不检查 Fermi energy 和 band index。
-- 把 smearing 造成的模糊或伪交叉当成物理费米面。
-- 忽略 SOC 或磁性导致的能带劈裂。
-- 将可视化软件输出当作 k mesh convergence 证据。
+使用 `<system>`、`<structure>`、`<pseudo>`、`<k_mesh>`、`<energy_window>`、`<output_format>` 等占位符记录个人学习任务。本仓库提供通用审阅框架，不保存具体计算结果。
 
-## 下游影响
+## 记录模板
 
-Fermi surface 会影响 figures、metallicity statement、Wannier/EPC/transport 前置判断和 publication record。进入 EPC 或 transport 时，本页只能作为前置审阅，不能替代 dense interpolation 和目标 observable 收敛。
+```text
+pw.scf.<system>.in
+pw.nscf.<system>.in
+fs.<system>.in
+fs.<system>.out
+fermi-surface.<system>.bxsf
+record.md
+```
 
-## 来源与边界
+## 与其他 workflow 的关系
+
+- 依赖 NSCF dense k mesh。
+- 与 bands 和 DOS 共同判断金属性。
+
+## 资料来源
 
 - QE PostProc guide: <https://www.quantum-espresso.org/Doc/pp_user_guide/>
-- QE `pw.x` input reference: <https://www.quantum-espresso.org/Doc/INPUT_PW.html>
 - XCrySDen: <http://www.xcrysden.org/>
-- 本仓库规范：[standards/output-review-checklist.md](../../standards/output-review-checklist.md)
-- 物理边界：[physics-judgement/kmesh-smearing-sensitivity.md](../../physics-judgement/kmesh-smearing-sensitivity.md)
+
+## Source / version boundary
+
+| 项目 | 边界 |
+|---|---|
+| `fs.x` 输入字段 | 以当前 QE PostProc 文档为准 |
+| BXSF 可视化 | XCrySDen 或其他工具只负责显示，不判断物理可信度 |
+| 金属判断 | 必须与 bands、DOS、occupation 和 smearing review 共同成立 |
