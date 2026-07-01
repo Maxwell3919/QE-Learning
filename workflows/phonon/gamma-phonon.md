@@ -4,6 +4,8 @@
 
 Gamma phonon 用于计算 Brillouin zone 中心的振动模式，是 IR/Raman、Born effective charge、dielectric tensor 和 LO-TO splitting 等响应性质的入口。它回答的是 zone-center 模式是否可信，不回答全 Brillouin zone 的动力学稳定性。Gamma phonon 属于 DFPT response workflow，依赖已经审阅过的结构、final static SCF、赝势、cutoff、k mesh、occupation 和 `prefix/outdir` 数据链。
 
+这页应按 handbook 使用：先确认 ground-state 数据链是否可信，再确认 `ph.x` 对 Gamma perturbations 的线性响应是否收敛，最后才解释 `dynmat.x` 给出的频率、模式和可选响应张量。Gamma 结果常被误用成“声子稳定性证明”，因此本页把它限定为 zone-center 证据；如果目标是 off-Gamma soft mode、zone-boundary instability 或热力学 phonon 数据，应转入 q-grid dispersion workflow。
+
 ## 上游依赖
 
 - 结构状态：来自可信 `relax` 或 `vc-relax` 后的 final static SCF；如果固定晶格，应记录原因。
@@ -24,7 +26,11 @@ relaxed structure
   -> output review
 ```
 
+这条计算图的核心不是命令顺序，而是数据所有权。`ph.x` 不重新建立一个新的 ground state；它读取 `pw.x scf` 留在 `prefix/outdir` 中的电荷密度、波函数和相关数据，并在 q = 0 上求解线性响应方程。`dynmat.x` 只读取当前 Gamma dynamical matrix 并输出模式表、频率和可选的 ASR 后处理结果。只要 final static SCF、scratch 目录或 `fildyn` 文件有一环不可追踪，后面的频率表就只能作为未准入数据。
+
 ## 关键 QE 输入对象
+
+Gamma phonon 的输入对象分成两个层次。`ph.x` 的 `&INPUTPH` 决定从哪个 SCF 数据链读取 ground state、求解哪些 perturbations、写出哪个 dynamical matrix；`dynmat.x` 的 `&INPUT` 决定对哪个 dynamical matrix 做模式分析和是否施加 ASR。两者共享的只是 `fildyn` 文件边界，不能把 `dynmat.x` 的后处理设置倒推为上游 DFPT 已经可靠。
 
 ```fortran
 &INPUTPH
@@ -61,9 +67,13 @@ ph.x -in ph.gamma.<system>.in > ph.gamma.<system>.out
 dynmat.x -in dynmat.<system>.in > dynmat.<system>.out
 ```
 
-`ph.x` 读取的是上游 SCF 的 `prefix/outdir`，输出 `fildyn` 所指定的 dynamical matrix。`dynmat.x` 只对已有 Gamma dynamical matrix 做对角化和模式输出；它不能修复上游 SCF、结构或 DFPT perturbation 未收敛的问题。个人记录中应保留 `pw.scf.<system>.out`、`ph.gamma.<system>.out`、`dynmat.<system>.out`、`fildyn` 文件名、ASR 设置和是否开启 `epsil`。
+`ph.x` 读取的是上游 SCF 的 `prefix/outdir`，输出 `fildyn` 所指定的 dynamical matrix。这个 `prefix/outdir` 应来自 final static SCF，而不是 relax 过程中的临时电子步，也不是同名体系的旧 scratch。`dynmat.x` 只对已有 Gamma dynamical matrix 做对角化和模式输出；它不能修复上游 SCF、结构或 DFPT perturbation 未收敛的问题。个人记录中应保留 `pw.scf.<system>.out`、`ph.gamma.<system>.out`、`dynmat.<system>.out`、`fildyn` 文件名、ASR 设置和是否开启 `epsil`。
+
+文件命名需要能回答一个简单问题：当前 `dynmat.x` 到底读取了哪一次 `ph.x` 产生的 Gamma matrix。若同一目录里有多次 Gamma 测试、不同 ASR 试验或不同 `epsil` 分支，记录中应明确输入、输出和 `fildyn` 的对应关系。一个看似合理的频率表，如果无法追溯到当前 final static SCF 和当前 `ph.x` output，应降级为文件链风险。
 
 ## Output review
+
+Output review 先看数据链，再看 perturbation convergence，最后看频率和模式解释。`JOB DONE`、频率表或 tensor 段落都不是单独的准入证据；它们必须和正确的 q-vector、收敛的 irreducible representations、当前 `fildyn` 以及上游 SCF 审阅记录一起出现，才构成可进入下游的 Gamma phonon 证据。
 
 | 检查项 | 从哪里看 | 能证明什么 | 不能证明什么 |
 |---|---|---|---|
@@ -83,13 +93,15 @@ dynmat.x -in dynmat.<system>.in > dynmat.<system>.out
 - Gamma 有小虚频时，应先区分 acoustic numerical artifact、结构未充分优化、DFPT 未收敛和可能的真实软模。
 - ASR 是后处理约束，用来审阅平移不变性相关误差，不能替代结构优化、SCF 或 DFPT 收敛。
 
+可靠性判断还要区分“响应方程收敛”和“物理解释成立”。`ph.x` perturbations 全部收敛，只说明当前输入对象下的线性响应方程已求解；cutoff、k mesh、occupation、smearing、赝势和结构残余力是否足以支撑目标谱学或 Born charge 解释，需要沿用上游 workflow 的收敛证据。ASR 后 acoustic modes 接近零是一个一致性信号，但如果 ASR 前后差异很大，或者 ASR 掩盖了明显虚频，就应回到结构、SCF 和 DFPT 收敛排查。
+
 ## PASS / WARN / BLOCK
 
 | 状态 | 条件 | 是否允许进入下游 |
 |---|---|---|
-| PASS | 上游 final static SCF 为 PASS；`ph.x` perturbations 收敛；`dynmat.x` 读取当前 `fildyn`；acoustic modes 和频率符号已审阅；`epsil` 分支若使用则条件和输出完整 | 可进入 dielectric/Born、IR/Raman 或作为 q-grid phonon 的前置审阅 |
-| WARN | acoustic modes 有小偏离、单个低频模式需复查、`epsil` 适用条件尚未充分说明，或只用于诊断 | 可进入受控复查，不应写入最终稳定性或谱学结论 |
-| BLOCK | 上游 SCF/结构为 BLOCK；`ph.x` perturbation 未收敛；`fildyn` 混用；明显虚频未 triage；把 Gamma 结果当完整稳定性证明 | 不允许进入 IR/Raman、Born charge 解释、稳定性声明或图件归档 |
+| PASS | 上游 final static SCF 为 PASS；`prefix/outdir` 指向可信 ground-state 数据；`ph.x` perturbations 全部收敛；`dynmat.x` 读取当前 `fildyn`；acoustic modes、频率符号、单位和 eigenvector/context 已审阅；`epsil` 分支若使用则条件和输出完整 | 可进入 dielectric/Born、IR/Raman 或作为 q-grid phonon 的前置审阅；仍不得声明全 BZ 稳定 |
+| WARN | acoustic modes 有小偏离、单个低频模式需复查、ASR 前后变化偏大、`epsil` 适用条件尚未充分说明，或当前结果只用于诊断 | 可进入受控复查、参数敏感性检查或 q-grid 计划，不应写入最终稳定性或谱学结论 |
+| BLOCK | 上游 SCF/结构为 BLOCK；没有 final static SCF；`prefix/outdir` 不可信；`ph.x` perturbation 未收敛；`fildyn` 混用；明显虚频未 triage；用 ASR 修补坏数据；把 Gamma 结果直接外推成全 BZ 稳定性结论 | 不允许进入 IR/Raman、Born charge 解释、稳定性声明或图件归档 |
 
 ## 常见误区
 
@@ -104,10 +116,13 @@ dynmat.x -in dynmat.<system>.in > dynmat.<system>.out
 
 Gamma phonon 是 [dielectric tensor and Born effective charge workflow](dielectric-born-effective-charge.md) 与 [IR and Raman workflow](ir-raman.md) 的上游。它也为 [phonon debugging workflow](phonon-debugging.md) 提供 acoustic modes 和 zone-center 虚频证据。若目标是全 Brillouin zone 审阅，应进入 [phonon dispersion workflow](phonon-dispersion-dfpt.md)。
 
+下游记录应继承本页的状态标签。Gamma `PASS` 可以支持 zone-center response 或作为 dispersion 前的 sanity check，但不能自动授权 phonon DOS、热学量、EPC 或相稳定性结论。Gamma `WARN` 适合保留为诊断证据，尤其是用于决定是否重做 final SCF、加严 DFPT 收敛或检查 eigenvector；Gamma `BLOCK` 则意味着所有依赖该 `fildyn` 的张量、模式图和解释都应停止传播。
+
 ## 来源与边界
 
 - Stable: `ph.x` 的 `tr2_ph`、`trans`、`epsil`、`fildyn` 和 q 点输入语义以 QE `INPUT_PH` 为准；`dynmat.x` 的 `fildyn`、`asr` 和输出语义以 QE `INPUT_DYNMAT` 为准。
 - Boundary: Gamma phonon 只能审阅 zone-center modes；全 Brillouin zone、低维边界和极性长程修正需要对应 workflow。
+- Inference: 本页要求 final static SCF、可信 `prefix/outdir`、perturbation convergence、ASR 前后审阅和虚频 triage，是 workflow 准入标准；它不等同于 QE 官方给出的普适数值参数推荐。
 - Internal standard: PASS / WARN / BLOCK 按 [pass-warn-block.md](../../standards/pass-warn-block.md) 与 [output-review-checklist.md](../../standards/output-review-checklist.md) 记录。
 
 ## 资料来源

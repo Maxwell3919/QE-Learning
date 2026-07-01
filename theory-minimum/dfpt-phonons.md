@@ -16,6 +16,10 @@
 
 ## 物理图像
 
+![Phonon dynamical matrix physical picture](../assets/diagrams/theory-minimum/phonon-dynamical-matrix-picture.svg)
+
+图：从能量面曲率到 force constants、`D(q)`、`omega^2` 和 eigenvectors 的最低物理图像；负曲率对应 imaginary frequency，需要 triage 后才能进入稳定性结论。
+
 声子是晶体中原子集体振动的正则模式。在 Born-Oppenheimer 图像下，电子先在给定原子结构上达到基态，原子核在这个电子基态能量面上运动。若原子只在平衡位置附近小幅振动，可以把能量面对原子位移展开到二阶；二阶曲率决定 force constants，进一步决定 dynamical matrix 和 phonon frequencies。
 
 频率平方可以看成能量曲率的符号和大小。正的曲率对应稳定振动模式；接近零的 acoustic branch 反映整体平移；负的曲率在输出中通常表现为 imaginary 或 negative frequency，需要判断它来自数值误差、结构未充分优化、边界条件、q-grid 插值问题，还是可能的真实软模和动力学不稳定。频率本身只告诉我们“某个 q 点某个模式的曲率符号和大小”，而 mode eigenvector 才告诉我们这个模式主要对应哪些原子、方向和相对位移。因此解释 soft mode 时，频率表和 eigenvector / displacement pattern 应一起审阅。

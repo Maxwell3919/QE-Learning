@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1140" height="560" viewBox="0 0 1140 560" role="img" aria-labelledby="title desc">
+  <title id="title">Phonon dynamical matrix physical picture</title>
+  <desc id="desc">A physical schematic connecting energy-surface curvature to force constants, the phonon dynamical matrix D(q), eigenvalues omega squared and eigenvectors, with imaginary frequency shown as negative curvature that requires triage.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#344054"/>
+    </marker>
+    <style>
+      .box { fill: #f8fafc; stroke: #344054; stroke-width: 2; rx: 10; }
+      .accent { fill: #eef6ff; stroke: #175cd3; stroke-width: 2; rx: 10; }
+      .warn { fill: #fff7ed; stroke: #c2410c; stroke-width: 2; rx: 10; }
+      .ok { fill: #f0fdf4; stroke: #15803d; stroke-width: 2; rx: 10; }
+      .text { font-family: Arial, sans-serif; font-size: 18px; fill: #101828; }
+      .small { font-family: Arial, sans-serif; font-size: 14px; fill: #344054; }
+      .tiny { font-family: Arial, sans-serif; font-size: 12px; fill: #475467; }
+      .arrow { stroke: #344054; stroke-width: 2; fill: none; marker-end: url(#arrow); }
+      .axis { stroke: #667085; stroke-width: 2; }
+      .curve-ok { stroke: #175cd3; stroke-width: 3; fill: none; }
+      .curve-warn { stroke: #c2410c; stroke-width: 3; fill: none; }
+      .dash { stroke: #98a2b3; stroke-width: 1.5; stroke-dasharray: 5 5; }
+      .note { fill: #ffffff; stroke: #98a2b3; stroke-width: 1.5; rx: 8; }
+    </style>
+  </defs>
+
+  <rect x="35" y="70" width="245" height="170" class="box"/>
+  <text x="157.5" y="105" text-anchor="middle" class="text">Energy surface</text>
+  <line x1="73" y1="195" x2="240" y2="195" class="axis"/>
+  <line x1="95" y1="210" x2="95" y2="125" class="axis"/>
+  <path d="M85,178 C112,125 176,125 230,178" class="curve-ok"/>
+  <line x1="158" y1="125" x2="158" y2="197" class="dash"/>
+  <text x="157.5" y="224" text-anchor="middle" class="small">positive curvature</text>
+
+  <rect x="35" y="315" width="245" height="170" class="warn"/>
+  <text x="157.5" y="350" text-anchor="middle" class="text">Imaginary branch</text>
+  <line x1="73" y1="440" x2="240" y2="440" class="axis"/>
+  <line x1="95" y1="455" x2="95" y2="370" class="axis"/>
+  <path d="M85,388 C122,448 178,448 230,388" class="curve-warn"/>
+  <line x1="158" y1="388" x2="158" y2="440" class="dash"/>
+  <text x="157.5" y="468" text-anchor="middle" class="small">negative curvature</text>
+
+  <rect x="350" y="145" width="190" height="115" class="accent"/>
+  <text x="445" y="185" text-anchor="middle" class="text">Force constants</text>
+  <text x="445" y="213" text-anchor="middle" class="small">Phi = d2E / du du</text>
+  <text x="445" y="237" text-anchor="middle" class="small">local curvature map</text>
+
+  <rect x="610" y="145" width="190" height="115" class="accent"/>
+  <text x="705" y="185" text-anchor="middle" class="text">D(q)</text>
+  <text x="705" y="213" text-anchor="middle" class="small">mass normalized</text>
+  <text x="705" y="237" text-anchor="middle" class="small">Fourier transformed</text>
+
+  <rect x="870" y="75" width="220" height="110" class="ok"/>
+  <text x="980" y="115" text-anchor="middle" class="text">Eigenvalues</text>
+  <text x="980" y="143" text-anchor="middle" class="small">omega^2(q)</text>
+  <text x="980" y="166" text-anchor="middle" class="small">sign and stiffness</text>
+
+  <rect x="870" y="235" width="220" height="110" class="box"/>
+  <text x="980" y="275" text-anchor="middle" class="text">Eigenvectors</text>
+  <text x="980" y="303" text-anchor="middle" class="small">mode displacement</text>
+  <text x="980" y="326" text-anchor="middle" class="small">atoms + directions</text>
+
+  <rect x="870" y="405" width="220" height="88" class="warn"/>
+  <text x="980" y="438" text-anchor="middle" class="text">omega^2 &lt; 0</text>
+  <text x="980" y="465" text-anchor="middle" class="small">imaginary frequency:</text>
+  <text x="980" y="486" text-anchor="middle" class="small">triage before claim</text>
+
+  <path d="M280,155 C305,170 322,190 350,198" class="arrow"/>
+  <path d="M280,400 C315,380 330,270 350,232" class="arrow"/>
+  <path d="M540,203 C565,203 585,203 610,203" class="arrow"/>
+  <path d="M800,190 C828,165 842,128 870,128" class="arrow"/>
+  <path d="M800,215 C830,235 842,288 870,288" class="arrow"/>
+  <path d="M800,235 C835,285 850,430 870,449" class="arrow"/>
+
+  <rect x="347" y="330" width="415" height="90" class="note"/>
+  <text x="554.5" y="358" text-anchor="middle" class="small">DFPT obtains this curvature information from linear response</text>
+  <text x="554.5" y="382" text-anchor="middle" class="small">at selected q points, without using a material-specific example.</text>
+  <text x="554.5" y="405" text-anchor="middle" class="tiny">Interpretation still inherits structure, SCF, cutoff, k mesh and response convergence.</text>
+
+  <rect x="315" y="25" width="510" height="36" class="note"/>
+  <text x="570" y="48" text-anchor="middle" class="small">A frequency table gives curvature; eigenvectors give the physical displacement pattern.</text>
+</svg>
