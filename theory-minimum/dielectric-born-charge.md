@@ -1,100 +1,92 @@
 # Dielectric tensor and Born effective charge
 
-## QE 中对应的问题
+## 本页解决什么问题
 
-介电张量和 Born effective charge 是 `ph.x` 在 Gamma limit 处理的电场线性响应量。它们主要回答三个 QE workflow 问题：
-
-- `epsil=.true.` 是否物理有效，output 中是否真的产生 dielectric tensor 和 Born effective charge。
-- Gamma 附近极性声子是否需要 non-analytic correction，以及 LO-TO splitting 能否被解释。
-- `dynmat.x` 或 `matdyn.x` 后处理中使用非解析项时，输入张量、方向、ASR 和金属/绝缘体边界是否被记录清楚。
-
-最低概念是：在绝缘体中，宏观电场微扰可以定义电子介电张量；原子位移引起的宏观极化变化给出 Born effective charge。长波极限 `q -> 0` 下，极性材料的库仑长程相互作用会让 dynamical matrix 出现方向相关的 non-analytic contribution，因此 Gamma 附近的 LO 和 TO 模式可能分裂。金属中自由载流子会屏蔽静态宏观电场，通常不能把 `epsil` 产生的电场响应当作绝缘体介电/Born 张量来解释。
-
-本页只说明 QE input/output review 需要的最低判断，不写完整线性响应理论推导，也不保存具体材料案例。
-
-## 输入字段表
-
-| 字段 | 所属程序 | 用来回答的问题 | 需要联动检查 | 常见误用 |
-|---|---|---|---|---|
-| `epsil` | `ph.x` | 是否请求宏观介电张量和 Born effective charge | q 点是否为 Gamma、体系是否按绝缘体处理、`trans`、output warning | 在金属、未确认带隙或非 Gamma 分支中硬解释张量 |
-| `trans` | `ph.x` | 是否计算原子位移 phonon perturbations | `epsil`、Gamma dynamical matrix、perturbation 收敛 | 只盯电场响应，忘记声子扰动也要收敛 |
-| `fildyn` | `ph.x/dynmat.x/q2r.x` | 本次 Gamma dynamical matrix 或 q-grid dyn 前缀是什么 | 后处理读入文件、文件时间、是否来自同一 `prefix/outdir` | `dynmat.x` 或 `q2r.x` 读取旧 dyn 文件 |
-| `tr2_ph` | `ph.x` | 电场和声子响应方程收敛到什么阈值 | 每个 perturbation 输出、SCF `conv_thr`、k 点和 cutoff | 只看 job 正常结束，不看响应收敛 |
-| `prefix/outdir` | `pw.x/ph.x` | `ph.x` 是否读取同一个 SCF 基态 | SCF output、scratch/restart、赝势和结构版本 | SCF 和 PH 不是同一数据源却继续后处理 |
-| `occupations/smearing/degauss` | `pw.x` | 体系是否被作为金属、绝缘体或边界小带隙问题处理 | band occupation、Fermi energy、DOS/bands、SCF 稳定性 | 有 smearing 或部分占据时仍按普通绝缘体解释 `epsil` |
-| `K_POINTS` | `pw.x` | 电子响应采样是否足够 | 绝缘体/小带隙判断、SCF 收敛、Born charge 稳定性 | k 点太粗导致张量数值不稳定 |
-| `ecutwfc/ecutrho` | `pw.x` | 力常数和响应量是否有足够基组质量 | cutoff 收敛、力/应力、phonon 频率 | 只按总能收敛就解释 Born charge |
-| `asr` | `dynmat.x/matdyn.x` | 后处理频率和模式时如何施加 acoustic sum rule | Gamma acoustic modes、LO-TO 设置、ASR 前后记录 | 把 ASR 当作未收敛结构或错误张量的修复 |
-| non-analytic / LO-TO 相关选项 | `dynmat.x/matdyn.x` | 是否在 Gamma limit 使用介电张量和 Born charges 加入非解析项 | 方向、张量是否完整、ASR、绝缘体条件 | 不记录方向却比较 LO-TO splitting |
-| `zasr` | `q2r.x` | 在 IFC 转换阶段如何处理 Born effective charge 的 sum rule | q-grid dyn 文件、`flfrc`、后续 `matdyn.x` 设置 | q-grid 和 Gamma 后处理的 ASR 层级混淆 |
-
-`epsil` 的关键边界：
-
-- QE 官方 `ph.x` 输入中，`epsil` 只对 `q=0` 的非金属有效；它请求介电常数以及 Born effective charge。
-- `trans=.true.` 且 `epsil=.true.` 时，Gamma phonon 与电场相关响应需要一起审阅。
-- 当 `ldisp=.true.` 时，`epsil` 相关量通常只和 Gamma 分支相关，不能把它当成整条 q-grid dispersion 都已自动验证。
-- 若上游 `pw.x` 使用金属占据、明显部分占据、无可靠带隙证据或边界小带隙行为，应先标记为 `WARN` 或 `BLOCK`，不要直接解释 dielectric tensor / Born effective charge。
-
-## output review
-
-`ph.x` output：
-
-- 是否明确为 `q = (0, 0, 0)` 或 Gamma limit 响应；非 Gamma q 点不能期待同样的宏观电场张量输出。
-- input summary 是否读到了 `epsil=.true.`、`trans=.true.`、目标 `prefix/outdir`、cutoff、k 点和 occupation policy。
-- 是否出现 dielectric tensor 段落；张量是否为完整 3x3 信息，是否有对称性约化或警告。
-- 是否出现 Born effective charge 段落；每个原子是否都有 3x3 有效电荷张量。
-- electric-field perturbations、atomic displacement perturbations 是否都达到 `tr2_ph`。
-- output 是否有 metallic、Fermi surface、electric field、polarization、symmetry、not converged、recover 相关 warning。
-- `fildyn` 是否写出本次 Gamma dynamical matrix，且文件名能被后续 `dynmat.x` 或 `matdyn.x` 追踪。
-
-`dynmat.x` / `matdyn.x` output：
-
-- 后处理是否读取了同一次 `ph.x` 产生的 Gamma dyn 文件或同一套 IFC。
-- 若使用 LO-TO splitting 或 non-analytic correction，是否记录了方向；Gamma limit 的非解析项是方向相关的，不能只写“Gamma 频率”。
-- ASR 设置是否明确；比较频率时应说明 ASR 前后或使用的 `asr/zasr`。
-- LO/TO 模式解释是否只建立在张量完整、响应收敛、绝缘体条件成立的前提上。
-- 若没有 dielectric/Born 段落，后处理仍可给普通 Gamma phonon，但不能写 IR-active、LO-TO 或 non-analytic 结论。
-
-PASS / WARN / BLOCK 最低判断：
-
-| 判断 | 条件 | 允许下游 |
-|---|---|---|
-| `PASS` | 绝缘体条件明确；Gamma `epsil` 分支开启；电场和声子 perturbations 收敛；dielectric tensor 与 Born charges 完整；后处理方向和 ASR 记录清楚 | LO-TO splitting、non-analytic correction、IR 相关 review |
-| `WARN` | 小带隙/占据边界、k 点或 cutoff 尚未充分复查；张量完整但数值敏感性未知；ASR/方向记录不充分 | 只允许探索性解释，不能写最终物理结论 |
-| `BLOCK` | 金属或明显部分占据；非 Gamma 分支期待 `epsil`；电场响应未收敛；缺 dielectric/Born 输出；后处理读取错误文件 | 不进入 LO-TO / non-analytic / IR 结论 |
-
-## 常见错误
-
-| 现象 | 常见原因 | 优先判断 |
-|---|---|---|
-| output 没有 dielectric tensor | `epsil` 未开启、不是 Gamma、体系被识别为金属或电场响应条件不满足 | 查 `ph.x` input summary、q 点和 warning |
-| Born effective charge 缺失 | `epsil` 分支没有成功完成、`trans/epsil` 组合或响应未收敛 | 查 electric-field 与 atomic perturbation 收敛 |
-| 张量存在但数值看起来异常 | SCF 太松、k 点/cutoff 不足、结构未充分 relax、赝势或对称性问题 | 回到 SCF/relax/phonon convergence，不先解释物理 |
-| 把 Born effective charge 当作静态价态 | 概念混淆 | Born charge 是极化对原子位移的动态响应，不是 Bader 电荷或形式价态 |
-| LO-TO splitting 解释混乱 | 没有记录方向、non-analytic 设置、ASR 或 dielectric/Born 来源 | 补全后处理记录；缺记录时标 `WARN` |
-| 金属里强行解释 `epsil` | 忽略自由载流子屏蔽和 QE 适用边界 | 金属或明显部分占据下标 `BLOCK` |
-| q-grid dispersion 中误以为每个 q 点都有 `epsil` | 混淆 Gamma response 与 q-grid phonon | `epsil` 是 Gamma limit 相关分支，不替代 q-grid 收敛 |
-| dynmat/matdyn 读错文件 | `fildyn/flfrc` 来自旧任务或不同 `prefix/outdir` | 核对文件名、时间、record 和 output header |
+本页解释 dielectric tensor 和 Born effective charge 在 QE/DFPT 中是什么，以及为什么它们只能在满足物理和文件链条件时用于 LO-TO splitting、non-analytic correction、IR/Raman 和极性声子解释。它帮助用户读懂 `ph.x epsil=.true.` 的 output，而不是把张量数值当作普通 ground-state scalar。
 
 ## 最低掌握深度
 
-完成本页后，学习者至少应能做到：
+最低需要知道：
 
-- 说明 `epsil=.true.` 属于 `ph.x` 的 Gamma、非金属电场响应分支，不是普通 phonon dispersion 的通用开关。
-- 区分 dielectric tensor、Born effective charge、LO-TO splitting 和 non-analytic correction：前两者是响应张量，后两者是 Gamma 附近极性声子后处理/解释中用到的效应。
-- 解释 Born effective charge 是原子位移与宏观极化之间的动态响应量，不能当作静态价态解释。
-- 在 input 中识别 `epsil`、`trans`、`fildyn`、`tr2_ph`、occupation policy、`asr/zasr` 和后处理非解析项之间的依赖。
-- 在 output 中找到 dielectric tensor、Born effective charge、electric-field perturbation 收敛和 warning。
-- 对金属、小带隙、smearing 或部分占据体系给出 `WARN/BLOCK`，而不是硬套绝缘体 LO-TO 解释。
-- 记录 LO-TO / non-analytic correction 的方向、ASR 和张量来源；缺一项时不写最终结论。
+- Dielectric tensor 描述系统对宏观电场的线性响应。
+- Born effective charge 描述宏观极化对原子位移的动态响应，不是静态离子价。
+- 它们是 response quantities，对 functional、PP、gap、structure、k mesh、cutoff 和 response convergence 敏感。
+- QE 中 `epsil=.true.` 是 Gamma、非金属电场响应分支；输出后仍需审阅 tensor symmetry、warning 和文件链。
 
-## 对应 workflow
+## QE 中的对应对象
 
-- [Dielectric tensor and Born effective charge workflow](../workflows/phonon/dielectric-born-effective-charge.md)：`epsil=.true.`、Gamma dielectric/Born 输出、LO-TO 和 non-analytic 前提。
-- [Gamma phonon workflow](../workflows/phonon/gamma-phonon.md)：单个 Gamma phonon、`ph.x -> dynmat.x`、acoustic modes 和 `epsil` 分支。
-- [Phonon dispersion DFPT workflow](../workflows/phonon/phonon-dispersion-dfpt.md)：q-grid dispersion 中使用 non-analytic correction 前的依赖和记录边界。
-- [IR/Raman workflow](../workflows/phonon/ir-raman.md)：IR-active 模式、Born charge 和介电响应的下游使用。
-- [PASS / WARN / BLOCK](../standards/pass-warn-block.md)：把金属边界、张量缺失、收敛不足和文件依赖错误转成准入判断。
+| 对象 | QE 程序 | 判断意义 | output 证据 |
+|---|---|---|---|
+| `epsil=.true.` | `ph.x` | 请求 dielectric tensor 和 Born effective charge | dielectric/Born tensor 段落 |
+| `trans` | `ph.x` | 声子 perturbations 与 response 计算 | perturbation convergence |
+| `tr2_ph` | `ph.x` | response 自洽阈值 | electric-field / atomic perturbation 收敛 |
+| `fildyn` | `ph.x` / `dynmat.x` | Gamma dynamical matrix 与 response 文件链 | 后处理读取记录 |
+| `asr` / `zasr` | `dynmat.x` / `q2r.x` / `matdyn.x` | acoustic / charge neutrality 相关约束 | ASR 设置、frequency changes |
+| non-analytic correction | `dynmat.x` / `matdyn.x` | LO-TO splitting 和方向相关 Gamma limit | direction、tensor 来源、frequency splitting |
+
+相关 workflow：[dielectric/Born workflow](../workflows/phonon/dielectric-born-effective-charge.md)、[IR/Raman](../workflows/phonon/ir-raman.md)、[Gamma phonon](../workflows/phonon/gamma-phonon.md)。
+
+## 核心概念
+
+在极性绝缘体中，长波极限下原子位移会产生宏观电场，电场又反馈到 dynamical matrix。Dielectric tensor 和 Born effective charge 提供了这一 non-analytic contribution 的输入，因此会影响 LO-TO splitting 和 IR activity。由于它们来自线性响应，output 中张量完整性、对称性、收敛和适用条件比单个数值更重要。
+
+## 对 input 的影响
+
+- `epsil=.true.` 应只在 Gamma response 目标明确且体系条件可解释时开启。
+- 上游 occupation、smearing、band gap 边界必须记录；金属或部分占据体系不应按普通绝缘体解释。
+- `fildyn`、`flfrc`、response tensor 和 non-analytic correction 必须来自同一结构/SCF/PP/XC 数据链。
+- 如果用于 IR/Raman 或 LO-TO splitting，应记录方向、ASR/zasr、tensor 来源和后处理程序。
+
+## 对 output review 的影响
+
+| output 证据 | 支持的判断 | 不能证明什么 |
+|---|---|---|
+| `epsil` 分支执行 | QE 请求并进入电场 response | 物理条件自动满足 |
+| dielectric tensor | 介电响应张量输出完整 | 张量已对所有数值参数收敛 |
+| Born charge tensors | 每个原子动态有效电荷输出 | 等于静态价态 |
+| tensor symmetry | 与结构对称性是否一致 | 异常一定是物理效应 |
+| perturbation convergence | response 方程完成 | functional/PP/model error 已消除 |
+| warnings | 金属、symmetry、收敛或电场问题 | warning 可忽略 |
+| non-analytic chain | LO-TO 文件链可追踪 | splitting 可无边界解释 |
+
+## 常见误区
+
+- 把 Born charge 当作静态离子价。
+- tensor 输出后不检查对称性。
+- response 未收敛就做 IR/LO-TO 解释。
+- polar correction 文件链不清。
+- 在金属或 occupation 边界不清时解释 dielectric/Born 张量。
+- q-grid dispersion 中误以为每个 q point 都有 `epsil` response。
+- LO-TO splitting 不记录方向和 ASR 设置。
+
+## PASS / WARN / BLOCK 关联
+
+| 状态 | 理论依据 | 下游准入 |
+|---|---|---|
+| PASS | 绝缘体条件明确；`epsil` 分支完整；electric-field/atomic perturbations 收敛；tensor symmetry 和文件链可复查 | 可进入 LO-TO、IR/Raman 和 polar phonon 分析 |
+| WARN | 小带隙、tensor 敏感、symmetry 或 ASR 记录不足 | 可探索或做敏感性测试，不应给定量响应结论 |
+| BLOCK | 金属/部分占据条件下解释张量；response 未收敛；张量缺失；non-analytic 文件链混用 | 不允许进入 IR/LO-TO/Born charge 结论 |
+
+## 下游影响
+
+- `Gamma phonon`：`epsil` 分支与 Gamma modes 一起审阅。
+- `phonon dispersion`：polar correction 依赖张量来源和文件链一致。
+- `IR/Raman`：IR activity 和 LO-TO 解释依赖 Born charge/dielectric tensor。
+- `workflows advanced`：EPC、spectroscopy 或 polar materials 分析会继承这些 response 边界。
+
+## 与 physics-judgement 的边界
+
+本页只说明 response tensor 的最低 QE 使用。以下问题转到：
+
+- [DFPT response and polar materials](../physics-judgement/10-dfpt-response-and-polar-materials.md)
+- [phonons, soft modes and dynamical stability](../physics-judgement/09-phonons-soft-modes-and-dynamical-stability.md)
+- [kmesh/smearing sensitivity](../physics-judgement/kmesh-smearing-sensitivity.md)
+
+## 来源与边界
+
+- Stable: `epsil`、`trans`、`tr2_ph`、`fildyn` 以 QE `INPUT_PH` 为准；`asr/zasr` 和 non-analytic 后处理以对应 QE `INPUT_*` 为准。
+- Stable: Born charge、dielectric tensor 与 IFC 的 DFPT 理论边界来自 Gonze and Lee 以及 DFPT canonical literature。
+- Boundary: 本页不把 response tensor 与实验介电常数或谱强度无条件等同。
 
 ## 资料来源
 
@@ -103,5 +95,5 @@ PASS / WARN / BLOCK 最低判断：
 - QE INPUT_Q2R reference: <https://www.quantum-espresso.org/Doc/INPUT_Q2R.html>
 - QE INPUT_MATDYN reference: <https://www.quantum-espresso.org/Doc/INPUT_MATDYN.html>
 - QE PHonon user guide: <https://www.quantum-espresso.org/Doc/ph_user_guide/>
-- Kyoto phonon DokuWiki: <https://www2.yukawa.kyoto-u.ac.jp/~koudai.sugimoto/dokuwiki/doku.php?id=quantumespresso%3Aphonon%3A%E3%83%95%E3%82%A9%E3%83%8E%E3%83%B3%E3%81%AE%E8%A8%88%E7%AE%97>
-- Pranab Das phonon tutorial: <https://pranabdas.github.io/espresso/hands-on/phonon/>
+- Gonze and Lee, Dynamical matrices, Born effective charges, dielectric permittivity tensors and interatomic force constants.
+- 本仓库：[dielectric/Born workflow](../workflows/phonon/dielectric-born-effective-charge.md)

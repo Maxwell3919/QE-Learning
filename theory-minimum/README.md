@@ -2,6 +2,8 @@
 
 本目录只记录正确使用 Quantum ESPRESSO 所需的最低 DFT / DFPT / 固体计算理论背景。它不是 DFT 教材，也不追求从历史、定理或完整推导建立理论体系；它只回答一个问题：为了读懂 QE input/output，并判断一次计算是否可以进入下游，最低需要知道哪些概念。
 
+Phase 3-A 的核心页已经与 ground-state、electronic 和 phonon 三类 workflow 建立回链：SCF、cutoff、pseudopotential、k-points、smearing、force/stress、DFPT phonon、dielectric tensor 和 Born effective charge 都应作为 output review 的理论回查层使用。
+
 ## 阅读方式
 
 先从 `learn/` 的能力路线进入具体 workflow，再到 `workflows/` 阅读 QE 原生命令、输入模板、output review 和 `PASS / WARN / BLOCK` 判断。读 workflow 时如果遇到参数选择、输出行含义或准入结论无法解释，再回到本目录查对应理论页。
@@ -12,7 +14,7 @@
 - 看不懂 output review 时，查对应物理量或数值判据，再回到 output 判断 `PASS / WARN / BLOCK`。
 - 遇到常见错误时，先确认它属于概念误解、输入不一致、收敛不足还是下游依赖错误，再回到 workflow 修复。
 
-不要按时间顺序阅读本目录，也不要把它写成具体材料案例库。理论页应按 QE workflow 中反复出现的判断问题组织，而不是按某一种材料、体系或研究故事组织。
+不要按时间顺序阅读本目录，也不要按某一种材料、体系或研究故事组织理论页。理论页应按 QE workflow 中反复出现的判断问题组织。
 
 ## 页面写作要求
 
@@ -24,6 +26,8 @@
 - 对应 workflow：应回链到 `workflows/` 中使用该理论判断的计算步骤。
 
 如果一个理论点不能帮助解释 input 字段、output 证据、收敛判断或 workflow 准入，它就不属于本目录的最低理论层；更深的模型边界和物理可信度问题应进入 `physics-judgement/`。
+
+本目录中的核心页不替代 workflow 页面：workflow 决定如何运行和审阅；theory-minimum 解释为什么这些 input/output 证据会影响准入判断。
 
 ## 与 physics-judgement/ 的关系
 
