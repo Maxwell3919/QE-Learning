@@ -37,11 +37,11 @@
 
 ## 判断规则
 
-- functional choice 是模型选择；cutoff 或 k mesh convergence 不能证明该 functional 适合目标物理问题。
+- functional choice 是模型选择；cutoff 或 k mesh convergence 只能降低数值误差，不能证明该 functional 适合目标物理问题。
 - `input_dft` 与 pseudopotential functional 应保持一致。若不一致，必须说明目的和边界；无说明时不能进入定量结论。
 - LDA、GGA、meta-GGA、hybrid、vdW、DFT+U 不是线性精度阶梯。某个方法对一个 observable 更合适，不代表对 lattice、gap、magnetism、phonon、work function 或 vdW distance 都更合适。
 - 比较不同 functional 时，应把每个 functional 当作独立模型：重新审阅结构、SCF、收敛、下游数据链和 energy reference。
-- functional sensitivity 不能用“图像更接近预期”替代；应写清目标 observable、对照设置和仍未排除的模型误差。
+- functional sensitivity 不能用“图像更接近预期”替代；应写清目标 observable、对照设置和仍未排除的模型误差。若同一 observable 同时对 PP、U、SOC、vdW 或 smearing 敏感，应把它写成模型组合的敏感性，而不是归因给单一 functional 标签。
 
 ## PASS / WARN / BLOCK
 
@@ -57,6 +57,7 @@
 - 不能把 functional 差异解释成 cutoff 或 k mesh 未收敛，除非已完成数值排查。
 - 不能把用一种 functional relax 的结构直接用于另一种 functional 的高风险下游而不说明。
 - 不能把 functional 改变后的 gap、磁矩或 phonon 差异写成充分物理机制。
+- 不能把不同 functional 下的 total energy、stress、phonon 或 work function 混入同一张表而不标明模型分支。
 
 ## 下游影响
 

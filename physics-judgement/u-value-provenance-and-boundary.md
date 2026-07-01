@@ -39,10 +39,10 @@
 ## 判断规则
 
 - U 作用于选定 localized manifold；没有 manifold 和 projector，U 数值本身不可解释。
-- U 不是元素常数。它依赖 projector、PP、functional、结构、局域环境、磁性状态、求取方法和是否自洽更新。
+- U 不是元素常数。它依赖 projector、PP、functional、结构、局域环境、磁性状态、求取方法和是否自洽更新。相同数值的 U 若作用于不同 projector、不同 Hubbard manifold 或不同 UPF，不应视为同一模型。
 - Literature U、empirical U、linear-response U、DFPT U、self-consistent U、U+V 是不同 provenance 类型。它们可以作为不同模型来源，但必须明确标注。
 - 只为了让 gap 接近某个目标而调 U，若没有模型说明和 sensitivity，不足以支撑可靠物理结论。
-- DFT+U 总能、结构、bands、phonon 或磁性比较必须在同一 U 模型和同一数据链下审阅。
+- DFT+U 总能、结构、bands、phonon 或磁性比较必须在同一 U 模型和同一数据链下审阅。若 U 是 linear-response 或 DFPT 求得，还应记录求取所用结构、磁态、functional、PP 和自洽策略，避免把求取阶段与生产计算阶段切断。
 
 ## PASS / WARN / BLOCK
 
@@ -59,6 +59,7 @@
 - 不能用同一 U 无说明迁移到不同 PP、functional、结构或局域环境。
 - 不能只凭 gap 变大就宣称模型更可靠。
 - 不能把 Hubbard occupation matrix 单独写成完整价态或电荷有序证明。
+- 不能把 linear-response / DFPT U 的数值从一个结构、磁态或 PP 迁移到另一个模型后仍称为同一 U。
 
 ## 下游影响
 

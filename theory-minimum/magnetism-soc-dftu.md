@@ -16,9 +16,9 @@
 
 ## 物理图像
 
-普通 non-spin-polarized DFT 把自旋自由度隐含地平均处理。磁性计算允许不同自旋通道或不同方向的自旋密度形成不同占据，从而改变 exchange-correlation potential、total energy、band splitting 和局域磁矩。初始磁化只是帮助 SCF 找到某个可能的解；最终磁态来自自洽后的 density、magnetization 和能量比较。
+普通 non-spin-polarized DFT 把自旋自由度隐含地平均处理。磁性计算允许不同自旋通道或不同方向的自旋密度形成不同占据，从而改变 exchange-correlation potential、total energy、band splitting 和局域磁矩。初始磁化只是帮助 SCF 找到某个可能的解；最终磁态来自自洽后的 density、magnetization 和能量比较。若存在多个合理磁性构型，单次 SCF 的磁矩只能说明该输入收敛到一个自洽解，不能替代同一模型下的构型对照。
 
-SOC 来自相对论效应，把电子自旋和轨道运动耦合起来。它会改变 Hamiltonian 的对称性、能带简并和某些能隙或交叉点，因此不能只看作后处理绘图开关。DFT+U 则在指定局域轨道子空间上加入 Hubbard correction，用来改变 semilocal functional 对局域电子占据的处理。U 的意义绑定到 projector、manifold、赝势、functional 和结构环境。
+SOC 来自相对论效应，把电子自旋和轨道运动耦合起来。它会改变 Hamiltonian 的对称性、能带简并和某些能隙或交叉点，因此不能只看作后处理绘图开关。DFT+U 则在指定局域轨道子空间上加入 Hubbard correction，用来改变 semilocal functional 对局域电子占据的处理。U 的意义绑定到 projector、manifold、赝势、functional 和结构环境；相同数值的 U 在不同 projector 或不同 PP 下不应视为同一个模型参数。
 
 这三类设置共同特点是改变模型本身。模型改变后，SCF、NSCF、bands、DOS、PDOS、phonon 和高级 workflow 都必须使用同一数据链；否则 output 之间的差异可能来自混用模型，而不是目标物理效应。
 
@@ -52,6 +52,7 @@ Collinear spin 把电子态分成自旋通道；noncollinear spin 用 spinor 描
 - SOC 计算需要 `noncolin`、`lspinorb` 和 fully relativistic pseudopotential 同时满足；只写 `lspinorb` 不足以证明 SOC 数据链可信。
 - DFT+U 输入必须记录 `HUBBARD` card 或当前 QE 版本对应语法、projector/manifold、参数单位、参数来源和作用的 species label。
 - `input_dft`、赝势、Hubbard 参数和结构状态必须一致；换其中任一项都应视为模型变化。
+- 若比较不同磁性构型、SOC 开关或 U 值，总能、结构和下游性质必须来自同一收敛标准和同一记录粒度；否则差异可能只是数据链不一致。
 
 ## 对 output review 的影响
 
@@ -59,6 +60,7 @@ Collinear spin 把电子态分成自旋通道；noncollinear spin 用 spinor 描
 |---|---|---|
 | spin / noncollinear / SOC 设置回显 | 计算进入预期 Hamiltonian 分支 | 磁态或 SOC 结论已经物理可信 |
 | total / absolute magnetization | 总磁矩和绝对磁化可复查 | 局域磁矩、磁有序或构型竞争已充分判断 |
+| competing magnetic configurations | 多个自洽解的模型内对照 | 单一构型足以证明基态磁序 |
 | atomic magnetization / projections | 局域投影趋势可审阅 | 投影磁矩是未经限定的完整磁矩定义 |
 | symmetry / irreducible k-points | 模型改变后的对称性可复查 | 原无 SOC k-path 和简并解释仍可沿用 |
 | loaded pseudopotentials | 实际 UPF 文件可追踪 | PP 支持 SOC 或 DFT+U projector 已充分验证 |

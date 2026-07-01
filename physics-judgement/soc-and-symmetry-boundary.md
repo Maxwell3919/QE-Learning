@@ -38,9 +38,9 @@
 
 ## 判断规则
 
-- SOC 计算必须从 SCF 数据链开始，而不是对已有无 SOC output 做后处理。
+- SOC 计算必须从 SCF 数据链开始，而不是对已有无 SOC output 做后处理。若要比较 SOC 与 non-SOC 结果，也应分别保存两条完整数据链，并明确 energy zero、Fermi level、结构和 functional 是否一致。
 - SOC 需要 fully relativistic / SOC-capable PP；若 PP 证据不清，SOC 结果不能进入定量解释。
-- SOC 会改变可用 symmetry、irreducible k-points、band degeneracy 和 k-path 解释；结构或模型改变后应重审路径来源。
+- SOC 会改变可用 symmetry、irreducible k-points、band degeneracy 和 k-path 解释；结构或模型改变后应重审路径来源。无 SOC 的 little-group label、degeneracy 或 band crossing 解释不能自动迁移到 SOC Hamiltonian。
 - SOC 的重要性不能按元素名或方法标签一刀切。应根据目标 observable、近简并、磁性、能带交叉和相对论 PP 证据判断。
 - 拓扑、spin texture 和 magnetic anisotropy 结论需要额外 invariant、有效模型、角度/构型对照或 Wannier 等证据，本页只给边界。
 
@@ -59,6 +59,7 @@
 - 不能沿用无 SOC 的 band degeneracy、k-path 或 PDOS 通道解释。
 - 不能把一次 SOC bands 图直接写成拓扑结论。
 - 不能把 SOC 对某类体系的重要性写成无条件规则。
+- 不能把 SOC/non-SOC 的能带差异归因于自旋轨道效应，而不先排除结构、energy zero、Fermi level、PP 或 k-path 数据链差异。
 
 ## 下游影响
 
