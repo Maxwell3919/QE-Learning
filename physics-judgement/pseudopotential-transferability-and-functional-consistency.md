@@ -38,10 +38,10 @@
 
 ## 判断规则
 
-- PP source、library/version、UPF 文件名、XC、valence、PP type、relativistic capability 和 recommended cutoff 都应进入 calculation record。
+- PP source、library/version、UPF 文件名、XC、valence、semicore、PP type、relativistic capability 和 recommended cutoff 都应进入 calculation record。
 - recommended cutoff 只能作为起点；能否进入下游取决于目标 observable 的 convergence，而不是 PP 文件建议值。
 - PP/functional consistency 是模型边界。若 `input_dft` 与 UPF functional 不一致，必须说明目的、重新审阅收敛，并在结论中保留边界。
-- 换 PP 后至少要重审 SCF、cutoff、kmesh、force/stress 和目标 observable；高风险目标包括 phonon、Born charge、magnetism、SOC、work function、PDOS、DFT+U 和 Wannier。
+- 换 PP 后至少要重审 SCF、cutoff、kmesh、force/stress 和目标 observable；高风险目标包括 phonon、Born charge、magnetism、SOC、work function、PDOS、DFT+U 和 Wannier。若两个 PP 的 valence 或 semicore 选择不同，即使 SCF 都收敛，也应按不同模型分支记录。
 - PP transferability 不能由 `JOB DONE`、单次 SCF convergence 或单个 total energy 数字证明。
 
 ## PASS / WARN / BLOCK
@@ -57,6 +57,7 @@
 - 不能把 PP 当作可随意替换的技术附件。
 - 不能把 PP recommended cutoff 写成收敛结论。
 - 不能把同一元素的不同 UPF 视为同一模型。
+- 不能把不同 semicore / valence choice 的结果直接合并比较而不说明模型差异。
 - 不能把 SCF convergence 当成 transferability 证明。
 - 不能在 PP 不支持目标 relativistic 或 projector 边界时解释 SOC、DFT+U、PDOS 或 Wannier 结论。
 
